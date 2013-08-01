@@ -1,0 +1,12 @@
+name: SimpleRegionMarket
+version: ${majorversion}-${state}
+description: Simple Region Market is the most comprehensive Region Market plugin available. It allows users to buy/sell, rent, lease, and auction WorldGuard regions.
+author: theZorro266
+prefix: SRM
+main: com.thezorro266.bukkit.srm.SimpleRegionMarket
+commands:
+    regionmarket:
+        aliases:
+            - rm
+            - srm
+        description: Control command for Simple Region Market

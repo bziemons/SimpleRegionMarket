@@ -22,11 +22,13 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
+
 /**
  * @author ienze
  * 
  */
-public class TemplateBid extends IntelligentSignTemplate {
+public class TemplateBid extends IntelligentSignTemplate implements TimedTemplate {
 	public TemplateBid(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		// TODO Auto-generated constructor stub

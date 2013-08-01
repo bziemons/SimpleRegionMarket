@@ -51,12 +51,6 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 	}
 
 	@Override
-	public void schedule() {
-		// Do nothing
-		System.out.println("Schedule here");
-	}
-
-	@Override
 	public boolean isRegionOwner(OfflinePlayer player, Region region) {
 		// TODO Auto-generated method stub
 		return false;

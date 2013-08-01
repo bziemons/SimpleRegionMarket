@@ -27,6 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.TemplateFormatException;
 import com.thezorro266.bukkit.srm.templates.TemplateManager;
+import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class SimpleRegionMarket extends JavaPlugin {
 	public static final boolean PRINT_STACKTRACE = false;
@@ -74,14 +75,16 @@ public class SimpleRegionMarket extends JavaPlugin {
 			return;
 		}
 		loading = false;
-		
+
 		getCommand("regionmarket").setExecutor(new CommandHandler());
 
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			@Override
 			public void run() {
 				for (Template template : templateManager.getTemplateList()) {
-					template.schedule();
+					if (template instanceof TimedTemplate) {
+						((TimedTemplate) template).schedule();
+					}
 				}
 			}
 		}, 1200L, 1200L);

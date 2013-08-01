@@ -22,11 +22,9 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-/**
- * @author theZorro266
- * 
- */
-public class TemplateLet extends IntelligentSignTemplate {
+import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
+
+public class TemplateLet extends IntelligentSignTemplate implements TimedTemplate {
 
 	public TemplateLet(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);

@@ -67,8 +67,6 @@ public abstract class Template {
 
 	abstract public void signClicked(Player player, Sign sign);
 
-	abstract public void schedule();
-
 	public static Template load(ConfigurationSection templateConfigSection) throws TemplateFormatException {
 		String id = templateConfigSection.getName();
 		if (templateConfigSection.isSet("type")) {

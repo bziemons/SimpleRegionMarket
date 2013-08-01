@@ -1,0 +1,197 @@
+/*
+ * SimpleRegionMarket
+ * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.thezorro266.bukkit.srm.templates;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+
+public abstract class IntelligentSignTemplate extends Template {
+
+	public static final int SIGN_LINE_COUNT = 4;
+
+	protected String[] signInput;
+	protected Map<String, String[]> signOutput;
+
+	public IntelligentSignTemplate(ConfigurationSection templateConfigSection) {
+		super(templateConfigSection);
+		signInput = new String[SIGN_LINE_COUNT];
+		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+			signInput[i] = templateConfigSection.getString("input." + (i + 1));
+		}
+		signOutput = new HashMap<String, String[]>(4);
+		for (String outputType : templateConfigSection.getConfigurationSection("output").getKeys(false)) {
+			String[] tempOutput = new String[SIGN_LINE_COUNT];
+			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+				tempOutput[i] = templateConfigSection.getString("output." + outputType + "." + (i + 1));
+			}
+			signOutput.put(outputType, tempOutput);
+		}
+	}
+
+	public static String replaceTokens(String text, Map<String, String> replacements) {
+		final Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
+		final Matcher matcher = pattern.matcher(text);
+		final StringBuffer buffer = new StringBuffer();
+		while (matcher.find()) {
+			try {
+				final String replacement = replacements.get(matcher.group(1));
+				if (replacement != null) {
+					matcher.appendReplacement(buffer, "");
+					buffer.append(replacement);
+				}
+			} catch (final Exception e) {
+				Bukkit.getLogger().log(Level.INFO, "Replacement map has a misconfiguration at " + matcher.group(1));
+			}
+		}
+		matcher.appendTail(buffer);
+		return buffer.toString();
+	}
+
+	public static HashMap<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
+		final HashMap<String, String> hashMap = new HashMap<String, String>();
+		for (int i = 0; i < lines.length; i++) {
+			final String inputLine = signTemplate.signInput[i];
+			if (inputLine != null && !inputLine.isEmpty()) {
+
+				Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
+				Matcher matcher = pattern.matcher(inputLine);
+				String newPattern = "";
+				final ArrayList<String> keys = new ArrayList<String>();
+				while (matcher.find()) {
+					for (int u = 0; u < matcher.groupCount(); u++) {
+						keys.add(matcher.group(u + 1));
+					}
+				}
+				newPattern = matcher.replaceAll("(.+)");
+
+				pattern = Pattern.compile(newPattern);
+				matcher = pattern.matcher(lines[i]);
+				final ArrayList<String> vars = new ArrayList<String>();
+				while (matcher.find()) {
+					for (int u = 0; u < matcher.groupCount(); u++) {
+						vars.add(matcher.group(u + 1));
+					}
+				}
+				for (int u = 0; u < keys.size(); u++) {
+					if (u < vars.size()) {
+						hashMap.put(keys.get(u), vars.get(u));
+						;
+					} else {
+						hashMap.put(keys.get(u), "");
+					}
+				}
+			}
+		}
+		return hashMap;
+	}
+
+	public static String getSignTime(long time) {
+		time = time / 1000; // From ms to sec
+		final int days = (int) (time / (24 * 60 * 60));
+		time = time % (24 * 60 * 60);
+		final int hours = (int) (time / (60 * 60));
+		time = time % (60 * 60);
+		final int minutes = (int) (time / 60);
+		time = time % (60);
+		final int seconds = (int) time;
+		String strReturn = "< 1 min";
+		if (days > 0) {
+			strReturn = Integer.toString(days);
+			if (hours > 0) {
+				strReturn += "+";
+			}
+			if (days == 1) {
+				strReturn += " day";
+			} else {
+				strReturn += " days";
+			}
+		} else if (hours > 0) {
+			strReturn = Integer.toString(hours);
+			if (minutes > 0) {
+				strReturn += "+";
+			}
+			if (hours == 1) {
+				strReturn += " hour";
+			} else {
+				strReturn += " hours";
+			}
+		} else if (minutes > 0) {
+			strReturn = Integer.toString(minutes);
+			if (seconds > 0) {
+				strReturn += "+";
+			}
+			if (minutes == 1) {
+				strReturn += " min";
+			} else {
+				strReturn += " mins";
+			}
+		}
+		return strReturn;
+	}
+
+	public static long parseSignTime(String timestring) {
+		long time = 0;
+		int i, u;
+
+		i = timestring.indexOf("d");
+		if (i > 0) {
+			if (timestring.charAt(i - 1) == ' ' && i > 1) {
+				i--;
+			}
+			u = i - 1;
+			while (u > 0 && Character.isDigit(timestring.charAt(u - 1))) {
+				u--;
+			}
+			time += Long.parseLong(timestring.substring(u, i)) * 24 * 60 * 60 * 1000;
+		}
+
+		i = timestring.indexOf("h");
+		if (i > 0) {
+			if (timestring.charAt(i - 1) == ' ' && i > 1) {
+				i--;
+			}
+			u = i - 1;
+			while (u > 0 && Character.isDigit(timestring.charAt(u - 1))) {
+				u--;
+			}
+			time += Long.parseLong(timestring.substring(u, i)) * 60 * 60 * 1000;
+		}
+
+		i = timestring.indexOf("m");
+		if (i > 0) {
+			if (timestring.charAt(i - 1) == ' ' && i > 1) {
+				i--;
+			}
+			u = i - 1;
+			while (u > 0 && Character.isDigit(timestring.charAt(u - 1))) {
+				u--;
+			}
+			time += Long.parseLong(timestring.substring(u, i)) * 60 * 1000;
+		}
+
+		return time;
+	}
+}

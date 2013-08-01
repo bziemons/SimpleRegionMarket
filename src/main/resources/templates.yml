@@ -1,0 +1,73 @@
+version: 1
+sell:
+  type: TemplateSell
+  removesigns: false
+  buyer: owner
+  price.min: 0
+  price.max: -1
+  input.1: '[SELL]'
+  input.2: '[[region]]'
+  input.3: '[[price]]'
+  input.4: '[[account]]'
+  output.free.1: FOR SALE
+  output.free.2: '[[region]]'
+  output.free.3: '[[price]]'
+  output.free.4: '[[x]] x [[y]] x [[z]]'
+  output.occupied.1: SOLD
+  output.occupied.2: ''
+  output.occupied.3: '[[player]]'
+  output.occupied.4: ''
+let:
+  type: TemplateLet
+  price.min: 0
+  price.max: -1
+  renttime.min: 60000
+  renttime.max: -1
+  input.1: '[LET]'
+  input.2: '[[region]]'
+  input.3: '[[price:time]]'
+  input.4: '[[account]]'
+  output.free.1: FOR LET
+  output.free.2: '[[region]]'
+  output.free.3: '[[price]]'
+  output.free.4: '[[time]]'
+  output.occupied.1: OCCUPIED
+  output.occupied.2: '[[timeleft]]'
+  output.occupied.3: ''
+  output.occupied.4: '[[player]]'
+rent:
+  type: TemplateRent
+  price.min: 0
+  price.max: -1
+  renttime.min: 60000
+  renttime.max: -1
+  input.1: '[RENT]'
+  input.2: '[[region]]'
+  input.3: '[[price:time]]'
+  input.4: '[[account]]'
+  output.free.1: FOR RENT
+  output.free.2: '[[region]]'
+  output.free.3: '[[price]]'
+  output.free.4: '[[time]]'
+  output.occupied.1: OCCUPIED
+  output.occupied.2: '[[timeleft]]'
+  output.occupied.3: ''
+  output.occupied.4: '[[player]]'
+bid:
+  type: TemplateBid
+  price.min: 0
+  price.max: -1
+  bidtime.min: 60000
+  bidtime.max: -1
+  input.1: '[BID]'
+  input.2: '[[region]]'
+  input.3: '[[price:time]]'
+  input.4: '[[account]]'
+  output.free.1: BID
+  output.free.2: '[[region]]'
+  output.free.3: '[[timeleft]]'
+  output.free.4: '[[player]] : [[highestpay]]'
+  output.occupied.1: BIDDEN
+  output.occupied.2: '[[region]]'
+  output.occupied.3: '[[player]]'
+  output.occupied.4: '[[highestpay]]'

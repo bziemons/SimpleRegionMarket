@@ -20,7 +20,7 @@ package com.thezorro266.bukkit.srm.templates.interfaces;
 
 import org.bukkit.OfflinePlayer;
 
-import com.thezorro266.bukkit.srm.templates.Region;
+import com.thezorro266.bukkit.srm.helpers.Region;
 
 public interface OwnableTemplate {
 

@@ -16,28 +16,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.templates;
+package com.thezorro266.bukkit.srm.helpers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import org.bukkit.Location;
+import lombok.Getter;
+
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.templates.IntelligentSignTemplate;
+import com.thezorro266.bukkit.srm.templates.Template;
 
 public class Region {
-
-	ProtectedRegion worldGuardRegion;
-	ArrayList<Sign> signs;
+	@Getter
+	final Template template;
+	final ProtectedRegion worldguardRegion;
+	@Getter
+	ArrayList<Sign> signList;
 	ArrayList<OfflinePlayer> owners;
 	ArrayList<OfflinePlayer> members;
 
-	public Region() {
-		// TODO Auto-generated constructor stub
+	public Region(Template template, ProtectedRegion worldguardRegion) {
+		this.template = template;
+		this.worldguardRegion = worldguardRegion;
 	}
 
-	public void addSign(Location location) {
-		signs.add(new Sign(this, location));
+	public void addSign(Block block) {
+		if (Sign.isSign(block)) {
+			int direction = 0;
+			// TODO direction
+			signList.add(new Sign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), direction));
+		}
+	}
+
+	public HashMap<String, String> getReplacementMap() {
+		if (!(template instanceof IntelligentSignTemplate)) {
+			throw new IllegalStateException(String.format("Template '%s' is not an intelligent sign template", template.getId()));
+		}
+		HashMap<String, String> replacementMap = new HashMap<String, String>();
+		replacementMap.put("region", worldguardRegion.getId());
+		replacementMap.put("x",
+				Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
+		replacementMap.put("y",
+				Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
+		replacementMap.put("z",
+				Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
+		((IntelligentSignTemplate) template).replacementMap(replacementMap);
+		return replacementMap;
 	}
 
 	/*

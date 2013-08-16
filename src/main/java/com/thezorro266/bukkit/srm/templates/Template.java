@@ -19,14 +19,18 @@
 package com.thezorro266.bukkit.srm.templates;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Getter;
 
-import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.Sign;
 
 public abstract class Template {
 
@@ -40,6 +44,8 @@ public abstract class Template {
 	protected String type = TYPE_UNKNOWN;
 	@Getter
 	protected String state = STATE_UNKNOWN;
+	@Getter
+	protected List<Region> regionList = new ArrayList<Region>();
 
 	public Template(ConfigurationSection templateConfigSection) {
 		id = templateConfigSection.getName();
@@ -61,11 +67,13 @@ public abstract class Template {
 		return false;
 	}
 
-	abstract public boolean signCreated(Player player, Location location, String[] lines);
+	abstract public boolean isSignApplicable(Location location, String[] lines);
 
-	abstract public boolean signDestroyed(Player player, Sign sign);
+	abstract public boolean changeSign(Player player, Location location, String[] lines);
 
-	abstract public void signClicked(Player player, Sign sign);
+	abstract public boolean breakSign(Player player, Sign sign);
+
+	abstract public void clickSign(Player player, Sign sign);
 
 	public static Template load(ConfigurationSection templateConfigSection) throws TemplateFormatException {
 		String id = templateConfigSection.getName();

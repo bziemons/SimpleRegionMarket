@@ -16,25 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.templates;
+package com.thezorro266.bukkit.srm.helpers;
 
-import lombok.Getter;
+import lombok.Data;
 
-import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 
-public class Sign {
+public @Data
+class Location {
+	final World world;
+	final int x;
+	final int y;
+	final int z;
 
-	@Getter
-	Region region;
-	@Getter
-	Location location;
-	@Getter
-	boolean wallSign;
-	@Getter
-	int direction;
+	public Block getBlock() {
+		return world.getBlockAt(x, y, z);
+	}
 
-	public Sign(Region region, Location location) {
-		this.region = region;
-		this.location = location;
+	public boolean isBlockAt(Block block) {
+		return block.getWorld().equals(world) && block.getX() == x && block.getY() == y && block.getZ() == z;
+	}
+
+	public static Location fromBlock(Block block) {
+		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 	}
 }

@@ -18,20 +18,22 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import static com.thezorro266.bukkit.srm.helpers.Sign.SIGN_LINE_COUNT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Sign;
 
 public abstract class IntelligentSignTemplate extends Template {
-
-	public static final int SIGN_LINE_COUNT = 4;
-
 	protected String[] signInput;
 	protected Map<String, String[]> signOutput;
 
@@ -51,28 +53,50 @@ public abstract class IntelligentSignTemplate extends Template {
 		}
 	}
 
-	public static String replaceTokens(String text, Map<String, String> replacements) {
+	public abstract void replacementMap(HashMap<String, String> replacementMap);
+
+	@Override
+	public boolean changeSign(Player player, Location location, String[] lines) {
+		if (lines[0].equalsIgnoreCase(signInput[0])) {
+			Map<String, String> inputMap = getSignInput(this, lines);
+
+			// Change Lines
+		}
+		return false;
+	}
+
+	protected void updateSign(Sign sign) {
+		if (sign.getRegion().getTemplate().equals(this)) {
+			String[] lines = signOutput.get(state).clone();
+			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+				lines[i] = replaceTokens(lines[i], sign.getRegion().getReplacementMap());
+			}
+			sign.setContent(lines);
+		}
+	}
+
+	public static String replaceTokens(String text, Map<String, String> replacementMap) {
 		final Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
 		final Matcher matcher = pattern.matcher(text);
 		final StringBuffer buffer = new StringBuffer();
 		while (matcher.find()) {
 			try {
-				final String replacement = replacements.get(matcher.group(1));
+				final String replacement = replacementMap.get(matcher.group(1));
 				if (replacement != null) {
 					matcher.appendReplacement(buffer, "");
 					buffer.append(replacement);
 				}
 			} catch (final Exception e) {
-				Bukkit.getLogger().log(Level.INFO, "Replacement map has a misconfiguration at " + matcher.group(1));
+				SimpleRegionMarket.getInstance().getLogger().info("Replacement map has a misconfiguration at " + matcher.group(1));
 			}
 		}
 		matcher.appendTail(buffer);
 		return buffer.toString();
 	}
 
-	public static HashMap<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
-		final HashMap<String, String> hashMap = new HashMap<String, String>();
-		for (int i = 0; i < lines.length; i++) {
+	public static Map<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
+		final HashMap<String, String> outputMap = new HashMap<String, String>();
+		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			final String inputLine = signTemplate.signInput[i];
 			if (inputLine != null && !inputLine.isEmpty()) {
 
@@ -97,15 +121,14 @@ public abstract class IntelligentSignTemplate extends Template {
 				}
 				for (int u = 0; u < keys.size(); u++) {
 					if (u < vars.size()) {
-						hashMap.put(keys.get(u), vars.get(u));
-						;
+						outputMap.put(keys.get(u), vars.get(u));
 					} else {
-						hashMap.put(keys.get(u), "");
+						outputMap.put(keys.get(u), "");
 					}
 				}
 			}
 		}
-		return hashMap;
+		return outputMap;
 	}
 
 	public static String getSignTime(long time) {

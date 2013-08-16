@@ -76,6 +76,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 		}
 		loading = false;
 
+		new EventListener();
+
 		getCommand("regionmarket").setExecutor(new CommandHandler());
 
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {

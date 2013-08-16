@@ -24,7 +24,7 @@ public class TemplateRent extends TemplateLet {
 
 	public TemplateRent(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
-		// TODO Auto-generated constructor stub
+		type = "rent";
 	}
 
 	/*

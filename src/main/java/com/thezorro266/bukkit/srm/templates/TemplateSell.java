@@ -18,36 +18,24 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import org.bukkit.Location;
+import java.util.HashMap;
+
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.Sign;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
 public class TemplateSell extends IntelligentSignTemplate implements OwnableTemplate {
+	protected boolean occupied = false;
 
 	public TemplateSell(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		type = "sell";
-	}
-
-	@Override
-	public boolean signCreated(Player player, Location location, String[] lines) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean signDestroyed(Player player, Sign sign) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void signClicked(Player player, Sign sign) {
-		// TODO Auto-generated method stub
-
+		state = "free";
 	}
 
 	@Override
@@ -76,7 +64,30 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 
 	@Override
 	public boolean isRegionOccupied(Region region) {
+		return this.occupied;
+	}
+
+	@Override
+	public boolean isSignApplicable(Location location, String[] lines) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public boolean breakSign(Player player, Sign sign) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void clickSign(Player player, Sign sign) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void replacementMap(HashMap<String, String> replacementMap) {
+		// TODO Auto-generated method stub
+
 	}
 }

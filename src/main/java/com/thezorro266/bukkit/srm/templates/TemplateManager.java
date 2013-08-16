@@ -18,7 +18,7 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import static com.thezorro266.bukkit.srm.templates.IntelligentSignTemplate.SIGN_LINE_COUNT;
+import static com.thezorro266.bukkit.srm.helpers.Sign.SIGN_LINE_COUNT;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 
 public class TemplateManager {
-
 	public static final String AGENTS_FILENAME = "agents.yml";
 	public static final String TEMPLATE_FILENAME = "templates.yml";
 	public static final int TEMPLATE_VERSION = 1;
@@ -59,6 +58,7 @@ public class TemplateManager {
 							templateList.add(template);
 						}
 					}
+					templateYaml.save(templateFile);
 				}
 			} else {
 				throw new IOException("Cannot read " + TEMPLATE_FILENAME);

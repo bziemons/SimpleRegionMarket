@@ -18,35 +18,15 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
-public class TemplateLet extends IntelligentSignTemplate implements TimedTemplate {
+public class TemplateLet extends TemplateSell implements TimedTemplate {
 
 	public TemplateLet(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public boolean signCreated(Player player, Location location, String[] lines) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean signDestroyed(Player player, Sign sign) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void signClicked(Player player, Sign sign) {
-		// TODO Auto-generated method stub
-
+		type = "let";
 	}
 
 	@Override

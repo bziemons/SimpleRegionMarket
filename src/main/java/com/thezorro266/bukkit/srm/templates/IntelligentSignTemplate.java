@@ -1,4 +1,4 @@
-/*
+/**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  * 
@@ -26,11 +26,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Region;
 import com.thezorro266.bukkit.srm.helpers.Sign;
 
 public abstract class IntelligentSignTemplate extends Template {
@@ -43,7 +45,7 @@ public abstract class IntelligentSignTemplate extends Template {
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			signInput[i] = templateConfigSection.getString("input." + (i + 1));
 		}
-		signOutput = new HashMap<String, String[]>(4);
+		signOutput = new HashMap<String, String[]>();
 		for (String outputType : templateConfigSection.getConfigurationSection("output").getKeys(false)) {
 			String[] tempOutput = new String[SIGN_LINE_COUNT];
 			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
@@ -53,21 +55,40 @@ public abstract class IntelligentSignTemplate extends Template {
 		}
 	}
 
-	public abstract void replacementMap(HashMap<String, String> replacementMap);
+	public abstract void replacementMap(Region region, HashMap<String, String> replacementMap);
+
+	public abstract Sign makeSign(Player player, Block block, HashMap<String, String> inputMap);
 
 	@Override
-	public boolean changeSign(Player player, Location location, String[] lines) {
+	public boolean isSignApplicable(Location location, String[] lines) {
 		if (lines[0].equalsIgnoreCase(signInput[0])) {
-			Map<String, String> inputMap = getSignInput(this, lines);
+			return true;
+		}
+		return false;
+	}
 
-			// Change Lines
+	@Override
+	public boolean createSign(Player player, Block block, String[] lines) {
+		if (lines[0].equalsIgnoreCase(signInput[0])) {
+			HashMap<String, String> inputMap = getSignInput(this, lines);
+
+			Sign sign = makeSign(player, block, inputMap);
+			if (sign != null) {
+				String[] output = signOutput.get(sign.getRegion().getOption("state"));
+				HashMap<String, String> replacementMap = sign.getRegion().getReplacementMap();
+
+				for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+					lines[i] = replaceTokens(output[i], replacementMap);
+				}
+				return true;
+			}
 		}
 		return false;
 	}
 
 	protected void updateSign(Sign sign) {
 		if (sign.getRegion().getTemplate().equals(this)) {
-			String[] lines = signOutput.get(state).clone();
+			String[] lines = signOutput.get(sign.getRegion().getOption("state")).clone();
 			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 				lines[i] = replaceTokens(lines[i], sign.getRegion().getReplacementMap());
 			}
@@ -75,7 +96,7 @@ public abstract class IntelligentSignTemplate extends Template {
 		}
 	}
 
-	public static String replaceTokens(String text, Map<String, String> replacementMap) {
+	private static String replaceTokens(String text, Map<String, String> replacementMap) {
 		final Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
 		final Matcher matcher = pattern.matcher(text);
 		final StringBuffer buffer = new StringBuffer();
@@ -94,7 +115,7 @@ public abstract class IntelligentSignTemplate extends Template {
 		return buffer.toString();
 	}
 
-	public static Map<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
+	private static HashMap<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
 		final HashMap<String, String> outputMap = new HashMap<String, String>();
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			final String inputLine = signTemplate.signInput[i];

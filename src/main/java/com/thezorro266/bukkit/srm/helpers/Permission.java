@@ -18,27 +18,6 @@
 
 package com.thezorro266.bukkit.srm.helpers;
 
-import lombok.Data;
-
-import org.bukkit.World;
-import org.bukkit.block.Block;
-
-public @Data
-class Location {
-	final World world;
-	final int x;
-	final int y;
-	final int z;
-
-	public Block getBlock() {
-		return world.getBlockAt(x, y, z);
-	}
-
-	public boolean isBlockAt(Block block) {
-		return block.getWorld().equals(world) && block.getX() == x && block.getY() == y && block.getZ() == z;
-	}
-
-	public static Location fromBlock(Block block) {
-		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
-	}
+public enum Permission {
+	COMMAND_RELEASE, COMMAND_REMOVE, COMMAND_LIST, COMMAND_ADDMEMBER_OWN, COMMAND_ADDMEMBER_OTHER, COMMAND_ADDOWNER_OWN, COMMAND_ADDOWNER_OTHER,
 }

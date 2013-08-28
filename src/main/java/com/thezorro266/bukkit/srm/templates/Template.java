@@ -1,4 +1,4 @@
-/*
+/**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  * 
@@ -24,6 +24,7 @@ import java.util.List;
 
 import lombok.Getter;
 
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -36,14 +37,11 @@ public abstract class Template {
 
 	public static final String ID_NONE = "none";
 	public static final String TYPE_UNKNOWN = "Unknown";
-	public static final String STATE_UNKNOWN = "unknown";
 
 	@Getter
 	protected String id = ID_NONE;
 	@Getter
 	protected String type = TYPE_UNKNOWN;
-	@Getter
-	protected String state = STATE_UNKNOWN;
 	@Getter
 	protected List<Region> regionList = new ArrayList<Region>();
 
@@ -69,7 +67,7 @@ public abstract class Template {
 
 	abstract public boolean isSignApplicable(Location location, String[] lines);
 
-	abstract public boolean changeSign(Player player, Location location, String[] lines);
+	abstract public boolean createSign(Player player, Block block, String[] lines);
 
 	abstract public boolean breakSign(Player player, Sign sign);
 

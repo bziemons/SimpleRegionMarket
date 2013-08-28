@@ -1,4 +1,4 @@
-/*
+/**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  * 
@@ -38,6 +38,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 	private final TemplateManager templateManager;
 	@Getter
 	private final WorldGuardManager worldGuardManager;
+	@Getter
+	private final VaultHook vaultHook;
 
 	private boolean loading = true;
 	private boolean disable = false;
@@ -47,6 +49,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		instance = this;
 		templateManager = new TemplateManager();
 		worldGuardManager = new WorldGuardManager();
+		vaultHook = new VaultHook();
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 			except(e);
 			return;
 		}
-		getLogger().info("Loaded " + templateManager.getTemplateList().size() + " templates in " + (System.currentTimeMillis() - start) + "ms");
+		getLogger().info(String.format("Loaded %d templates in %dms", templateManager.getTemplateList().size(), System.currentTimeMillis() - start));
 	}
 
 	@Override

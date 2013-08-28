@@ -4,6 +4,8 @@ description: Simple Region Market is the most comprehensive Region Market plugin
 author: theZorro266
 prefix: SRM
 main: com.thezorro266.bukkit.srm.SimpleRegionMarket
+depend: [WorldGuard]
+softdepend: [Vault]
 commands:
     regionmarket:
         aliases:

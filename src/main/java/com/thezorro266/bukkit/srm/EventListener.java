@@ -1,4 +1,4 @@
-/*
+/**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  * 
@@ -47,14 +47,15 @@ public class EventListener implements Listener {
 				}
 			}
 
-			Location loc = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ());
 			for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
 				String[] lines = event.getLines().clone();
-				if (template.changeSign(player, loc, lines)) {
-					for (int i = 0; i < lines.length; i++) {
-						event.setLine(i, lines[i]);
+				if (template.isSignApplicable(Location.fromBlock(event.getBlock()), lines)) {
+					if (template.createSign(player, event.getBlock(), lines)) {
+						for (int i = 0; i < lines.length; i++) {
+							event.setLine(i, lines[i]);
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}

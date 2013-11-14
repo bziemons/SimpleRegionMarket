@@ -144,7 +144,7 @@ public abstract class IntelligentSignTemplate extends Template {
 					if (u < vars.size()) {
 						outputMap.put(keys.get(u), vars.get(u));
 					} else {
-						outputMap.put(keys.get(u), "");
+						outputMap.put(keys.get(u), null);
 					}
 				}
 			}

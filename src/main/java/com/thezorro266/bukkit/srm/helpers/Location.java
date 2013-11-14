@@ -23,8 +23,7 @@ import lombok.Data;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public @Data
-class Location {
+public @Data class Location {
 	final World world;
 	final int x;
 	final int y;
@@ -32,6 +31,10 @@ class Location {
 
 	public Block getBlock() {
 		return world.getBlockAt(x, y, z);
+	}
+	
+	public org.bukkit.Location getBukkitLocation() {
+		return getBlock().getLocation();
 	}
 
 	public boolean isBlockAt(Block block) {

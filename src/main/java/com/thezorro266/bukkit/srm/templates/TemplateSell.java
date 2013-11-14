@@ -27,6 +27,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.helpers.Region;
 import com.thezorro266.bukkit.srm.helpers.Sign;
@@ -86,60 +87,87 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 
 	@Override
 	public void replacementMap(Region region, HashMap<String, String> replacementMap) {
+		String strPrice;
+		Double price = (Double) region.getOption("price");
+		try {
+			strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
+		} catch (Throwable e) {
+			strPrice = String.format("%.2f", price);
+		}
+		replacementMap.put("price", strPrice);
+		replacementMap.put("account", region.getOption("account").toString());
 	}
 
 	@Override
 	public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
-		// TODO Get region from coordinates
-		ProtectedRegion worldguardRegion = null;
-		
-		// TODO if (entry on this region not exists)
-			Region region = new Region(this, block.getWorld(), worldguardRegion);
-			
-			double price;
-			// TODO if (SimpleRegionMarket.econManager.isEconomy()) {
-				String priceString = inputMap.remove("price");
-				if (priceString != null) {
-					try {
-						price = Double.parseDouble(priceString);
-					} catch (final Exception e) {
-						// TODO langHandler.playerErrorOut(player, "PLAYER.ERROR.NO_PRICE", null);
-						return null;
+		ProtectedRegion worldguardRegion = Region.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
+
+		if (worldguardRegion != null) {
+			boolean existentRegion = false;
+			for (Region regionEntry : regionList) {
+				if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
+					existentRegion = true;
+					break;
+				}
+			}
+
+			if (!existentRegion) {
+				Region region = new Region(this, block.getWorld(), worldguardRegion);
+
+				double price;
+				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
+					String priceString = inputMap.remove("price");
+					if (priceString != null) {
+						try {
+							price = Double.parseDouble(priceString);
+						} catch (final Exception e) {
+							player.sendMessage("Price not found.");
+							return null;
+						}
+					} else {
+						price = priceMin;
 					}
 				} else {
-					price = priceMin;
+					price = 0;
 				}
-			//} else {
-			//	price = 0;
-			//}
-	
-			if (priceMin > price && (priceMax == -1 || price < priceMax)) {
-				// TODO Add Vault formatting for price
-				player.sendMessage(String.format(ChatColor.RED + "The price must be between %d and %d", priceMin, priceMax)); 
-				return null;
-			}
-	
-			String account = player.getName();
-			{
-				String accountString = inputMap.remove("account");
-				if (accountString != null) {
-					// TODO if (SimpleRegionMarket.permManager.isAdmin(player)) {
-						if (accountString.equalsIgnoreCase("none")) {
-							account = "";
-						} else {
-							account = accountString;
-						}
-					//}
-				}
-			}
-	
-			region.setOption("state", "free");
-			region.setOption("price", price);
-			region.setOption("account", account);
-		//} else {
-			// return null;
-		//}
 
-		return region.addBlockAsSign(block);
+				if (priceMin > price && (priceMax == -1 || price < priceMax)) {
+					String priceMinString;
+					String priceMaxString;
+					try {
+						priceMinString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMin);
+						priceMaxString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMax);
+					} catch (Throwable e) {
+						priceMinString = String.format("%.2f", priceMin);
+						priceMaxString = String.format("%.2f", priceMax);
+					}
+					player.sendMessage(String.format(ChatColor.RED + "The price must be between %s and %s", priceMinString, priceMaxString));
+					return null;
+				}
+
+				String account = player.getName();
+				{
+					String accountString = inputMap.remove("account");
+					if (accountString != null) {
+						if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+							if (accountString.equalsIgnoreCase("none")) {
+								account = "";
+							} else {
+								account = accountString;
+							}
+						}
+					}
+				}
+
+				region.setOption("state", "free");
+				region.setOption("price", price);
+				region.setOption("account", account);
+
+				return region.addBlockAsSign(block);
+			}
+		} else {
+			player.sendMessage(ChatColor.RED + "Could not find the region.");
+		}
+		return null;
 	}
 }

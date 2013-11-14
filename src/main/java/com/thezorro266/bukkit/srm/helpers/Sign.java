@@ -22,6 +22,7 @@ import lombok.Data;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.templates.Template;
@@ -33,7 +34,7 @@ class Sign {
 	final Region region;
 	final Location location;
 	final boolean wallSign;
-	final int direction;
+	final BlockFace direction;
 
 	public void clear() {
 		setContent(new String[] { "", "", "", "" });

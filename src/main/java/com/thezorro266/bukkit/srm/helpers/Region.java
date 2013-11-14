@@ -27,14 +27,19 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.templates.IntelligentSignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
 
 public class Region {
 	@Getter
 	final Template template;
+	@Getter
 	final World world;
+	@Getter
 	final ProtectedRegion worldguardRegion;
 
 	@Getter
@@ -45,8 +50,10 @@ public class Region {
 		this.template = template;
 		this.world = world;
 		this.worldguardRegion = worldguardRegion;
+		signList = new ArrayList<Sign>();
+		options = new HashMap<String, Object>();
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("region %s in world %s, template %s", worldguardRegion.getId(), world.getName(), template.toString());
@@ -54,10 +61,8 @@ public class Region {
 
 	public Sign addBlockAsSign(Block block) {
 		if (Sign.isSign(block)) {
-			int direction = 0;
-			// TODO direction
-			System.out.println(block.getData());
-			Sign sign = new Sign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), direction);
+			org.bukkit.material.Sign signMat = (org.bukkit.material.Sign) block.getState().getData();
+			Sign sign = new Sign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
 			signList.add(sign);
 			return sign;
 		}
@@ -90,5 +95,22 @@ public class Region {
 		((IntelligentSignTemplate) template).replacementMap(this, replacementMap);
 
 		return replacementMap;
+	}
+
+	public static ProtectedRegion getProtectedRegionFromLocation(Location loc, String region) {
+		ProtectedRegion protectedRegion = null;
+		final RegionManager worldRegionManager = SimpleRegionMarket.getInstance().getWorldGuardManager().getWorldGuard().getRegionManager(loc.getWorld());
+		if (region == null) {
+			ApplicableRegionSet regionSet = worldRegionManager.getApplicableRegions(loc.getBukkitLocation());
+			if (regionSet.size() == 1) {
+				protectedRegion = regionSet.iterator().next();
+			} else {
+				System.out.println("More than one region detected at " + loc.toString());
+				// TODO Take child region or region with highest priority
+			}
+		} else {
+			protectedRegion = worldRegionManager.getRegion(region);
+		}
+		return protectedRegion;
 	}
 }

@@ -32,10 +32,10 @@ public class WorldGuardManager {
 
 	WorldGuardPlugin worldguardPlugin;
 
-	public WorldGuardManager() {
+	public void load() {
 		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
 
-		if (plugin == null || !(plugin instanceof WorldGuardPlugin) || !plugin.isEnabled()) {
+		if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
 			throw new UnknownDependencyException("No WorldGuard installed or WorldGuard not enabled");
 		} else {
 			worldguardPlugin = (WorldGuardPlugin) plugin;

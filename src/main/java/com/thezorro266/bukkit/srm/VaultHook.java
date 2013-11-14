@@ -34,10 +34,10 @@ public class VaultHook {
 	@Getter
 	Economy economy = null;
 
-	public VaultHook() {
+	public void load() {
 		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("Vault");
 
-		if (plugin == null || !(plugin instanceof Vault) || !plugin.isEnabled()) {
+		if (plugin == null || !(plugin instanceof Vault)) {
 			SimpleRegionMarket.getInstance().getLogger().info("Vault not found. No economy enabled. Permissions system: Bukkit's SuperPerms");
 		} else {
 			SimpleRegionMarket.getInstance().getLogger().info("Vault found. Hooking into permissions and economy system..");

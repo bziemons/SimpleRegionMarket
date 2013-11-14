@@ -73,11 +73,20 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		try {
+			vaultHook.load();
+			worldGuardManager.load();
+		} catch (Throwable e) {
+			except(e);
+		}
+
 		if (disable) {
 			getPluginLoader().disablePlugin(this);
 			return;
 		}
 		loading = false;
+
+		// TODO template region load (I guess)
 
 		new EventListener();
 
@@ -108,7 +117,6 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 		if (!loading) {
 			getPluginLoader().disablePlugin(this);
-			return;
 		}
 	}
 

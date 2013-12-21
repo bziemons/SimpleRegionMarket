@@ -67,14 +67,16 @@ public class SimpleRegionMarket extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		long start = System.currentTimeMillis();
-		try {
-			templateManager.load();
-		} catch (TemplateFormatException e) {
-			except(e);
-			return;
-		} catch (IOException e) {
-			except(e);
-			return;
+		{
+			try {
+				templateManager.load();
+			} catch (TemplateFormatException e) {
+				except(e);
+				return;
+			} catch (IOException e) {
+				except(e);
+				return;
+			}
 		}
 		getLogger().info(String.format("Loaded %d templates in %dms", templateManager.getTemplateList().size(), System.currentTimeMillis() - start));
 	}

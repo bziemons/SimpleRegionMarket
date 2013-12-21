@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.templates;
+package com.thezorro266.bukkit.srm;
 
 import static com.thezorro266.bukkit.srm.helpers.Sign.SIGN_LINE_COUNT;
 
@@ -27,9 +27,16 @@ import java.util.List;
 
 import lombok.Getter;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.templates.Template;
+import com.thezorro266.bukkit.srm.templates.TemplateFormatException;
+import com.thezorro266.bukkit.srm.templates.TemplateRent;
+import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
 	public static final String AGENTS_FILENAME = "agents.yml";
@@ -86,39 +93,45 @@ public class TemplateManager {
 
 	private void updateAgents(YamlConfiguration agentsYaml) throws TemplateFormatException, IOException {
 		loadDefault();
-		/*
-		for (final TemplateMain token : TokenManager.tokenList) {
-			if (token.id.equalsIgnoreCase("SELL")) {
-				tokenAgent = (TemplateSell) token;
-			}
-			if (token.id.equalsIgnoreCase("HOTEL")) {
-				tokenHotel = (TemplateHotel) token;
+		
+		TemplateSell tokenAgent = null;
+		TemplateRent tokenHotel = null;
+		for (Template template : templateList) {
+			if(template.getId().equalsIgnoreCase("SELL")) {
+				tokenAgent = (TemplateSell) template;
+			} else if(template.getId().equalsIgnoreCase("HOTEL")) {
+				tokenHotel = (TemplateRent) template;
 			}
 		}
+		
 		if (tokenHotel == null || tokenAgent == null) {
-			return false;
+			SimpleRegionMarket.getInstance().getLogger().severe("Could not import old config. Stopping..");
+			throw new RuntimeException("There were no templates with the IDs SELL and HOTEL found");
 		}
 
 		ConfigurationSection path;
-		for (final String world : confighandle.getKeys(false)) {
-			final World worldWorld = Bukkit.getWorld(world);
-			if (worldWorld == null) {
+		for (final String world : agentsYaml.getKeys(false)) {
+			World realWorld = Bukkit.getWorld(world);
+			if (realWorld == null) {
 				continue;
 			}
-			path = confighandle.getConfigurationSection(world);
+			path = agentsYaml.getConfigurationSection(world);
 			for (final String region : path.getKeys(false)) {
-				final ProtectedRegion protectedRegion = AlphaRegionMarket.instance.wgManager.getProtectedRegion(worldWorld, region);
+				ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(realWorld, region);
 				if (protectedRegion == null) {
 					continue;
 				}
-				path = confighandle.getConfigurationSection(world).getConfigurationSection(region);
+				path = agentsYaml.getConfigurationSection(world).getConfigurationSection(region);
 				for (final String signnr : path.getKeys(false)) {
-					path = confighandle.getConfigurationSection(world).getConfigurationSection(region).getConfigurationSection(signnr);
+					path = agentsYaml.getConfigurationSection(world).getConfigurationSection(region).getConfigurationSection(signnr);
 					if (path == null) {
 						continue;
 					}
 
 					if (path.getInt("Mode") == 1) { // HOTEL
+						
+						
+						/*
 						if (!tokenHotel.entries.containsKey(world)) {
 							tokenHotel.entries.put(world, new HashMap<String, HashMap<String, Object>>());
 						}
@@ -137,11 +150,13 @@ public class TemplateManager {
 						}
 
 						final ArrayList<Location> signLocations = Utils.getSignLocations(tokenHotel, world, region);
-						signLocations.add(new Location(worldWorld, path.getDouble("X"), path.getDouble("Y"), path.getDouble("Z")));
+						signLocations.add(new Location(realWorld, path.getDouble("X"), path.getDouble("Y"), path.getDouble("Z")));
 						if (signLocations.size() == 1) {
 							Utils.setEntry(tokenHotel, world, region, "signs", signLocations);
 						}
+						*/
 					} else { // SELL
+						/*
 						if (!tokenAgent.entries.containsKey(world)) {
 							tokenAgent.entries.put(world, new HashMap<String, HashMap<String, Object>>());
 						}
@@ -154,15 +169,15 @@ public class TemplateManager {
 						}
 
 						final ArrayList<Location> signLocations = Utils.getSignLocations(tokenAgent, world, region);
-						signLocations.add(new Location(worldWorld, path.getDouble("X"), path.getDouble("Y"), path.getDouble("Z")));
+						signLocations.add(new Location(realWorld, path.getDouble("X"), path.getDouble("Y"), path.getDouble("Z")));
 						if (signLocations.size() == 1) {
 							Utils.setEntry(tokenAgent, world, region, "signs", signLocations);
 						}
+						*/
 					}
 				}
 			}
 		}
-		*/
 		load();
 	}
 

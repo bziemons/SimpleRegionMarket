@@ -30,7 +30,7 @@ import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Sign;
 
 public abstract class Template {

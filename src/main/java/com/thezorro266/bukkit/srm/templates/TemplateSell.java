@@ -29,11 +29,12 @@ import org.bukkit.entity.Player;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Sign;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
-public class TemplateSell extends IntelligentSignTemplate implements OwnableTemplate {
+public class TemplateSell extends SignTemplate implements OwnableTemplate {
 	double priceMin;
 	double priceMax;
 
@@ -45,22 +46,58 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 
 	@Override
 	public boolean isRegionOwner(OfflinePlayer player, Region region) {
-		return false;
+		return SimpleRegionMarket.getInstance().getWorldGuardManager().isPlayerOwner(region.getWorldguardRegion(), player);
 	}
 
 	@Override
 	public boolean isRegionMember(OfflinePlayer player, Region region) {
-		return false;
+		return SimpleRegionMarket.getInstance().getWorldGuardManager().isPlayerMember(region.getWorldguardRegion(), player);
 	}
 
 	@Override
 	public OfflinePlayer[] getRegionOwners(Region region) {
-		return new OfflinePlayer[] {};
+		return SimpleRegionMarket.getInstance().getWorldGuardManager().getOwners(region.getWorldguardRegion());
 	}
 
 	@Override
 	public OfflinePlayer[] getRegionMembers(Region region) {
-		return new OfflinePlayer[] {};
+		return SimpleRegionMarket.getInstance().getWorldGuardManager().getMembers(region.getWorldguardRegion());
+	}
+
+	@Override
+	public void setRegionOwners(Region region, OfflinePlayer[] owners) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().removeAllOwners(region.getWorldguardRegion());
+		for (OfflinePlayer player : owners) {
+			addRegionOwner(region, player);
+		}
+	}
+
+	@Override
+	public void setRegionMembers(Region region, OfflinePlayer[] members) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().removeAllMembers(region.getWorldguardRegion());
+		for (OfflinePlayer player : members) {
+			addRegionMember(region, player);
+		}
+	}
+
+	@Override
+	public void addRegionOwner(Region region, OfflinePlayer player) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().addOwner(region.getWorldguardRegion(), player);
+	}
+
+	@Override
+	public void addRegionMember(Region region, OfflinePlayer player) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().addMember(region.getWorldguardRegion(), player);
+	}
+
+	@Override
+	public void removeRegionOwner(Region region, OfflinePlayer player) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().removeOwner(region.getWorldguardRegion(), player);
+	}
+
+	@Override
+	public void removeRegionMember(Region region, OfflinePlayer player) {
+		SimpleRegionMarket.getInstance().getWorldGuardManager().removeMember(region.getWorldguardRegion(), player);
 	}
 
 	@Override
@@ -69,20 +106,49 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 	}
 
 	@Override
-	public boolean isSignApplicable(Location location, String[] lines) {
-		if (super.isSignApplicable(location, lines)) {
-			return true;
+	public void setRegionOccupied(Region region, boolean isOccupied) {
+		region.setOption("state", (isOccupied ? "occupied" : "free"));
+	}
+
+	@Override
+	public void clearRegion(Region region) {
+		if (isRegionOccupied(region)) {
+			setRegionOccupied(region, false);
+			setRegionMembers(region, new OfflinePlayer[] {});
+			setRegionOwners(region, new OfflinePlayer[] {});
 		}
-		return false;
+	}
+
+	@Override
+	public boolean isSignApplicable(Location location, String[] lines) {
+		return super.isSignApplicable(location, lines);
 	}
 
 	@Override
 	public boolean breakSign(Player player, Sign sign) {
+		// TODO: Can sign be broken?
+		player.sendMessage("You're not allowed to break this sign");
 		return false;
 	}
 
 	@Override
 	public void clickSign(Player player, Sign sign) {
+		Region r = sign.getRegion();
+		if (isRegionOccupied(r)) {
+			if (isRegionOwner(player, r)) {
+				player.sendMessage("This is your region.");
+			} else {
+				player.sendMessage("This region is already sold.");
+			}
+		} else {
+			// TODO: Player permissions
+			// TODO: Player money
+			// TODO: WG Region Owner/Member question
+			setRegionOwners(r, new OfflinePlayer[] { player });
+			setRegionMembers(r, new OfflinePlayer[] {});
+			setRegionOccupied(r, true);
+			player.sendMessage("You're now the owner of this region");
+		}
 	}
 
 	@Override
@@ -100,7 +166,7 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 
 	@Override
 	public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
-		ProtectedRegion worldguardRegion = Region.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
+		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
 
 		if (worldguardRegion != null) {
 			boolean existentRegion = false;
@@ -112,7 +178,7 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 			}
 
 			if (!existentRegion) {
-				Region region = new Region(this, block.getWorld(), worldguardRegion);
+				Region region = SimpleRegionMarket.getInstance().getRegionFactory().createRegion(this, block.getWorld(), worldguardRegion);
 
 				double price;
 				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
@@ -159,9 +225,9 @@ public class TemplateSell extends IntelligentSignTemplate implements OwnableTemp
 					}
 				}
 
-				region.setOption("state", "free");
 				region.setOption("price", price);
 				region.setOption("account", account);
+				setRegionOccupied(region, false);
 
 				return region.addBlockAsSign(block);
 			}

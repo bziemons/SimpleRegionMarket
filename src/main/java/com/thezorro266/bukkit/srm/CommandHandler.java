@@ -30,7 +30,9 @@ import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.helpers.Permission;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
+import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
 public class CommandHandler implements CommandExecutor {
 
@@ -57,34 +59,34 @@ public class CommandHandler implements CommandExecutor {
 					return true;
 				} else {
 					final String region = args[1];
-					String world;
+					String world = "";
 					if (args.length > 2) {
 						world = args[2];
 					} else {
-						if (isConsole) {
-							sender.sendMessage("You have to type the world in the console");
-							return true;
-						} else {
+						if (!isConsole) {
 							world = player.getWorld().getName();
 						}
 					}
-					Boolean found = false;
-					for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
-						/*
-						if (Utils.getEntry(token, world, region, "taken") != null) {
-							if (Utils.getEntryBoolean(token, world, region, "taken")) {
-								token.releaseRegion(world, region);
-								found = true;
-								break;
-							}
+					World realWorld = Bukkit.getWorld(world);
+					Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
+					if (realRegion == null) {
+						if (realWorld == null) {
+							sender.sendMessage(String.format("Region %s was not found in any world.", region));
+						} else {
+							sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
 						}
-						*/
-					}
-
-					if (found) {
-						sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
 					} else {
-						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
+						if (realRegion.getTemplate() instanceof OwnableTemplate) {
+							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
+							if (ot.isRegionOccupied(realRegion)) {
+								ot.clearRegion(realRegion);
+								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+							} else {
+								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
+							}
+						} else {
+							sender.sendMessage(String.format("Region %s in world %s cannot be owned.", region, world));
+						}
 					}
 				}
 			} else {
@@ -97,35 +99,35 @@ public class CommandHandler implements CommandExecutor {
 					return true;
 				} else {
 					final String region = args[1];
-					String world;
+					String world = "";
 					if (args.length > 2) {
 						world = args[2];
 					} else {
-						if (isConsole) {
-							sender.sendMessage("You have to type the world in the console");
-							return true;
-						} else {
+						if (!isConsole) {
 							world = player.getWorld().getName();
 						}
 					}
-					Boolean found = false;
-					for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
-						/*
-						if (Utils.getEntry(token, world, region, "taken") != null) {
-							if (Utils.getEntryBoolean(token, world, region, "taken")) {
-								token.releaseRegion(world, region);
-								Utils.removeRegion(token, world, region);
-								found = true;
-								break;
+					World realWorld = Bukkit.getWorld(world);
+					Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
+					if (realRegion == null) {
+						if (realWorld == null) {
+							sender.sendMessage(String.format("Region %s was not found in any world.", region));
+						} else {
+							sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
+						}
+					} else {
+						if (realRegion.getTemplate() instanceof OwnableTemplate) {
+							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
+							if (ot.isRegionOccupied(realRegion)) {
+								ot.clearRegion(realRegion);
+								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+							} else {
+								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
 							}
 						}
-						*/
-					}
 
-					if (found) {
-						sender.sendMessage(String.format("Region %s in world %s has been removed.", region, world));
-					} else {
-						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
+						SimpleRegionMarket.getInstance().getRegionFactory().destroyRegion(realRegion);
+						sender.sendMessage(String.format("Region %s in world %s was removed.", region, world));
 					}
 				}
 			} else {

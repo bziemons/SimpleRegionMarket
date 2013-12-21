@@ -24,9 +24,10 @@ import lombok.Getter;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.thezorro266.bukkit.srm.helpers.RegionFactory;
+import com.thezorro266.bukkit.srm.helpers.WorldHelper;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.TemplateFormatException;
-import com.thezorro266.bukkit.srm.templates.TemplateManager;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class SimpleRegionMarket extends JavaPlugin {
@@ -34,6 +35,10 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Getter
 	private static SimpleRegionMarket instance = null;
+	@Getter
+	private final WorldHelper worldHelper;
+	@Getter
+	private final RegionFactory regionFactory;
 	@Getter
 	private final TemplateManager templateManager;
 	@Getter
@@ -47,6 +52,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 	public SimpleRegionMarket() {
 		super();
 		instance = this;
+		worldHelper = new WorldHelper();
+		regionFactory = new RegionFactory();
 		templateManager = new TemplateManager();
 		worldGuardManager = new WorldGuardManager();
 		vaultHook = new VaultHook();
@@ -54,6 +61,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		instance = null;
 	}
 
 	@Override

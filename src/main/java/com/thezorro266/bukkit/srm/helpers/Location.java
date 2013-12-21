@@ -23,16 +23,32 @@ import lombok.Data;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-public @Data class Location {
+public @Data
+class Location {
 	final World world;
 	final int x;
 	final int y;
 	final int z;
 
+	public Location(World world, int x, int y, int z) {
+		if (world == null) {
+			throw new IllegalArgumentException("world must not be null");
+		}
+
+		this.world = world;
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public Location(Location loc) {
+		this(loc.world, loc.x, loc.y, loc.z);
+	}
+
 	public Block getBlock() {
 		return world.getBlockAt(x, y, z);
 	}
-	
+
 	public org.bukkit.Location getBukkitLocation() {
 		return getBlock().getLocation();
 	}
@@ -43,5 +59,10 @@ public @Data class Location {
 
 	public static Location fromBlock(Block block) {
 		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Location[w:%s,c:(%d,%d,%d)]", world.getName(), x, y, z);
 	}
 }

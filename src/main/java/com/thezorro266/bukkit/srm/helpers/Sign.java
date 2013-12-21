@@ -25,6 +25,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
 
 public @Data
@@ -33,8 +34,25 @@ class Sign {
 
 	final Region region;
 	final Location location;
-	final boolean wallSign;
+	final boolean isWallSign;
 	final BlockFace direction;
+
+	public Sign(Region region, Location location, boolean isWallSign, BlockFace direction) {
+		if (region == null) {
+			throw new IllegalArgumentException("region must not be null");
+		}
+		if (location == null) {
+			throw new IllegalArgumentException("location must not be null");
+		}
+		if (direction == null) {
+			throw new IllegalArgumentException("direction must not be null");
+		}
+
+		this.region = region;
+		this.location = new Location(location);
+		this.isWallSign = isWallSign;
+		this.direction = direction;
+	}
 
 	public void clear() {
 		setContent(new String[] { "", "", "", "" });
@@ -43,7 +61,7 @@ class Sign {
 	public void setContent(String[] lines) {
 		Block signBlock = location.getBlock();
 		if (!isSign(signBlock)) {
-			signBlock.setType(wallSign ? Material.WALL_SIGN : Material.SIGN_POST);
+			signBlock.setType(isWallSign ? Material.WALL_SIGN : Material.SIGN_POST);
 		}
 		org.bukkit.block.Sign signBlockState = (org.bukkit.block.Sign) signBlock.getState();
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
@@ -80,5 +98,10 @@ class Sign {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Sign[r:%s,l:%s]", region.getName(), location);
 	}
 }

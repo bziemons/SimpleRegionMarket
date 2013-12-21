@@ -20,7 +20,7 @@ package com.thezorro266.bukkit.srm.templates.interfaces;
 
 import org.bukkit.OfflinePlayer;
 
-import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 
 public interface OwnableTemplate {
 
@@ -28,9 +28,25 @@ public interface OwnableTemplate {
 
 	public boolean isRegionMember(OfflinePlayer player, Region region);
 
-	public boolean isRegionOccupied(Region region);
-
 	public OfflinePlayer[] getRegionOwners(Region region);
 
 	public OfflinePlayer[] getRegionMembers(Region region);
+
+	public void setRegionOwners(Region region, OfflinePlayer[] owners);
+
+	public void setRegionMembers(Region region, OfflinePlayer[] members);
+
+	public void addRegionOwner(Region region, OfflinePlayer player);
+
+	public void addRegionMember(Region region, OfflinePlayer player);
+
+	public void removeRegionOwner(Region region, OfflinePlayer player);
+
+	public void removeRegionMember(Region region, OfflinePlayer player);
+
+	public boolean isRegionOccupied(Region region);
+
+	public void setRegionOccupied(Region region, boolean isOccupied);
+
+	public void clearRegion(Region region);
 }

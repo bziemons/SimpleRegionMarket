@@ -16,10 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.templates;
+package com.thezorro266.bukkit.srm.exceptions;
 
+/**
+ * An exception for a wrong template format.
+ * 
+ * @author theZorro266
+ */
 public class TemplateFormatException extends Exception {
-
 	private static final long serialVersionUID = 54537656279632141L;
 
 	public TemplateFormatException(String message) {

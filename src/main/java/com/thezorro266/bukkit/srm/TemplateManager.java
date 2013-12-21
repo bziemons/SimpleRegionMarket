@@ -33,8 +33,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.templates.Template;
-import com.thezorro266.bukkit.srm.templates.TemplateFormatException;
 import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
@@ -68,7 +68,7 @@ public class TemplateManager {
 					templateYaml.save(templateFile);
 				}
 			} else {
-				throw new IOException("Cannot read " + TEMPLATE_FILENAME);
+				throw new IOException(String.format("Cannot read %s", TEMPLATE_FILENAME));
 			}
 		} else {
 			// Load very old agents file, if exist

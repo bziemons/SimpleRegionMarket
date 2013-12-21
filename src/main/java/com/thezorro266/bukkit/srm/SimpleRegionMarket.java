@@ -24,10 +24,10 @@ import lombok.Getter;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory;
 import com.thezorro266.bukkit.srm.helpers.WorldHelper;
 import com.thezorro266.bukkit.srm.templates.Template;
-import com.thezorro266.bukkit.srm.templates.TemplateFormatException;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class SimpleRegionMarket extends JavaPlugin {
@@ -96,7 +96,12 @@ public class SimpleRegionMarket extends JavaPlugin {
 		}
 		loading = false;
 
-		// TODO template region load (I guess)
+		long start = System.currentTimeMillis();
+		int regionCount = 0;
+		{
+			// TODO template region load
+		}
+		getLogger().info(String.format("Loaded %d regions in %dms", regionCount, System.currentTimeMillis() - start));
 
 		new EventListener();
 

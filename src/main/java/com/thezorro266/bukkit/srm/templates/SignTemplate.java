@@ -32,14 +32,14 @@ import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.Region;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Sign;
 
-public abstract class IntelligentSignTemplate extends Template {
+public abstract class SignTemplate extends Template {
 	protected String[] signInput;
 	protected Map<String, String[]> signOutput;
 
-	public IntelligentSignTemplate(ConfigurationSection templateConfigSection) {
+	public SignTemplate(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		signInput = new String[SIGN_LINE_COUNT];
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
@@ -61,10 +61,7 @@ public abstract class IntelligentSignTemplate extends Template {
 
 	@Override
 	public boolean isSignApplicable(Location location, String[] lines) {
-		if (lines[0].equalsIgnoreCase(signInput[0])) {
-			return true;
-		}
-		return false;
+		return lines[0].equalsIgnoreCase(signInput[0]);
 	}
 
 	@Override
@@ -115,7 +112,7 @@ public abstract class IntelligentSignTemplate extends Template {
 		return buffer.toString();
 	}
 
-	private static HashMap<String, String> getSignInput(IntelligentSignTemplate signTemplate, String[] lines) {
+	private static HashMap<String, String> getSignInput(SignTemplate signTemplate, String[] lines) {
 		final HashMap<String, String> outputMap = new HashMap<String, String>();
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			final String inputLine = signTemplate.signInput[i];

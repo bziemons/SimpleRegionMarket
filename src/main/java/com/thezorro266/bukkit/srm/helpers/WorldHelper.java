@@ -30,7 +30,7 @@ public class WorldHelper {
 	private WeakHashMap<Region, World> regionMap = new WeakHashMap<Region, World>();
 
 	public Region[] getRegions(World world) {
-		ArrayList<Region> list = new ArrayList<>();
+		ArrayList<Region> list = new ArrayList<Region>();
 
 		for (Entry<Region, World> entry : regionMap.entrySet()) {
 			if (entry.getValue().equals(world)) {

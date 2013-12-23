@@ -20,8 +20,10 @@ package com.thezorro266.bukkit.srm.helpers;
 
 import lombok.Data;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.Configuration;
 
 public @Data
 class Location {
@@ -32,7 +34,7 @@ class Location {
 
 	public Location(World world, int x, int y, int z) {
 		if (world == null) {
-			throw new IllegalArgumentException("world must not be null");
+			throw new IllegalArgumentException("World must not be null");
 		}
 
 		this.world = world;
@@ -60,7 +62,22 @@ class Location {
 	public static Location fromBlock(Block block) {
 		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 	}
-	
+
+	public void saveToConfiguration(Configuration config, String path) {
+		config.set(path + "world", world.getName());
+		config.set(path + "x", x);
+		config.set(path + "y", y);
+		config.set(path + "z", z);
+	}
+
+	public static Location loadFromConfiguration(Configuration config, String path) {
+		World world = Bukkit.getWorld(config.getString(path + "world"));
+		int x = config.getInt(path + "x");
+		int y = config.getInt(path + "y");
+		int z = config.getInt(path + "z");
+		return new Location(world, x, y, z);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Location[w:%s,c:(%d,%d,%d)]", world.getName(), x, y, z);

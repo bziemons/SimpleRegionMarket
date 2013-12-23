@@ -24,6 +24,8 @@ import lombok.Getter;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory;
 import com.thezorro266.bukkit.srm.helpers.WorldHelper;
@@ -61,12 +63,17 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		try {
+			saveRegions();
+		} catch (ContentSaveException e) {
+			e.printStackTrace();
+		}
 		instance = null;
 	}
 
 	@Override
 	public void onLoad() {
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		{
 			try {
 				templateManager.load();
@@ -78,11 +85,12 @@ public class SimpleRegionMarket extends JavaPlugin {
 				return;
 			}
 		}
-		getLogger().info(String.format("Loaded %d templates in %dms", templateManager.getTemplateList().size(), System.currentTimeMillis() - start));
+		getLogger().info(String.format("Loaded %d templates in %dms", templateManager.getTemplateList().size(), (System.nanoTime() - start) / 1000000L));
 	}
 
 	@Override
 	public void onEnable() {
+		// Try to load dependencies
 		try {
 			vaultHook.load();
 			worldGuardManager.load();
@@ -90,23 +98,31 @@ public class SimpleRegionMarket extends JavaPlugin {
 			except(e);
 		}
 
+		// Load regions in templates
+		long start = System.nanoTime();
+		{
+			try {
+				templateManager.loadContent();
+			} catch (ContentLoadException e) {
+				except(e);
+			}
+		}
+		getLogger().info(String.format("Loaded %d regions in %dms", regionFactory.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+
+		// Check if the plugin should be disabled because of an exception
 		if (disable) {
 			getPluginLoader().disablePlugin(this);
 			return;
 		}
 		loading = false;
 
-		long start = System.currentTimeMillis();
-		int regionCount = 0;
-		{
-			// TODO template region load
-		}
-		getLogger().info(String.format("Loaded %d regions in %dms", regionCount, System.currentTimeMillis() - start));
-
+		// Register events
 		new EventListener();
 
+		// Set command executor
 		getCommand("regionmarket").setExecutor(new CommandHandler());
 
+		// Set up async timer
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			@Override
 			public void run() {
@@ -119,12 +135,25 @@ public class SimpleRegionMarket extends JavaPlugin {
 		}, 1200L, 1200L);
 	}
 
+	public void saveRegions() throws ContentSaveException {
+		if (!loading) {
+			long start = System.nanoTime();
+			{
+				templateManager.saveContent();
+			}
+			getLogger().info(String.format("Saved %d regions in %dms", regionFactory.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+		} else {
+			getLogger().info("Not saving anything, because I didn't even load");
+		}
+	}
+
 	private void except(Throwable t) {
 		disable = true;
 		getLogger().severe("We got a problem here. Disabling plugin..");
 		if (PRINT_STACKTRACE) {
 			t.printStackTrace();
 		} else {
+			getLogger().severe(t.toString());
 			for (StackTraceElement element : t.getStackTrace()) {
 				getLogger().severe(element.toString());
 			}

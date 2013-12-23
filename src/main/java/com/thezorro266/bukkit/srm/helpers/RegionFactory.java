@@ -20,21 +20,31 @@ package com.thezorro266.bukkit.srm.helpers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import lombok.Getter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
 
 public class RegionFactory {
+
+	@Getter
+	private int regionCount = 0;
+
 	public class Region {
 		@Getter
 		final Template template;
@@ -49,13 +59,13 @@ public class RegionFactory {
 
 		private Region(Template template, World world, ProtectedRegion worldguardRegion) {
 			if (template == null) {
-				throw new IllegalArgumentException("template must not be null");
+				throw new IllegalArgumentException("Template must not be null");
 			}
 			if (world == null) {
-				throw new IllegalArgumentException("world must not be null");
+				throw new IllegalArgumentException("World must not be null");
 			}
 			if (worldguardRegion == null) {
-				throw new IllegalArgumentException("worldguard region must not be null");
+				throw new IllegalArgumentException("WorldGuard region must not be null");
 			}
 
 			this.template = template;
@@ -78,7 +88,13 @@ public class RegionFactory {
 			}
 			return null;
 		}
-
+		
+		public void updateSigns() {
+			for (Sign sign : signList) {
+				template.updateSign(sign);
+			}
+		}
+		
 		public Object getOption(String optionAlias) {
 			return options.get(optionAlias);
 		}
@@ -107,23 +123,78 @@ public class RegionFactory {
 			return replacementMap;
 		}
 
+		public void saveToConfiguration(Configuration config, String path) {
+			config.set(path + "template_id", template.getId());
+			config.set(path + "world", world.getName());
+			config.set(path + "worldguard_region", worldguardRegion.getId());
+			saveOptions(config, path + "options.");
+
+			int signCount = 0;
+			for (Sign sign : signList) {
+				sign.saveToConfiguration(config, String.format("signs.%d.", signCount));
+				++signCount;
+			}
+		}
+
+		private void saveOptions(Configuration config, String path) {
+			for (Entry<String, Object> optionEntry : options.entrySet()) {
+				config.set(path + optionEntry.getKey(), optionEntry.getValue());
+			}
+		}
+
 		@Override
 		public String toString() {
 			return String.format("Region[%s,w:%s,t:%s]", getName(), world.getName(), template.toString());
 		}
 	}
-	
+
 	public Region createRegion(Template template, World world, ProtectedRegion worldguardRegion) {
 		Region r = new Region(template, world, worldguardRegion);
-		
+
 		SimpleRegionMarket.getInstance().getWorldHelper().putRegion(r, world);
 		template.getRegionList().add(r);
-		
+
+		++regionCount;
+
 		return r;
 	}
-	
+
 	public void destroyRegion(Region region) {
 		region.getTemplate().getRegionList().remove(region);
+
+		--regionCount;
+	}
+
+	public void loadFromConfiguration(Configuration config, String path) throws ContentLoadException {
+		Template template = SimpleRegionMarket.getInstance().getTemplateManager().getTemplateFromId(config.getString(path + "template_id"));
+		World world = Bukkit.getWorld(config.getString(path + "world"));
+		ProtectedRegion worldguardRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+				.getProtectedRegion(world, config.getString(path + "worldguard_region"));
+
+		Region region;
+		try {
+			region = createRegion(template, world, worldguardRegion);
+		} catch (IllegalArgumentException e) {
+			throw new ContentLoadException("Could not create region " + config.getString(path + "worldguard_region"), e);
+		}
+
+		Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+		for (Entry<String, Object> optionEntry : optionEntrySet) {
+			if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
+				region.setOption(optionEntry.getKey(), optionEntry.getValue());
+			}
+		}
+
+		for (String signKey : config.getConfigurationSection(path + "signs").getKeys(false)) {
+			Sign sign;
+			try {
+				sign = Sign.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+			} catch (IllegalArgumentException e) {
+				throw new ContentLoadException("Could not create sign " + signKey, e);
+			}
+
+			region.signList.add(sign);
+		}
 	}
 
 	public static ProtectedRegion getProtectedRegionFromLocation(Location loc, String region) {

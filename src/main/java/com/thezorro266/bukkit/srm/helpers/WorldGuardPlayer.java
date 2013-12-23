@@ -18,9 +18,8 @@
 
 package com.thezorro266.bukkit.srm.helpers;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.OfflinePlayer;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.Vector;

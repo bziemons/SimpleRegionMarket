@@ -21,6 +21,7 @@ package com.thezorro266.bukkit.srm;
 import static com.thezorro266.bukkit.srm.helpers.Sign.SIGN_LINE_COUNT;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +31,21 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
+import com.thezorro266.bukkit.srm.exceptions.ThisShouldNeverHappenException;
+import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
+	public static final String TEMPLATES_FOLDER = "templates";
 	public static final String AGENTS_FILENAME = "agents.yml";
 	public static final String TEMPLATE_FILENAME = "templates.yml";
 	public static final int TEMPLATE_VERSION = 1;
@@ -247,5 +254,92 @@ public class TemplateManager {
 
 		templateYaml.save(templateFile);
 		load();
+	}
+
+	public Template getTemplateFromId(String id) {
+		for (Template template : templateList) {
+			if (template.getId().equalsIgnoreCase(id)) {
+				return template;
+			}
+		}
+		return null;
+	}
+	
+	public void loadContent() throws ContentLoadException {
+		for (Template template : templateList) {
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATES_FOLDER), template.getId().toLowerCase());
+			
+			// Search through template dir, if exists
+			if(templateDir.exists()) {
+				for(String worldStr : templateDir.list()) {
+					File worldDir = new File(templateDir, worldStr);
+					if(worldDir.isDirectory()) {
+						// Check the world and get the world object from Bukkit
+						World world = Bukkit.getWorld(worldStr);
+						
+						if(world != null) {
+							for (File regionFile : worldDir.listFiles()) {
+								// Create a fresh YamlConfiguration
+								YamlConfiguration regionConfig = new YamlConfiguration();
+								
+								// Open the region configuration file and try to load it
+								try {
+									regionConfig.load(regionFile);
+								} catch (FileNotFoundException e) {
+									throw new ThisShouldNeverHappenException("The region file does not exist, but it did a few nanoseconds ago");
+								} catch (IOException e) {
+									throw new ContentLoadException("Problem when loading region file", e);
+								} catch (InvalidConfigurationException e) {
+									throw new ContentLoadException("Yaml region file with wrong configuration", e);
+								}
+								
+								// Let the RegionFactory do the rest
+								SimpleRegionMarket.getInstance().getRegionFactory().loadFromConfiguration(regionConfig, "");
+							}
+						} else {
+							SimpleRegionMarket.getInstance().getLogger().warning(String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void saveContent() throws ContentSaveException {
+		for (Template template : templateList) {
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATES_FOLDER), template.getId().toLowerCase());
+			
+			// Create template folder in srm data dir
+			if(!templateDir.exists()) {
+				if(!templateDir.mkdirs()) {
+					throw new ContentSaveException("Could not create template dir");
+				}
+			}
+			
+			for (Region region : template.getRegionList()) {
+				File regionFolder = new File(templateDir, region.getWorld().getName());
+				
+				// Create world folder in template folder
+				if(!regionFolder.exists()) {
+					if(!regionFolder.mkdirs()) {
+						throw new ContentSaveException("Could not create region dir");
+					}
+				}
+				
+				YamlConfiguration regionConfig = new YamlConfiguration();
+				
+				// Let the region put the stuff in
+				region.saveToConfiguration(regionConfig, "");
+
+				File regionFile = new File(regionFolder, String.format("%s.yml", region.getName()));
+				
+				// Save
+				try {
+					regionConfig.save(regionFile);
+				} catch (IOException e) {
+					throw new ContentSaveException(region, e);
+				}
+			}
+		}
 	}
 }

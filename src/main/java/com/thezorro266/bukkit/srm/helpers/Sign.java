@@ -23,8 +23,10 @@ import lombok.Data;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.configuration.Configuration;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
 
@@ -39,13 +41,13 @@ class Sign {
 
 	public Sign(Region region, Location location, boolean isWallSign, BlockFace direction) {
 		if (region == null) {
-			throw new IllegalArgumentException("region must not be null");
+			throw new IllegalArgumentException("Region must not be null");
 		}
 		if (location == null) {
-			throw new IllegalArgumentException("location must not be null");
+			throw new IllegalArgumentException("Location must not be null");
 		}
 		if (direction == null) {
-			throw new IllegalArgumentException("direction must not be null");
+			throw new IllegalArgumentException("Direction must not be null");
 		}
 
 		this.region = region;
@@ -60,13 +62,17 @@ class Sign {
 
 	public void setContent(String[] lines) {
 		Block signBlock = location.getBlock();
+		org.bukkit.block.Sign signBlockState = (org.bukkit.block.Sign) signBlock.getState();
 		if (!isSign(signBlock)) {
 			signBlock.setType(isWallSign ? Material.WALL_SIGN : Material.SIGN_POST);
+			((org.bukkit.material.Sign) signBlockState.getData()).setFacingDirection(direction);
 		}
-		org.bukkit.block.Sign signBlockState = (org.bukkit.block.Sign) signBlock.getState();
+
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			signBlockState.setLine(i, lines[i]);
 		}
+		
+		signBlockState.update(false, false);
 	}
 
 	public boolean isBlockThisSign(Block block) {
@@ -98,6 +104,27 @@ class Sign {
 			}
 		}
 		return null;
+	}
+
+	public void saveToConfiguration(Configuration config, String path) {
+		config.set(path + "region", region.getName());
+		location.saveToConfiguration(config, path + "location.");
+		config.set(path + "is_wall_sign", isWallSign);
+		config.set(path + "direction", direction.toString());
+	}
+
+	public static Sign loadFromConfiguration(Configuration config, Region region, String path) throws ContentLoadException {
+		String regionName = region.getName();
+		String configRegionName = config.getString(path + "region");
+		if (regionName.equals(configRegionName)) {
+			Location location = Location.loadFromConfiguration(config, path + "location.");
+			boolean isWallSign = config.getBoolean(path + "is_wall_sign");
+			BlockFace direction = BlockFace.valueOf(config.getString(path + "direction"));
+
+			return new Sign(region, location, isWallSign, direction);
+		} else {
+			throw new ContentLoadException("Region string in sign config did not match the outer region");
+		}
 	}
 
 	@Override

@@ -43,6 +43,16 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 		super(templateConfigSection);
 
 		type = "sell";
+		
+		if(templateConfigSection.contains("price.min")) {
+			priceMin = templateConfigSection.getDouble("price.min");
+		}
+		if(templateConfigSection.contains("price.max")) {
+			priceMax = templateConfigSection.getDouble("price.max");
+		}
+		if(templateConfigSection.contains("removesigns")) {
+			removeSigns = templateConfigSection.getBoolean("removesigns");
+		}
 	}
 
 	@Override

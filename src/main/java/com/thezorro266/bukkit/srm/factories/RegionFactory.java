@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.helpers;
+package com.thezorro266.bukkit.srm.factories;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,11 +37,16 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
-import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
+import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
+import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
 
 public class RegionFactory {
+	public static final RegionFactory instance = new RegionFactory();
+
+	private RegionFactory() {
+	}
 
 	@Getter
 	private int regionCount = 0;
@@ -81,24 +86,24 @@ public class RegionFactory {
 		}
 
 		public Sign addBlockAsSign(Block block) {
-			if (SimpleRegionMarket.getInstance().getSignFactory().isSign(block)) {
+			if (SignFactory.instance.isSign(block)) {
 				org.bukkit.material.Sign signMat = (org.bukkit.material.Sign) block.getState().getData();
-				Sign sign = SimpleRegionMarket.getInstance().getSignFactory().createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
+				Sign sign = SignFactory.instance.createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
 				return sign;
 			}
 			return null;
 		}
-		
+
 		public void updateSigns() {
 			for (Sign sign : signList) {
 				template.updateSign(sign);
 			}
 		}
-		
+
 		public boolean isOption(String optionAlias) {
 			return options.containsKey(optionAlias);
 		}
-		
+
 		public Object getOption(String optionAlias) {
 			return options.get(optionAlias);
 		}
@@ -192,7 +197,7 @@ public class RegionFactory {
 		for (String signKey : config.getConfigurationSection(path + "signs").getKeys(false)) {
 			Sign sign;
 			try {
-				sign = SimpleRegionMarket.getInstance().getSignFactory().loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+				sign = SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
 			} catch (IllegalArgumentException e) {
 				throw new ContentLoadException("Could not create sign " + signKey, e);
 			}

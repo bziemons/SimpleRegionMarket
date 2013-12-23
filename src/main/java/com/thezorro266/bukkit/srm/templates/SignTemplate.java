@@ -18,7 +18,7 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import static com.thezorro266.bukkit.srm.helpers.SignFactory.Sign.SIGN_LINE_COUNT;
+import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +31,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 
 public abstract class SignTemplate extends Template {
 	protected String[] signInput;

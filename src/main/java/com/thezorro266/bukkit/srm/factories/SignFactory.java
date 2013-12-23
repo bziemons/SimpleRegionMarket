@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.helpers;
+package com.thezorro266.bukkit.srm.factories;
 
 import lombok.Data;
+import lombok.Getter;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,9 +28,16 @@ import org.bukkit.configuration.Configuration;
 
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.helpers.Location;
 
 public class SignFactory {
+	public static final SignFactory instance = new SignFactory();
+	
+	private SignFactory() {
+	}
+	
+	@Getter
 	private int signCount = 0;
 
 	public @Data
@@ -115,10 +123,6 @@ public class SignFactory {
 		SimpleRegionMarket.getInstance().getLocationSignHelper().removeSignAndLocation(sign);
 
 		--signCount;
-	}
-
-	public int getSignCount() {
-		return signCount;
 	}
 
 	public boolean isSign(Block block) {

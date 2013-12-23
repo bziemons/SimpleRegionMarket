@@ -27,9 +27,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import com.thezorro266.bukkit.srm.helpers.LocationSignHelper;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory;
-import com.thezorro266.bukkit.srm.helpers.SignFactory;
 import com.thezorro266.bukkit.srm.helpers.WorldHelper;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
@@ -43,10 +42,6 @@ public class SimpleRegionMarket extends JavaPlugin {
 	private final LocationSignHelper locationSignHelper;
 	@Getter
 	private final WorldHelper worldHelper;
-	@Getter
-	private final SignFactory signFactory;
-	@Getter
-	private final RegionFactory regionFactory;
 	@Getter
 	private final TemplateManager templateManager;
 	@Getter
@@ -62,8 +57,6 @@ public class SimpleRegionMarket extends JavaPlugin {
 		instance = this;
 		locationSignHelper = new LocationSignHelper();
 		worldHelper = new WorldHelper();
-		signFactory = new SignFactory();
-		regionFactory = new RegionFactory();
 		templateManager = new TemplateManager();
 		worldGuardManager = new WorldGuardManager();
 		vaultHook = new VaultHook();
@@ -115,7 +108,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 				except(e);
 			}
 		}
-		getLogger().info(String.format("Loaded %d regions in %dms", regionFactory.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+		getLogger().info(String.format("Loaded %d regions in %dms", RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
 
 		// Check if the plugin should be disabled because of an exception
 		if (disable) {
@@ -149,7 +142,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 			{
 				templateManager.saveContent();
 			}
-			getLogger().info(String.format("Saved %d regions in %dms", regionFactory.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+			getLogger().info(String.format("Saved %d regions in %dms", RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
 		} else {
 			getLogger().info("Not saving anything, because I didn't even load");
 		}

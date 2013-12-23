@@ -24,7 +24,7 @@ import java.util.WeakHashMap;
 
 import org.bukkit.World;
 
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 
 public class WorldHelper {
 	private WeakHashMap<Region, World> regionMap = new WeakHashMap<Region, World>();

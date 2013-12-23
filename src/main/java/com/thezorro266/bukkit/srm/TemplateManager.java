@@ -18,7 +18,7 @@
 
 package com.thezorro266.bukkit.srm;
 
-import static com.thezorro266.bukkit.srm.helpers.SignFactory.Sign.SIGN_LINE_COUNT;
+import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +39,8 @@ import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.exceptions.ThisShouldNeverHappenException;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
@@ -324,7 +325,7 @@ public class TemplateManager {
 								}
 								
 								// Let the RegionFactory do the rest
-								SimpleRegionMarket.getInstance().getRegionFactory().loadFromConfiguration(regionConfig, "");
+								RegionFactory.instance.loadFromConfiguration(regionConfig, "");
 							}
 						} else {
 							SimpleRegionMarket.getInstance().getLogger().warning(String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));

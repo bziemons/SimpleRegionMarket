@@ -28,10 +28,10 @@ import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
 public class TemplateSell extends SignTemplate implements OwnableTemplate {
@@ -218,7 +218,7 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 			}
 
 			if (!existentRegion) {
-				Region region = SimpleRegionMarket.getInstance().getRegionFactory().createRegion(this, block.getWorld(), worldguardRegion);
+				Region region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
 				double price;
 				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {

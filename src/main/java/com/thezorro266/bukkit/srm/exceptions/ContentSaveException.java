@@ -1,6 +1,6 @@
 package com.thezorro266.bukkit.srm.exceptions;
 
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 
 public class ContentSaveException extends Exception {
 

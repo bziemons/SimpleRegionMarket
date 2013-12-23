@@ -26,8 +26,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import com.thezorro266.bukkit.srm.factories.SignFactory;
+import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.templates.Template;
 
 public class EventListener implements Listener {
@@ -39,7 +40,7 @@ public class EventListener implements Listener {
 	public void onSignChanged(SignChangeEvent event) {
 		if (!event.isCancelled()) {
 			Player player = event.getPlayer();
-			Sign sign = SimpleRegionMarket.getInstance().getSignFactory().getSignFromLocation(Location.fromBlock(event.getBlock()));
+			Sign sign = SignFactory.instance.getSignFromLocation(Location.fromBlock(event.getBlock()));
 			if (sign != null) {
 				if (!sign.getRegion().getTemplate().breakSign(player, sign)) {
 					event.setCancelled(true);
@@ -64,7 +65,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (!event.isCancelled()) {
-			Sign sign = SimpleRegionMarket.getInstance().getSignFactory().getSignFromLocation(Location.fromBlock(event.getBlock()));
+			Sign sign = SignFactory.instance.getSignFromLocation(Location.fromBlock(event.getBlock()));
 			if (sign != null) {
 				if (!sign.getRegion().getTemplate().breakSign(event.getPlayer(), sign)) {
 					event.setCancelled(true);
@@ -76,9 +77,9 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.hasBlock()) {
-			if (SimpleRegionMarket.getInstance().getSignFactory().isSign(event.getClickedBlock())) {
+			if (SignFactory.instance.isSign(event.getClickedBlock())) {
 				if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-					Sign sign = SimpleRegionMarket.getInstance().getSignFactory().getSignFromLocation(Location.fromBlock(event.getClickedBlock()));
+					Sign sign = SignFactory.instance.getSignFromLocation(Location.fromBlock(event.getClickedBlock()));
 					if (sign != null) {
 						sign.getRegion().getTemplate().clickSign(event.getPlayer(), sign);
 					}

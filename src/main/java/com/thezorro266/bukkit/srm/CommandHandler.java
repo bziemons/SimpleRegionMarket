@@ -29,8 +29,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Permission;
-import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
@@ -126,7 +127,7 @@ public class CommandHandler implements CommandExecutor {
 							}
 						}
 
-						SimpleRegionMarket.getInstance().getRegionFactory().destroyRegion(realRegion);
+						RegionFactory.instance.destroyRegion(realRegion);
 						sender.sendMessage(String.format("Region %s in world %s was removed.", region, world));
 					}
 				}

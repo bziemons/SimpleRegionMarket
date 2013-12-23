@@ -38,6 +38,7 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 	protected double priceMin = 0;
 	protected double priceMax = -1;
 	protected boolean removeSigns = true;
+	protected boolean buyerIsOwner = true;
 
 	public TemplateSell(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
@@ -52,6 +53,14 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 		}
 		if(templateConfigSection.contains("removesigns")) {
 			removeSigns = templateConfigSection.getBoolean("removesigns");
+		}
+		if(templateConfigSection.contains("buyer")) {
+			String buyer = templateConfigSection.getString("buyer");
+			if(buyer.equalsIgnoreCase("owner")) {
+				buyerIsOwner = true;
+			} else if(buyer.equalsIgnoreCase("member")) {
+				buyerIsOwner = false;
+			}
 		}
 	}
 
@@ -137,9 +146,13 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 
 	@Override
 	public boolean breakSign(Player player, Sign sign) {
-		// TODO: Can sign be broken?
-		player.sendMessage("You're not allowed to break this sign");
-		return false;
+		if(sign.getRegion().getSignList().size() > 1 || removeSigns) {
+			sign.getRegion().getSignList().remove(sign);
+			return true;
+		} else {
+			player.sendMessage("You're not allowed to break this sign");
+			return false;
+		}
 	}
 
 	@Override

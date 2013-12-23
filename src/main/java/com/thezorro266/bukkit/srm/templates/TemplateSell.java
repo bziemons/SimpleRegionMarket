@@ -31,7 +31,7 @@ import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.Sign;
+import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
 public class TemplateSell extends SignTemplate implements OwnableTemplate {
@@ -44,21 +44,21 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 		super(templateConfigSection);
 
 		type = "sell";
-		
-		if(templateConfigSection.contains("price.min")) {
+
+		if (templateConfigSection.contains("price.min")) {
 			priceMin = templateConfigSection.getDouble("price.min");
 		}
-		if(templateConfigSection.contains("price.max")) {
+		if (templateConfigSection.contains("price.max")) {
 			priceMax = templateConfigSection.getDouble("price.max");
 		}
-		if(templateConfigSection.contains("removesigns")) {
+		if (templateConfigSection.contains("removesigns")) {
 			removeSigns = templateConfigSection.getBoolean("removesigns");
 		}
-		if(templateConfigSection.contains("buyer")) {
+		if (templateConfigSection.contains("buyer")) {
 			String buyer = templateConfigSection.getString("buyer");
-			if(buyer.equalsIgnoreCase("owner")) {
+			if (buyer.equalsIgnoreCase("owner")) {
 				buyerIsOwner = true;
-			} else if(buyer.equalsIgnoreCase("member")) {
+			} else if (buyer.equalsIgnoreCase("member")) {
 				buyerIsOwner = false;
 			}
 		}
@@ -146,7 +146,7 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 
 	@Override
 	public boolean breakSign(Player player, Sign sign) {
-		if(sign.getRegion().getSignList().size() > 1 || removeSigns) {
+		if (sign.getRegion().getSignList().size() > 1 || removeSigns) {
 			sign.getRegion().getSignList().remove(sign);
 			return true;
 		} else {
@@ -168,12 +168,12 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 			// TODO: Player permissions
 			// TODO: Player money
 			clearRegion(r);
-			if(buyerIsOwner) {
+			if (buyerIsOwner) {
 				setRegionOwners(r, new OfflinePlayer[] { player });
 			} else {
 				setRegionMembers(r, new OfflinePlayer[] { player });
 			}
-			
+
 			r.setOption("price", null);
 			r.setOption("account", null);
 			r.setOption("buyer", player.getName());

@@ -32,7 +32,7 @@ import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.Sign;
+import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 
 public abstract class Template {
 

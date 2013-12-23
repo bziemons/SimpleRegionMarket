@@ -37,6 +37,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
+import com.thezorro266.bukkit.srm.helpers.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
 
@@ -80,10 +81,9 @@ public class RegionFactory {
 		}
 
 		public Sign addBlockAsSign(Block block) {
-			if (Sign.isSign(block)) {
+			if (SimpleRegionMarket.getInstance().getSignFactory().isSign(block)) {
 				org.bukkit.material.Sign signMat = (org.bukkit.material.Sign) block.getState().getData();
-				Sign sign = new Sign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
-				signList.add(sign);
+				Sign sign = SimpleRegionMarket.getInstance().getSignFactory().createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
 				return sign;
 			}
 			return null;
@@ -192,7 +192,7 @@ public class RegionFactory {
 		for (String signKey : config.getConfigurationSection(path + "signs").getKeys(false)) {
 			Sign sign;
 			try {
-				sign = Sign.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+				sign = SimpleRegionMarket.getInstance().getSignFactory().loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
 			} catch (IllegalArgumentException e) {
 				throw new ContentLoadException("Could not create sign " + signKey, e);
 			}

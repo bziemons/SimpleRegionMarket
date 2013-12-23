@@ -59,10 +59,6 @@ class Location {
 		return block.getWorld().equals(world) && block.getX() == x && block.getY() == y && block.getZ() == z;
 	}
 
-	public static Location fromBlock(Block block) {
-		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
-	}
-
 	public void saveToConfiguration(Configuration config, String path) {
 		config.set(path + "world", world.getName());
 		config.set(path + "x", x);
@@ -76,6 +72,10 @@ class Location {
 		int y = config.getInt(path + "y");
 		int z = config.getInt(path + "z");
 		return new Location(world, x, y, z);
+	}
+
+	public static Location fromBlock(Block block) {
+		return new Location(block.getWorld(), block.getX(), block.getY(), block.getZ());
 	}
 
 	@Override

@@ -27,7 +27,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
+import com.thezorro266.bukkit.srm.helpers.LocationSignHelper;
 import com.thezorro266.bukkit.srm.helpers.RegionFactory;
+import com.thezorro266.bukkit.srm.helpers.SignFactory;
 import com.thezorro266.bukkit.srm.helpers.WorldHelper;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
@@ -38,7 +40,11 @@ public class SimpleRegionMarket extends JavaPlugin {
 	@Getter
 	private static SimpleRegionMarket instance = null;
 	@Getter
+	private final LocationSignHelper locationSignHelper;
+	@Getter
 	private final WorldHelper worldHelper;
+	@Getter
+	private final SignFactory signFactory;
 	@Getter
 	private final RegionFactory regionFactory;
 	@Getter
@@ -54,7 +60,9 @@ public class SimpleRegionMarket extends JavaPlugin {
 	public SimpleRegionMarket() {
 		super();
 		instance = this;
+		locationSignHelper = new LocationSignHelper();
 		worldHelper = new WorldHelper();
+		signFactory = new SignFactory();
 		regionFactory = new RegionFactory();
 		templateManager = new TemplateManager();
 		worldGuardManager = new WorldGuardManager();

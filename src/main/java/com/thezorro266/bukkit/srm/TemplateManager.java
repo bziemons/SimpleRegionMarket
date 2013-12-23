@@ -18,7 +18,7 @@
 
 package com.thezorro266.bukkit.srm;
 
-import static com.thezorro266.bukkit.srm.helpers.Sign.SIGN_LINE_COUNT;
+import static com.thezorro266.bukkit.srm.helpers.SignFactory.Sign.SIGN_LINE_COUNT;
 
 import java.io.File;
 import java.io.FileNotFoundException;

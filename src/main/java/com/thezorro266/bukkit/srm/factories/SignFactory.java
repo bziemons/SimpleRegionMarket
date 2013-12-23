@@ -33,10 +33,10 @@ import com.thezorro266.bukkit.srm.helpers.Location;
 
 public class SignFactory {
 	public static final SignFactory instance = new SignFactory();
-	
+
 	private SignFactory() {
 	}
-	
+
 	@Getter
 	private int signCount = 0;
 
@@ -108,6 +108,13 @@ public class SignFactory {
 	}
 
 	public Sign createSign(Region region, Location location, boolean isWallSign, BlockFace direction) {
+		// Check for sign on location
+		Sign oldSign = SimpleRegionMarket.getInstance().getLocationSignHelper().getSign(location);
+		if (oldSign != null) {
+			throw new IllegalArgumentException("Location already has a sign");
+		}
+
+		// Create new sign
 		Sign sign = new Sign(region, location, isWallSign, direction);
 
 		region.getSignList().add(sign);
@@ -144,7 +151,7 @@ public class SignFactory {
 			boolean isWallSign = config.getBoolean(path + "is_wall_sign");
 			BlockFace direction = BlockFace.valueOf(config.getString(path + "direction"));
 
-			return new Sign(region, location, isWallSign, direction);
+			return createSign(region, location, isWallSign, direction);
 		} else {
 			throw new ContentLoadException("Region string in sign config did not match the outer region");
 		}

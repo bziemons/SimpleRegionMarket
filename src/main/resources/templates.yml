@@ -1,7 +1,6 @@
 version: 1
 sell:
   type: TemplateSell
-  removesigns: false
   buyer: owner
   price.min: 0
   price.max: -1
@@ -19,6 +18,8 @@ sell:
   output.occupied.4: ''
 let:
   type: TemplateLet
+  removesigns: false
+  buyer: member
   price.min: 0
   price.max: -1
   renttime.min: 60000
@@ -37,6 +38,8 @@ let:
   output.occupied.4: '[[owner]]'
 rent:
   type: TemplateRent
+  removesigns: false
+  buyer: member
   price.min: 0
   price.max: -1
   renttime.min: 60000
@@ -55,6 +58,7 @@ rent:
   output.occupied.4: '[[owner]]'
 bid:
   type: TemplateBid
+  buyer: owner
   price.min: 0
   price.max: -1
   bidtime.min: 60000

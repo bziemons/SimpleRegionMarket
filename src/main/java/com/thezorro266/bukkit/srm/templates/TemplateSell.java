@@ -132,11 +132,9 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 
 	@Override
 	public void clearRegion(Region region) {
-		if (isRegionOccupied(region)) {
-			setRegionOccupied(region, false);
-			setRegionMembers(region, new OfflinePlayer[] {});
-			setRegionOwners(region, new OfflinePlayer[] {});
-		}
+		setRegionOccupied(region, false);
+		setRegionMembers(region, new OfflinePlayer[] {});
+		setRegionOwners(region, new OfflinePlayer[] {});
 	}
 
 	@Override
@@ -267,7 +265,7 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 
 				region.setOption("price", price);
 				region.setOption("account", account);
-				setRegionOccupied(region, false);
+				clearRegion(region);
 
 				return region.addBlockAsSign(block);
 			}

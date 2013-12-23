@@ -15,7 +15,7 @@ sell:
   output.free.4: '[[x]] x [[y]] x [[z]]'
   output.occupied.1: SOLD
   output.occupied.2: ''
-  output.occupied.3: '[[player]]'
+  output.occupied.3: '[[buyer]]'
   output.occupied.4: ''
 let:
   type: TemplateLet
@@ -34,7 +34,7 @@ let:
   output.occupied.1: OCCUPIED
   output.occupied.2: '[[timeleft]]'
   output.occupied.3: ''
-  output.occupied.4: '[[player]]'
+  output.occupied.4: '[[owner]]'
 rent:
   type: TemplateRent
   price.min: 0
@@ -52,7 +52,7 @@ rent:
   output.occupied.1: OCCUPIED
   output.occupied.2: '[[timeleft]]'
   output.occupied.3: ''
-  output.occupied.4: '[[player]]'
+  output.occupied.4: '[[owner]]'
 bid:
   type: TemplateBid
   price.min: 0
@@ -66,8 +66,8 @@ bid:
   output.free.1: BID
   output.free.2: '[[region]]'
   output.free.3: '[[timeleft]]'
-  output.free.4: '[[player]] : [[highestpay]]'
+  output.free.4: '[[highestbidder]] : [[highestpay]]'
   output.occupied.1: BIDDEN
   output.occupied.2: '[[region]]'
-  output.occupied.3: '[[player]]'
+  output.occupied.3: '[[highestbidder]]'
   output.occupied.4: '[[highestpay]]'

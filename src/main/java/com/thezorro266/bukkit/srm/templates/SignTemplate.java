@@ -83,7 +83,8 @@ public abstract class SignTemplate extends Template {
 		return false;
 	}
 
-	protected void updateSign(Sign sign) {
+	@Override
+	public void updateSign(Sign sign) {
 		if (sign.getRegion().getTemplate().equals(this)) {
 			String[] lines = signOutput.get(sign.getRegion().getOption("state")).clone();
 			for (int i = 0; i < SIGN_LINE_COUNT; i++) {

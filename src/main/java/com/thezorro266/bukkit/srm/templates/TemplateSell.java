@@ -35,8 +35,9 @@ import com.thezorro266.bukkit.srm.helpers.Sign;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
 
 public class TemplateSell extends SignTemplate implements OwnableTemplate {
-	double priceMin;
-	double priceMax;
+	protected double priceMin = 0;
+	protected double priceMax = -1;
+	protected boolean removeSigns = true;
 
 	public TemplateSell(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
@@ -146,22 +147,34 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 			// TODO: WG Region Owner/Member question
 			setRegionOwners(r, new OfflinePlayer[] { player });
 			setRegionMembers(r, new OfflinePlayer[] {});
+			r.setOption("price", null);
+			r.setOption("account", null);
+			r.setOption("buyer", player.getName());
 			setRegionOccupied(r, true);
+
 			player.sendMessage("You're now the owner of this region");
 		}
+		r.updateSigns();
 	}
 
 	@Override
 	public void replacementMap(Region region, HashMap<String, String> replacementMap) {
-		String strPrice;
-		Double price = (Double) region.getOption("price");
-		try {
-			strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
-		} catch (Throwable e) {
-			strPrice = String.format("%.2f", price);
+		if (region.isOption("price")) {
+			String strPrice;
+			Double price = (Double) region.getOption("price");
+			try {
+				strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
+			} catch (Throwable e) {
+				strPrice = String.format("%.2f", price);
+			}
+			replacementMap.put("price", strPrice);
 		}
-		replacementMap.put("price", strPrice);
-		replacementMap.put("account", region.getOption("account").toString());
+
+		if (region.isOption("account"))
+			replacementMap.put("account", region.getOption("account").toString());
+
+		if (region.isOption("buyer"))
+			replacementMap.put("buyer", region.getOption("buyer").toString());
 	}
 
 	@Override

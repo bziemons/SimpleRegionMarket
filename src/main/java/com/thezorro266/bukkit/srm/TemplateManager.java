@@ -233,6 +233,36 @@ public class TemplateManager {
 					}
 					templateYaml.set(templateId + ".taken", null);
 				}
+
+				String type = templateYaml.getString(templateId + ".type");
+				if(templateYaml.isSet(templateId + ".output.occupied")) {
+					for (int i = 1; i <= SIGN_LINE_COUNT; ++i) {
+						String tempPath = String.format("%s.output.occupied.%d", templateId, i);
+						String str = templateYaml.getString(tempPath);
+						if (type.equalsIgnoreCase("TemplateSell")) {
+							
+							// occupied [[player]] => [[buyer]]
+							str.replaceAll("[[player]]", "[[buyer]]");
+							
+						} else if (type.equalsIgnoreCase("let")) {
+							
+							// occupied [[player]] => [[owner]]
+							str.replaceAll("[[player]]", "[[owner]]");
+							
+						} else if (type.equalsIgnoreCase("rent")) {
+							
+							// occupied [[player]] => [[owner]]
+							str.replaceAll("[[player]]", "[[owner]]");
+							
+						} else if (type.equalsIgnoreCase("bid")) {
+							
+							// occupied [[player]] => [[highestbidder]]
+							str.replaceAll("[[player]]", "[[highestbidder]]");
+							
+						}
+						templateYaml.set(tempPath, str);
+					}
+				}
 			}
 			templateYaml.set("templates_version", null);
 			templateYaml.set("version", 1);

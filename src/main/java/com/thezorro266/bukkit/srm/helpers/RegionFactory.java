@@ -95,6 +95,10 @@ public class RegionFactory {
 			}
 		}
 		
+		public boolean isOption(String optionAlias) {
+			return options.containsKey(optionAlias);
+		}
+		
 		public Object getOption(String optionAlias) {
 			return options.get(optionAlias);
 		}
@@ -109,7 +113,7 @@ public class RegionFactory {
 			}
 
 			HashMap<String, String> replacementMap = new HashMap<String, String>();
-			replacementMap.put("region", worldguardRegion.getId());
+			replacementMap.put("region", getName());
 			replacementMap.put("world", world.getName());
 			replacementMap.put("x",
 					Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
@@ -194,6 +198,7 @@ public class RegionFactory {
 			}
 
 			region.signList.add(sign);
+			template.updateSign(sign);
 		}
 	}
 

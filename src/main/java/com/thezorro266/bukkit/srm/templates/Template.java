@@ -74,6 +74,8 @@ public abstract class Template {
 
 	abstract public void clickSign(Player player, Sign sign);
 
+	abstract public void updateSign(Sign sign);
+
 	public static Template load(ConfigurationSection templateConfigSection) throws TemplateFormatException {
 		String id = templateConfigSection.getName();
 		if (templateConfigSection.isSet("type")) {

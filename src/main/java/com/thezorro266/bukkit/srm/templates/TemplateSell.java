@@ -168,8 +168,13 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 			// TODO: Player permissions
 			// TODO: Player money
 			// TODO: WG Region Owner/Member question
-			setRegionOwners(r, new OfflinePlayer[] { player });
-			setRegionMembers(r, new OfflinePlayer[] {});
+			clearRegion(r);
+			if(buyerIsOwner) {
+				setRegionOwners(r, new OfflinePlayer[] { player });
+			} else {
+				setRegionMembers(r, new OfflinePlayer[] { player });
+			}
+			
 			r.setOption("price", null);
 			r.setOption("account", null);
 			r.setOption("buyer", player.getName());

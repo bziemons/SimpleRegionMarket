@@ -32,9 +32,9 @@ public interface OwnableTemplate {
 	 * Checks if the given player is an owner of the specific region.
 	 * 
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer}
+	 *            as the {@link OfflinePlayer}
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to be checked
+	 *            as the {@link Region} to be checked
 	 * @return true, if the player is an owner of the region
 	 */
 	public boolean isRegionOwner(OfflinePlayer player, Region region);
@@ -43,48 +43,48 @@ public interface OwnableTemplate {
 	 * Checks if the given player is a member of the specific region.
 	 * 
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer}
+	 *            as the {@link OfflinePlayer}
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to be checked
+	 *            as the {@link Region} to be checked
 	 * @return true, if the player is a member of the region
 	 */
 	public boolean isRegionMember(OfflinePlayer player, Region region);
 
 	/**
-	 * Returns all owners of the given region. The owners will be put into an {@link org.bukkit.OfflinePlayer} array.
+	 * Returns all owners of the given region. The owners will be put into an {@link OfflinePlayer} array.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which the owners should be returned
-	 * @return the owners in an {@link org.bukkit.OfflinePlayer} array
+	 *            as the {@link Region} of which the owners should be returned
+	 * @return the owners in an {@link OfflinePlayer} array
 	 */
 	public OfflinePlayer[] getRegionOwners(Region region);
 
 	/**
-	 * Returns all members of the given region. The members will be put into an {@link org.bukkit.OfflinePlayer} array.
+	 * Returns all members of the given region. The members will be put into an {@link OfflinePlayer} array.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which the members should be returned
-	 * @return the members in an {@link org.bukkit.OfflinePlayer} array
+	 *            as the {@link Region} of which the members should be returned
+	 * @return the members in an {@link OfflinePlayer} array
 	 */
 	public OfflinePlayer[] getRegionMembers(Region region);
 
 	/**
-	 * Sets the owners of a region. The owners are in an {@link org.bukkit.OfflinePlayer} array.
+	 * Sets the owners of a region. The owners are in an {@link OfflinePlayer} array.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which the owners should be set
+	 *            as the {@link Region} of which the owners should be set
 	 * @param owners
-	 *            in an {@link org.bukkit.OfflinePlayer} array as the new owners of that region
+	 *            in an {@link OfflinePlayer} array as the new owners of that region
 	 */
 	public void setRegionOwners(Region region, OfflinePlayer[] owners);
 
 	/**
-	 * Sets the members of a region. The members are in an {@link org.bukkit.OfflinePlayer} array.
+	 * Sets the members of a region. The members are in an {@link OfflinePlayer} array.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which the members should be set
+	 *            as the {@link Region} of which the members should be set
 	 * @param members
-	 *            in an {@link org.bukkit.OfflinePlayer} array as the new members of that region
+	 *            in an {@link OfflinePlayer} array as the new members of that region
 	 */
 	public void setRegionMembers(Region region, OfflinePlayer[] members);
 
@@ -92,9 +92,9 @@ public interface OwnableTemplate {
 	 * Adds a player to the list of owners of a region.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to which an owner should be added
+	 *            as the {@link Region} to which an owner should be added
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer} to be added as an owner to the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region}
+	 *            as the {@link OfflinePlayer} to be added as an owner to the {@link Region}
 	 */
 	public void addRegionOwner(Region region, OfflinePlayer player);
 
@@ -102,9 +102,9 @@ public interface OwnableTemplate {
 	 * Adds a player to the list of members of a region.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to which a member should be added
+	 *            as the {@link Region} to which a member should be added
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer} to be added as a member to the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region}
+	 *            as the {@link OfflinePlayer} to be added as a member to the {@link Region}
 	 */
 	public void addRegionMember(Region region, OfflinePlayer player);
 
@@ -112,9 +112,9 @@ public interface OwnableTemplate {
 	 * Removes an owner from the region.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which an owner should be removed
+	 *            as the {@link Region} of which an owner should be removed
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer}, who should be removed from the list of owners
+	 *            as the {@link OfflinePlayer}, who should be removed from the list of owners
 	 */
 	public void removeRegionOwner(Region region, OfflinePlayer player);
 
@@ -122,9 +122,9 @@ public interface OwnableTemplate {
 	 * Removes a member from the region.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} of which a member should be removed
+	 *            as the {@link Region} of which a member should be removed
 	 * @param player
-	 *            as the {@link org.bukkit.OfflinePlayer}, who should be removed from the list of members
+	 *            as the {@link OfflinePlayer}, who should be removed from the list of members
 	 */
 	public void removeRegionMember(Region region, OfflinePlayer player);
 
@@ -132,7 +132,7 @@ public interface OwnableTemplate {
 	 * Checks from the template if a region is occupied.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to be checked
+	 *            as the {@link Region} to be checked
 	 * @return true, if the given region is occupied by someone
 	 */
 	public boolean isRegionOccupied(Region region);
@@ -141,18 +141,17 @@ public interface OwnableTemplate {
 	 * Sets a region to be occupied or not.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region}, which state should be changed
+	 *            as the {@link Region}, which state should be changed
 	 * @param isOccupied
 	 *            is true, if the region should be set as occupied
 	 */
 	public void setRegionOccupied(Region region, boolean isOccupied);
 
 	/**
-	 * Clears a region. This should remove all owners and members and should set the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region} to a
-	 * non-occupied state again.
+	 * Clears a region. This should remove all owners and members and should set the {@link Region} to a non-occupied state again.
 	 * 
 	 * @param region
-	 *            as the {@link com.thezorro266.bukkit.srm.helpers.RegionFactory.Region}, which should be cleared
+	 *            as the {@link Region}, which should be cleared
 	 */
 	public void clearRegion(Region region);
 }

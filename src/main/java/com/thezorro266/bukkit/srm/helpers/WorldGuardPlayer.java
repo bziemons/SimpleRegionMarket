@@ -18,7 +18,6 @@
 
 package com.thezorro266.bukkit.srm.helpers;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.OfflinePlayer;
 
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -31,7 +30,7 @@ public class WorldGuardPlayer extends LocalPlayer {
 
 	public WorldGuardPlayer(OfflinePlayer player) {
 		if (player == null) {
-			throw new IllegalArgumentException("player must not be null");
+			throw new IllegalArgumentException("Player must not be null");
 		}
 
 		this.player = player;
@@ -53,7 +52,8 @@ public class WorldGuardPlayer extends LocalPlayer {
 			org.bukkit.Location loc = player.getPlayer().getLocation();
 			return new Vector(loc.getX(), loc.getY(), loc.getZ());
 		} else {
-			throw new NotImplementedException();
+			SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to get a position of an offline player");
+			return new Vector(0, 0, 0);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class WorldGuardPlayer extends LocalPlayer {
 		if (player.isOnline()) {
 			player.getPlayer().kickPlayer(msg);
 		} else {
-			throw new NotImplementedException();
+			SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to kick an offline player");
 		}
 	}
 
@@ -72,7 +72,7 @@ public class WorldGuardPlayer extends LocalPlayer {
 			player.getPlayer().setBanned(true);
 			player.getPlayer().kickPlayer(msg);
 		} else {
-			throw new NotImplementedException();
+			SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to ban an offline player");
 		}
 	}
 
@@ -81,7 +81,7 @@ public class WorldGuardPlayer extends LocalPlayer {
 		if (player.isOnline()) {
 			player.getPlayer().sendMessage(msg);
 		} else {
-			throw new NotImplementedException();
+			SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to message an offline player");
 		}
 	}
 
@@ -95,7 +95,8 @@ public class WorldGuardPlayer extends LocalPlayer {
 		if (player.isOnline()) {
 			return SimpleRegionMarket.getInstance().getWorldGuardManager().getWorldGuard().hasPermission(player.getPlayer(), perm);
 		} else {
-			throw new NotImplementedException();
+			SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to get the permissions of an offline player");
+			return true;
 		}
 	}
 

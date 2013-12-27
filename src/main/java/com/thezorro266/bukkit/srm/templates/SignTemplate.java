@@ -36,16 +36,15 @@ import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
 
 public abstract class SignTemplate extends Template {
-	protected String[] signInput;
-	protected Map<String, String[]> signOutput;
+	protected final String[] signInput = new String[SIGN_LINE_COUNT];
+	protected final HashMap<String, String[]> signOutput = new HashMap<String, String[]>();
 
 	public SignTemplate(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
-		signInput = new String[SIGN_LINE_COUNT];
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
 			signInput[i] = templateConfigSection.getString("input." + (i + 1));
 		}
-		signOutput = new HashMap<String, String[]>();
+
 		for (String outputType : templateConfigSection.getConfigurationSection("output").getKeys(false)) {
 			String[] tempOutput = new String[SIGN_LINE_COUNT];
 			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
@@ -57,7 +56,7 @@ public abstract class SignTemplate extends Template {
 
 	public abstract void replacementMap(Region region, HashMap<String, String> replacementMap);
 
-	public abstract Sign makeSign(Player player, Block block, HashMap<String, String> inputMap);
+	protected abstract Sign makeSign(Player player, Block block, HashMap<String, String> inputMap);
 
 	@Override
 	public boolean isSignApplicable(Location location, String[] lines) {
@@ -71,13 +70,17 @@ public abstract class SignTemplate extends Template {
 
 			Sign sign = makeSign(player, block, inputMap);
 			if (sign != null) {
-				String[] output = signOutput.get(sign.getRegion().getOption("state"));
-				HashMap<String, String> replacementMap = sign.getRegion().getReplacementMap();
+                if(sign.getRegion().isOption("state")) {
+                    String state = (String) sign.getRegion().getOption("state");
 
-				for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-					lines[i] = replaceTokens(output[i], replacementMap);
-				}
-				return true;
+                    String[] output = signOutput.get(state);
+                    HashMap<String, String> replacementMap = sign.getRegion().getReplacementMap();
+
+                    for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+                        lines[i] = replaceTokens(output[i], replacementMap);
+                    }
+                    return true;
+                }
 			}
 		}
 		return false;
@@ -86,11 +89,15 @@ public abstract class SignTemplate extends Template {
 	@Override
 	public void updateSign(Sign sign) {
 		if (sign.getRegion().getTemplate().equals(this)) {
-			String[] lines = signOutput.get(sign.getRegion().getOption("state")).clone();
-			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-				lines[i] = replaceTokens(lines[i], sign.getRegion().getReplacementMap());
-			}
-			sign.setContent(lines);
+            if(sign.getRegion().isOption("state")) {
+                String state = (String) sign.getRegion().getOption("state");
+
+                String[] lines = signOutput.get(state).clone();
+                for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+                    lines[i] = replaceTokens(lines[i], sign.getRegion().getReplacementMap());
+                }
+                sign.setContent(lines);
+            }
 		}
 	}
 
@@ -121,14 +128,13 @@ public abstract class SignTemplate extends Template {
 
 				Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
 				Matcher matcher = pattern.matcher(inputLine);
-				String newPattern = "";
 				final ArrayList<String> keys = new ArrayList<String>();
 				while (matcher.find()) {
 					for (int u = 0; u < matcher.groupCount(); u++) {
 						keys.add(matcher.group(u + 1));
 					}
 				}
-				newPattern = matcher.replaceAll("(.+)");
+                String newPattern = matcher.replaceAll("(.+)");
 
 				pattern = Pattern.compile(newPattern);
 				matcher = pattern.matcher(lines[i]);

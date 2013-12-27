@@ -133,10 +133,7 @@ public class SignFactory {
 	}
 
 	public boolean isSign(Block block) {
-		if (block.getType().equals(Material.WALL_SIGN) || block.getType().equals(Material.SIGN_POST)) {
-			return true;
-		}
-		return false;
+		return block.getType().equals(Material.WALL_SIGN) || block.getType().equals(Material.SIGN_POST);
 	}
 
 	public Sign getSignFromLocation(Location location) {

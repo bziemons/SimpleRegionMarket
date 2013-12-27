@@ -27,7 +27,7 @@ import org.bukkit.World;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 
 public class WorldHelper {
-	private WeakHashMap<Region, World> regionMap = new WeakHashMap<Region, World>();
+	private final WeakHashMap<Region, World> regionMap = new WeakHashMap<Region, World>();
 
 	public Region[] getRegions(World world) {
 		ArrayList<Region> list = new ArrayList<Region>();

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 
 public class LocationSignHelper {
-	private ArrayList<Sign> signList = new ArrayList<Sign>();
-	private ArrayList<Location> locationList = new ArrayList<Location>();
+	private final ArrayList<Sign> signList = new ArrayList<Sign>();
+	private final ArrayList<Location> locationList = new ArrayList<Location>();
 
 	public Sign getSign(Location location) {
 		int index = locationList.indexOf(location);

@@ -30,9 +30,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class VaultHook {
 	@Getter
-	Permission permission = null;
+    private Permission permission = null;
 	@Getter
-	Economy economy = null;
+    private Economy economy = null;
 
 	public void load() {
 		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("Vault");

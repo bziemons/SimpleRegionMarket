@@ -34,7 +34,7 @@ import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class SimpleRegionMarket extends JavaPlugin {
-	public static final boolean PRINT_STACKTRACE = false;
+	private static final boolean PRINT_STACKTRACE = false;
 
 	@Getter
 	private static SimpleRegionMarket instance = null;
@@ -136,7 +136,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		}, 1200L, 1200L);
 	}
 
-	public void saveRegions() throws ContentSaveException {
+	void saveRegions() throws ContentSaveException {
 		if (!loading) {
 			long start = System.nanoTime();
 			{

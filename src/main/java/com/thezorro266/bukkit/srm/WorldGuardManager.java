@@ -35,7 +35,7 @@ import com.thezorro266.bukkit.srm.helpers.WorldGuardPlayer;
 
 public class WorldGuardManager {
 
-	WorldGuardPlugin worldguardPlugin;
+	private WorldGuardPlugin worldguardPlugin;
 
 	public void load() {
 		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");

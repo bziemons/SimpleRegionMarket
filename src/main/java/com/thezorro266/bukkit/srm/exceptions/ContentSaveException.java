@@ -18,7 +18,7 @@ public class ContentSaveException extends Exception {
 		super(errorMessageFromRegion(region), cause);
 	}
 
-	public static String errorMessageFromRegion(Region region) {
+	private static String errorMessageFromRegion(Region region) {
 		return String.format("Could not save %s", region);
 	}
 }

@@ -137,12 +137,7 @@ public class TemplateSell extends SignTemplate implements OwnableTemplate {
 		setRegionOwners(region, new OfflinePlayer[] {});
 	}
 
-	@Override
-	public boolean isSignApplicable(Location location, String[] lines) {
-		return super.isSignApplicable(location, lines);
-	}
-
-	@Override
+    @Override
 	public boolean breakSign(Player player, Sign sign) {
 		if (sign.getRegion().getSignList().size() > 1 || removeSigns) {
 			sign.getRegion().getSignList().remove(sign);

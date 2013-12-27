@@ -88,8 +88,7 @@ public class RegionFactory {
 		public Sign addBlockAsSign(Block block) {
 			if (SignFactory.instance.isSign(block)) {
 				org.bukkit.material.Sign signMat = (org.bukkit.material.Sign) block.getState().getData();
-				Sign sign = SignFactory.instance.createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
-				return sign;
+				return SignFactory.instance.createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
 			}
 			return null;
 		}

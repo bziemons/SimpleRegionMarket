@@ -46,10 +46,10 @@ import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
-	public static final String TEMPLATES_FOLDER = "templates";
-	public static final String AGENTS_FILENAME = "agents.yml";
-	public static final String TEMPLATE_FILENAME = "templates.yml";
-	public static final int TEMPLATE_VERSION = 1;
+	private static final String TEMPLATES_FOLDER = "templates";
+	private static final String AGENTS_FILENAME = "agents.yml";
+	private static final String TEMPLATE_FILENAME = "templates.yml";
+	private static final int TEMPLATE_VERSION = 1;
 
 	@Getter
 	private List<Template> templateList = null;
@@ -243,22 +243,22 @@ public class TemplateManager {
 						if (type.equalsIgnoreCase("TemplateSell")) {
 							
 							// occupied [[player]] => [[buyer]]
-							str.replaceAll("[[player]]", "[[buyer]]");
+                            str = str.replaceAll("[[player]]", "[[buyer]]");
 							
 						} else if (type.equalsIgnoreCase("let")) {
 							
 							// occupied [[player]] => [[owner]]
-							str.replaceAll("[[player]]", "[[owner]]");
+                            str = str.replaceAll("[[player]]", "[[owner]]");
 							
 						} else if (type.equalsIgnoreCase("rent")) {
 							
 							// occupied [[player]] => [[owner]]
-							str.replaceAll("[[player]]", "[[owner]]");
+                            str = str.replaceAll("[[player]]", "[[owner]]");
 							
 						} else if (type.equalsIgnoreCase("bid")) {
 							
 							// occupied [[player]] => [[highestbidder]]
-							str.replaceAll("[[player]]", "[[highestbidder]]");
+                            str = str.replaceAll("[[player]]", "[[highestbidder]]");
 							
 						}
 						templateYaml.set(tempPath, str);

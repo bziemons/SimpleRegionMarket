@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import lombok.Getter;
 
 import org.bukkit.Bukkit;
@@ -119,12 +120,14 @@ public class RegionFactory {
 			HashMap<String, String> replacementMap = new HashMap<String, String>();
 			replacementMap.put("region", getName());
 			replacementMap.put("world", world.getName());
-			replacementMap.put("x",
-					Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
-			replacementMap.put("y",
-					Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
-			replacementMap.put("z",
-					Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
+            if(getWorldguardRegion() instanceof ProtectedCuboidRegion) {
+                replacementMap.put("x",
+                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
+                replacementMap.put("y",
+                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
+                replacementMap.put("z",
+                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
+            }
 
 			((SignTemplate) template).replacementMap(this, replacementMap);
 

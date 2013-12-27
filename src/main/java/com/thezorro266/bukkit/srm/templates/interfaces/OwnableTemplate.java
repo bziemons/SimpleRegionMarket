@@ -75,8 +75,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} of which the owners should be set
 	 * @param owners
 	 *            in an {@link OfflinePlayer} array as the new owners of that region
+     * @return true, if successful
 	 */
-	public void setRegionOwners(Region region, OfflinePlayer[] owners);
+	public boolean setRegionOwners(Region region, OfflinePlayer[] owners);
 
 	/**
 	 * Sets the members of a region. The members are in an {@link OfflinePlayer} array.
@@ -85,8 +86,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} of which the members should be set
 	 * @param members
 	 *            in an {@link OfflinePlayer} array as the new members of that region
+     * @return true, if successful
 	 */
-	public void setRegionMembers(Region region, OfflinePlayer[] members);
+	public boolean setRegionMembers(Region region, OfflinePlayer[] members);
 
 	/**
 	 * Adds a player to the list of owners of a region.
@@ -95,8 +97,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} to which an owner should be added
 	 * @param player
 	 *            as the {@link OfflinePlayer} to be added as an owner to the {@link Region}
+     * @return true, if successful
 	 */
-	public void addRegionOwner(Region region, OfflinePlayer player);
+	public boolean addRegionOwner(Region region, OfflinePlayer player);
 
 	/**
 	 * Adds a player to the list of members of a region.
@@ -105,8 +108,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} to which a member should be added
 	 * @param player
 	 *            as the {@link OfflinePlayer} to be added as a member to the {@link Region}
+     * @return true, if successful
 	 */
-	public void addRegionMember(Region region, OfflinePlayer player);
+	public boolean addRegionMember(Region region, OfflinePlayer player);
 
 	/**
 	 * Removes an owner from the region.
@@ -115,8 +119,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} of which an owner should be removed
 	 * @param player
 	 *            as the {@link OfflinePlayer}, who should be removed from the list of owners
+     * @return true, if successful
 	 */
-	public void removeRegionOwner(Region region, OfflinePlayer player);
+	public boolean removeRegionOwner(Region region, OfflinePlayer player);
 
 	/**
 	 * Removes a member from the region.
@@ -125,8 +130,9 @@ public interface OwnableTemplate {
 	 *            as the {@link Region} of which a member should be removed
 	 * @param player
 	 *            as the {@link OfflinePlayer}, who should be removed from the list of members
+     * @return true, if successful
 	 */
-	public void removeRegionMember(Region region, OfflinePlayer player);
+	public boolean removeRegionMember(Region region, OfflinePlayer player);
 
 	/**
 	 * Checks from the template if a region is occupied.
@@ -144,14 +150,16 @@ public interface OwnableTemplate {
 	 *            as the {@link Region}, which state should be changed
 	 * @param isOccupied
 	 *            is true, if the region should be set as occupied
+     * @return true, if successful
 	 */
-	public void setRegionOccupied(Region region, boolean isOccupied);
+	public boolean setRegionOccupied(Region region, boolean isOccupied);
 
 	/**
 	 * Clears a region. This should remove all owners and members and should set the {@link Region} to a non-occupied state again.
 	 * 
 	 * @param region
 	 *            as the {@link Region}, which should be cleared
+     * @return true, if successful
 	 */
-	public void clearRegion(Region region);
+	public boolean clearRegion(Region region);
 }

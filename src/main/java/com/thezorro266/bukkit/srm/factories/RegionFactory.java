@@ -1,17 +1,17 @@
 /**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -101,7 +101,7 @@ public class RegionFactory {
 		}
 
 		public boolean isOption(String optionAlias) {
-			return options.containsKey(optionAlias);
+			return options.get(optionAlias) != null;
 		}
 
 		public Object getOption(String optionAlias) {
@@ -109,7 +109,11 @@ public class RegionFactory {
 		}
 
 		public void setOption(String optionAlias, Object value) {
-			options.put(optionAlias, value);
+            if(value == null) {
+                options.remove(optionAlias);
+            } else {
+			    options.put(optionAlias, value);
+            }
 		}
 
 		public HashMap<String, String> getReplacementMap() {
@@ -196,16 +200,19 @@ public class RegionFactory {
 			}
 		}
 
-		for (String signKey : config.getConfigurationSection(path + "signs").getKeys(false)) {
-			Sign sign;
-			try {
-				sign = SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
-			} catch (IllegalArgumentException e) {
-				throw new ContentLoadException("Could not create sign " + signKey, e);
-			}
+		ConfigurationSection signSection = config.getConfigurationSection(path + "signs");
+		if(signSection != null) {
+			for (String signKey : signSection.getKeys(false)) {
+				Sign sign;
+				try {
+					sign = SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+				} catch (IllegalArgumentException e) {
+					throw new ContentLoadException("Could not create sign " + signKey, e);
+				}
 
-			region.signList.add(sign);
-			template.updateSign(sign);
+				region.signList.add(sign);
+				template.updateSign(sign);
+			}
 		}
 	}
 

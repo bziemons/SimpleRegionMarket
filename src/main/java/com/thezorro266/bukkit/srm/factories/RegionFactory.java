@@ -109,11 +109,11 @@ public class RegionFactory {
 		}
 
 		public void setOption(String optionAlias, Object value) {
-            if(value == null) {
-                options.remove(optionAlias);
-            } else {
-			    options.put(optionAlias, value);
-            }
+			if (value == null) {
+				options.remove(optionAlias);
+			} else {
+				options.put(optionAlias, value);
+			}
 		}
 
 		public HashMap<String, String> getReplacementMap() {
@@ -124,14 +124,14 @@ public class RegionFactory {
 			HashMap<String, String> replacementMap = new HashMap<String, String>();
 			replacementMap.put("region", getName());
 			replacementMap.put("world", world.getName());
-            if(getWorldguardRegion() instanceof ProtectedCuboidRegion) {
-                replacementMap.put("x",
-                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
-                replacementMap.put("y",
-                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
-                replacementMap.put("z",
-                        Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
-            }
+			if (getWorldguardRegion() instanceof ProtectedCuboidRegion) {
+				replacementMap.put("x",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
+				replacementMap.put("y",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
+				replacementMap.put("z",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
+			}
 
 			((SignTemplate) template).replacementMap(this, replacementMap);
 
@@ -201,7 +201,7 @@ public class RegionFactory {
 		}
 
 		ConfigurationSection signSection = config.getConfigurationSection(path + "signs");
-		if(signSection != null) {
+		if (signSection != null) {
 			for (String signKey : signSection.getKeys(false)) {
 				Sign sign;
 				try {

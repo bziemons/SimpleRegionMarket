@@ -76,6 +76,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 
     @Override
     public boolean clearRegion(Region region) {
+        region.setOption("buyer", null);
         setRegionOccupied(region, false);
         return super.clearRegion(region);
     }
@@ -93,9 +94,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 
     @Override
     public void clickSign(Player player, Sign sign) {
-        Region r = sign.getRegion();
-        if (isRegionOccupied(r)) {
-            if (isRegionOwner(player, r)) {
+        Region region = sign.getRegion();
+        if (isRegionOccupied(region)) {
+            if (isRegionOwner(player, region)) {
                 player.sendMessage("This is your region.");
             } else {
                 player.sendMessage("This region is already sold.");
@@ -103,21 +104,21 @@ public class TemplateSell extends OwnableRegionTemplate {
         } else {
             // TODO: Player permissions
             // TODO: Player money
-            clearRegion(r);
+            clearRegion(region);
             if (buyerIsOwner) {
-                setRegionOwners(r, new OfflinePlayer[]{player});
+                setRegionOwners(region, new OfflinePlayer[]{player});
             } else {
-                setRegionMembers(r, new OfflinePlayer[]{player});
+                setRegionMembers(region, new OfflinePlayer[]{player});
             }
 
-            r.setOption("price", null);
-            r.setOption("account", null);
-            r.setOption("buyer", player.getName());
-            setRegionOccupied(r, true);
+            region.setOption("price", null);
+            region.setOption("account", null);
+            region.setOption("buyer", player.getName());
+            setRegionOccupied(region, true);
 
             player.sendMessage("You're now the owner of this region");
         }
-        r.updateSigns();
+        region.updateSigns();
     }
 
     @Override

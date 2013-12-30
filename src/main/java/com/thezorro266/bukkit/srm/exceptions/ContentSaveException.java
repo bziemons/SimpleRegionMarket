@@ -1,3 +1,4 @@
+
 package com.thezorro266.bukkit.srm.exceptions;
 
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;

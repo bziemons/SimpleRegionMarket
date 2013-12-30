@@ -1,17 +1,17 @@
 /**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,8 +19,6 @@
 package com.thezorro266.bukkit.srm;
 
 import java.util.ArrayList;
-
-import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -28,8 +26,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Permission;
@@ -82,17 +80,17 @@ public class CommandHandler implements CommandExecutor {
 							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
 							if (ot.isRegionOccupied(realRegion)) {
 								ot.clearRegion(realRegion);
-                                sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
 
-                                realRegion.updateSigns();
+								realRegion.updateSigns();
 
-                                try {
-                                    SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(realRegion);
-                                } catch(ContentSaveException e) {
-                                    sender.sendMessage(ChatColor.RED + "Could not save region");
-                                    SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + realRegion.getName());
-                                    SimpleRegionMarket.getInstance().printError(e);
-                                }
+								try {
+									SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(realRegion);
+								} catch (ContentSaveException e) {
+									sender.sendMessage(ChatColor.RED + "Could not save region");
+									SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + realRegion.getName());
+									SimpleRegionMarket.getInstance().printError(e);
+								}
 							} else {
 								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
 							}
@@ -132,7 +130,7 @@ public class CommandHandler implements CommandExecutor {
 							((OwnableTemplate) realRegion.getTemplate()).clearRegion(realRegion);
 						}
 
-                        SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(realRegion);
+						SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(realRegion);
 						RegionFactory.instance.destroyRegion(realRegion);
 						sender.sendMessage(String.format("Region %s in world %s was removed.", region, world));
 					}

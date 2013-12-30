@@ -19,7 +19,6 @@
 package com.thezorro266.bukkit.srm.templates;
 
 import org.bukkit.configuration.ConfigurationSection;
-
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class TemplateBid extends TemplateSell implements TimedTemplate {

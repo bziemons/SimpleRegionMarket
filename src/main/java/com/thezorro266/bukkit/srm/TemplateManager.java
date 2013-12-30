@@ -1,17 +1,17 @@
 /**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,22 +19,18 @@
 package com.thezorro266.bukkit.srm;
 
 import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import lombok.Getter;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
@@ -51,7 +47,7 @@ public class TemplateManager {
 	private static final String AGENTS_FILENAME = "agents.yml";
 	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml";
 	private static final int TEMPLATE_VERSION = 1;
-
+	
 	@Getter
 	private List<Template> templateList = null;
 
@@ -102,17 +98,17 @@ public class TemplateManager {
 
 	private void updateAgents(YamlConfiguration agentsYaml) throws TemplateFormatException, IOException {
 		loadDefault();
-		
+
 		TemplateSell tokenAgent = null;
 		TemplateRent tokenHotel = null;
 		for (Template template : templateList) {
-			if(template.getId().equalsIgnoreCase("SELL")) {
+			if (template.getId().equalsIgnoreCase("SELL")) {
 				tokenAgent = (TemplateSell) template;
-			} else if(template.getId().equalsIgnoreCase("HOTEL")) {
+			} else if (template.getId().equalsIgnoreCase("HOTEL")) {
 				tokenHotel = (TemplateRent) template;
 			}
 		}
-		
+
 		if (tokenHotel == null || tokenAgent == null) {
 			SimpleRegionMarket.getInstance().getLogger().severe("Could not import old config. Stopping..");
 			throw new RuntimeException("There were no templates with the IDs SELL and HOTEL found");
@@ -138,8 +134,7 @@ public class TemplateManager {
 					}
 
 					if (path.getInt("Mode") == 1) { // HOTEL
-						
-						
+
 						/*
 						if (!tokenHotel.entries.containsKey(world)) {
 							tokenHotel.entries.put(world, new HashMap<String, HashMap<String, Object>>());
@@ -237,30 +232,30 @@ public class TemplateManager {
 				}
 
 				String type = templateYaml.getString(templateId + ".type");
-				if(templateYaml.isSet(templateId + ".output.occupied")) {
+				if (templateYaml.isSet(templateId + ".output.occupied")) {
 					for (int i = 1; i <= SIGN_LINE_COUNT; ++i) {
 						String tempPath = String.format("%s.output.occupied.%d", templateId, i);
 						String str = templateYaml.getString(tempPath);
 						if (type.equalsIgnoreCase("TemplateSell")) {
-							
+
 							// occupied [[player]] => [[buyer]]
-                            str = str.replaceAll("[[player]]", "[[buyer]]");
-							
+							str = str.replaceAll("[[player]]", "[[buyer]]");
+
 						} else if (type.equalsIgnoreCase("let")) {
-							
+
 							// occupied [[player]] => [[owner]]
-                            str = str.replaceAll("[[player]]", "[[owner]]");
-							
+							str = str.replaceAll("[[player]]", "[[owner]]");
+
 						} else if (type.equalsIgnoreCase("rent")) {
-							
+
 							// occupied [[player]] => [[owner]]
-                            str = str.replaceAll("[[player]]", "[[owner]]");
-							
+							str = str.replaceAll("[[player]]", "[[owner]]");
+
 						} else if (type.equalsIgnoreCase("bid")) {
-							
+
 							// occupied [[player]] => [[highestbidder]]
-                            str = str.replaceAll("[[player]]", "[[highestbidder]]");
-							
+							str = str.replaceAll("[[player]]", "[[highestbidder]]");
+
 						}
 						templateYaml.set(tempPath, str);
 					}
@@ -296,24 +291,24 @@ public class TemplateManager {
 		}
 		return null;
 	}
-	
+
 	public void loadContent() throws ContentLoadException {
 		for (Template template : templateList) {
 			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
-			
+
 			// Search through template dir, if exists
-			if(templateDir.exists()) {
-				for(String worldStr : templateDir.list()) {
+			if (templateDir.exists()) {
+				for (String worldStr : templateDir.list()) {
 					File worldDir = new File(templateDir, worldStr);
-					if(worldDir.isDirectory()) {
+					if (worldDir.isDirectory()) {
 						// Check the world and get the world object from Bukkit
 						World world = Bukkit.getWorld(worldStr);
-						
-						if(world != null) {
+
+						if (world != null) {
 							for (File regionFile : worldDir.listFiles()) {
 								// Create a fresh YamlConfiguration
 								YamlConfiguration regionConfig = new YamlConfiguration();
-								
+
 								// Open the region configuration file and try to load it
 								try {
 									regionConfig.load(regionFile);
@@ -324,125 +319,129 @@ public class TemplateManager {
 								} catch (InvalidConfigurationException e) {
 									throw new ContentLoadException("Yaml region file with wrong configuration", e);
 								}
-								
+
 								// Let the RegionFactory do the rest
 								RegionFactory.instance.loadFromConfiguration(regionConfig, "");
 							}
 						} else {
-							SimpleRegionMarket.getInstance().getLogger().warning(String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
+							SimpleRegionMarket
+									.getInstance()
+									.getLogger()
+									.warning(
+											String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	public void saveContent() throws ContentSaveException {
-        for(World world : Bukkit.getWorlds()) {
-            saveContent(world);
-        }
+		for (World world : Bukkit.getWorlds()) {
+			saveContent(world);
+		}
 	}
 
-    public void saveContent(World world) throws ContentSaveException {
-        if(world == null) {
-            throw new IllegalArgumentException("World cannot be null");
-        }
+	public void saveContent(World world) throws ContentSaveException {
+		if (world == null) {
+			throw new IllegalArgumentException("World cannot be null");
+		}
 
-        for (Template template : templateList) {
-            File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
+		for (Template template : templateList) {
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
 
-            // Get the world folder
-            File worldFolder = new File(templateDir, world.getName());
-            File[] regionFiles = worldFolder.listFiles();
-            ArrayList<File> files;
-            if(regionFiles != null) {
-                files = new ArrayList<File>(Arrays.asList(regionFiles));
-            } else {
-                // empty ArrayList
-                files = new ArrayList<File>(0);
-            }
+			// Get the world folder
+			File worldFolder = new File(templateDir, world.getName());
+			File[] regionFiles = worldFolder.listFiles();
+			ArrayList<File> files;
+			if (regionFiles != null) {
+				files = new ArrayList<File>(Arrays.asList(regionFiles));
+			} else {
+				// empty ArrayList
+				files = new ArrayList<File>(0);
+			}
 
-            for (Region region : template.getRegionList()) {
-                if(region.getWorld().equals(world)) {
-                    File regionFile = new File(worldFolder, String.format("%s.yml", region.getName()));
-                    files.remove(regionFile);
-                    saveRegion(region, regionFile);
-                }
-            }
+			for (Region region : template.getRegionList()) {
+				if (region.getWorld().equals(world)) {
+					File regionFile = new File(worldFolder, String.format("%s.yml", region.getName()));
+					files.remove(regionFile);
+					saveRegion(region, regionFile);
+				}
+			}
 
-            for(File toDelete : files) {
-                if(!toDelete.delete()) {
-                    SimpleRegionMarket.getInstance().getLogger().warning("Could not remove file " + toDelete.getPath());
-                }
-            }
-        }
-    }
+			for (File toDelete : files) {
+				if (!toDelete.delete()) {
+					SimpleRegionMarket.getInstance().getLogger().warning("Could not remove file " + toDelete.getPath());
+				}
+			}
+		}
+	}
 
-    public void saveRegion(Region region) throws ContentSaveException {
-        if(region == null) {
-            throw new IllegalArgumentException("Region cannot be null");
-        }
+	public void saveRegion(Region region) throws ContentSaveException {
+		if (region == null) {
+			throw new IllegalArgumentException("Region cannot be null");
+		}
 
-        File regionFile = new File(
-                new File(
-                        new File(
-                                new File(
-                                        SimpleRegionMarket.getInstance().getDataFolder(),
-                                        REGIONS_FOLDER
-                                ),
-                                region.getTemplate().getId().toLowerCase()
-                        ),
-                        region.getWorld().getName()
-                ),
-                String.format("%s.yml", region.getName())
-        );
+		File regionFile = new File(
+				new File(
+						new File(
+								new File(
+										SimpleRegionMarket.getInstance().getDataFolder(),
+										REGIONS_FOLDER
+								),
+								region.getTemplate().getId().toLowerCase()
+						),
+						region.getWorld().getName()
+				),
+				String.format("%s.yml", region.getName())
+				);
 
-        saveRegion(region, regionFile);
-    }
+		saveRegion(region, regionFile);
+	}
 
-    public void removeRegion(Region region) {
-        if(region == null) {
-            throw new IllegalArgumentException("Region cannot be null");
-        }
+	public void removeRegion(Region region) {
+		if (region == null) {
+			throw new IllegalArgumentException("Region cannot be null");
+		}
 
-        File regionFile = new File(
-                new File(
-                        new File(
-                                new File(
-                                        SimpleRegionMarket.getInstance().getDataFolder(),
-                                        REGIONS_FOLDER
-                                ),
-                                region.getTemplate().getId().toLowerCase()
-                        ),
-                        region.getWorld().getName()
-                ),
-                String.format("%s.yml", region.getName())
-        );
+		File regionFile = new File(
+				new File(
+						new File(
+								new File(
+										SimpleRegionMarket.getInstance().getDataFolder(),
+										REGIONS_FOLDER
+								),
+								region.getTemplate().getId().toLowerCase()
+						),
+						region.getWorld().getName()
+				),
+				String.format("%s.yml", region.getName())
+				);
 
-        regionFile.delete();
-    }
+		regionFile.delete();
+	}
 
-    public void saveRegion(Region region, File file) throws ContentSaveException {
-        if(region == null) {
-            throw new IllegalArgumentException("Region cannot be null");
-        }
-        if(file == null) {
-            throw new IllegalArgumentException("File cannot be null");
-        }
+	public void saveRegion(Region region, File file) throws ContentSaveException {
+		if (region == null) {
+			throw new IllegalArgumentException("Region cannot be null");
+		}
+		if (file == null) {
+			throw new IllegalArgumentException("File cannot be null");
+		}
 
-        // Create folders leading to the region config file
-        file.getParentFile().mkdirs();
+		// Create folders leading to the region config file
+		file.getParentFile().mkdirs();
 
-        YamlConfiguration regionConfig = new YamlConfiguration();
+		YamlConfiguration regionConfig = new YamlConfiguration();
 
-        // Let the region put the stuff in
-        region.saveToConfiguration(regionConfig, "");
+		// Let the region put the stuff in
+		region.saveToConfiguration(regionConfig, "");
 
-        // Save
-        try {
-            regionConfig.save(file);
-        } catch (IOException e) {
-            throw new ContentSaveException(region, e);
-        }
-    }
+		// Save
+		try {
+			regionConfig.save(file);
+		} catch (IOException e) {
+			throw new ContentSaveException(region, e);
+		}
+	}
 }

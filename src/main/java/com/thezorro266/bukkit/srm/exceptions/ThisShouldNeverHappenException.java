@@ -1,3 +1,4 @@
+
 package com.thezorro266.bukkit.srm.exceptions;
 
 public class ThisShouldNeverHappenException extends RuntimeException {

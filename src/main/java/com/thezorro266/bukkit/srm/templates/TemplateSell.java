@@ -19,19 +19,17 @@
 package com.thezorro266.bukkit.srm.templates;
 
 import java.util.HashMap;
-
-import com.thezorro266.bukkit.srm.factories.SignFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.SignFactory;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
 
@@ -72,9 +70,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public boolean setRegionOccupied(Region region, boolean isOccupied) {
-        if(!isOccupied) {
-            region.setOption("buyer", null);
-        }
+		if (!isOccupied) {
+			region.setOption("buyer", null);
+		}
 		region.setOption("state", (isOccupied ? "occupied" : "free"));
 		return true;
 	}
@@ -88,7 +86,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 	@Override
 	public boolean breakSign(Player player, Sign sign) {
 		if (sign.getRegion().getSignList().size() > 1 || removeSigns) {
-            SignFactory.instance.destroySign(sign);
+			SignFactory.instance.destroySign(sign);
 			return true;
 		} else {
 			player.sendMessage("You're not allowed to break this sign");
@@ -123,7 +121,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 			} catch (ContentSaveException e) {
 				player.sendMessage(ChatColor.RED + "Could not save region");
 				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
-                SimpleRegionMarket.getInstance().printError(e);
+				SimpleRegionMarket.getInstance().printError(e);
 			}
 
 			player.sendMessage("You're now the owner of this region");
@@ -156,16 +154,16 @@ public class TemplateSell extends OwnableRegionTemplate {
 		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
 
 		if (worldguardRegion != null) {
-            Region region = null;
+			Region region = null;
 			for (Region regionEntry : regionList) {
 				if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
-                    region = regionEntry;
+					region = regionEntry;
 					break;
 				}
 			}
 
 			if (region == null) {
-                region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
+				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
 				double price;
 				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
@@ -217,16 +215,16 @@ public class TemplateSell extends OwnableRegionTemplate {
 				clearRegion(region);
 			}
 
-            Sign sign = region.addBlockAsSign(block);
+			Sign sign = region.addBlockAsSign(block);
 
-            try {
-                SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
-            } catch (ContentSaveException e) {
-                SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
-                SimpleRegionMarket.getInstance().printError(e);
-            }
+			try {
+				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+			} catch (ContentSaveException e) {
+				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+				SimpleRegionMarket.getInstance().printError(e);
+			}
 
-            return sign;
+			return sign;
 		} else {
 			player.sendMessage(ChatColor.RED + "Could not find the region.");
 		}

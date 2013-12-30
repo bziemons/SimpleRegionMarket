@@ -1,17 +1,17 @@
 /**
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -21,13 +21,10 @@ package com.thezorro266.bukkit.srm.templates;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Getter;
-
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
@@ -38,8 +35,7 @@ public abstract class Template {
 
 	public static final String ID_NONE = "none";
 	public static final String TYPE_UNKNOWN = "Unknown";
-
-    // TODO: Make options class
+	// TODO: Make options class
 	@Getter
 	protected String id = ID_NONE;
 	@Getter
@@ -51,31 +47,6 @@ public abstract class Template {
 		id = templateConfigSection.getName();
 		type = TYPE_UNKNOWN;
 	}
-
-	@Override
-	public String toString() {
-		return id;
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		if (other instanceof Template) {
-			if (this.getId().equals(((Template) other).getId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	abstract public boolean isSignApplicable(Location location, String[] lines);
-
-	abstract public boolean createSign(Player player, Block block, String[] lines);
-
-	abstract public boolean breakSign(Player player, Sign sign);
-
-	abstract public void clickSign(Player player, Sign sign);
-
-	abstract public void updateSign(Sign sign);
 
 	public static Template load(ConfigurationSection templateConfigSection) throws TemplateFormatException {
 		String id = templateConfigSection.getName();
@@ -119,4 +90,29 @@ public abstract class Template {
 			throw new TemplateFormatException("No type defined on template " + id);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return id;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Template) {
+			if (this.getId().equals(((Template) other).getId())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	abstract public boolean isSignApplicable(Location location, String[] lines);
+
+	abstract public boolean createSign(Player player, Block block, String[] lines);
+
+	abstract public boolean breakSign(Player player, Sign sign);
+
+	abstract public void clickSign(Player player, Sign sign);
+
+	abstract public void updateSign(Sign sign);
 }

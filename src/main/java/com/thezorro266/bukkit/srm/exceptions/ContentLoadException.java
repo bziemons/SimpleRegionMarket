@@ -1,3 +1,4 @@
+
 package com.thezorro266.bukkit.srm.exceptions;
 
 public class ContentLoadException extends Exception {
@@ -7,7 +8,7 @@ public class ContentLoadException extends Exception {
 	public ContentLoadException(String message) {
 		super(message);
 	}
-	
+
 	public ContentLoadException(String message, Throwable cause) {
 		super(message, cause);
 	}

@@ -39,6 +39,7 @@ public abstract class Template {
 	public static final String ID_NONE = "none";
 	public static final String TYPE_UNKNOWN = "Unknown";
 
+    // TODO: Make options class
 	@Getter
 	protected String id = ID_NONE;
 	@Getter

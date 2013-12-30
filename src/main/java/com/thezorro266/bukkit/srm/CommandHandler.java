@@ -20,6 +20,7 @@ package com.thezorro266.bukkit.srm;
 
 import java.util.ArrayList;
 
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -81,7 +82,17 @@ public class CommandHandler implements CommandExecutor {
 							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
 							if (ot.isRegionOccupied(realRegion)) {
 								ot.clearRegion(realRegion);
-								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+                                sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+
+                                realRegion.updateSigns();
+
+                                try {
+                                    SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(realRegion);
+                                } catch(ContentSaveException e) {
+                                    sender.sendMessage(ChatColor.RED + "Could not save region");
+                                    SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + realRegion.getName());
+                                    SimpleRegionMarket.getInstance().printError(e);
+                                }
 							} else {
 								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
 							}
@@ -118,15 +129,10 @@ public class CommandHandler implements CommandExecutor {
 						}
 					} else {
 						if (realRegion.getTemplate() instanceof OwnableTemplate) {
-							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
-							if (ot.isRegionOccupied(realRegion)) {
-								ot.clearRegion(realRegion);
-								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
-							} else {
-								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
-							}
+							((OwnableTemplate) realRegion.getTemplate()).clearRegion(realRegion);
 						}
 
+                        SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(realRegion);
 						RegionFactory.instance.destroyRegion(realRegion);
 						sender.sendMessage(String.format("Region %s in world %s was removed.", region, world));
 					}

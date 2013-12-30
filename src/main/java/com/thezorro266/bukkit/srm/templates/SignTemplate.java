@@ -65,41 +65,46 @@ public abstract class SignTemplate extends Template {
 
 	@Override
 	public boolean createSign(Player player, Block block, String[] lines) {
+        if(lines == null || lines.length != SIGN_LINE_COUNT) {
+            throw new IllegalArgumentException("Lines array must be in the correct format and must not be null");
+        }
+
 		if (lines[0].equalsIgnoreCase(signInput[0])) {
 			HashMap<String, String> inputMap = getSignInput(this, lines);
-
 			Sign sign = makeSign(player, block, inputMap);
-			if (sign != null) {
-                if(sign.getRegion().isOption("state")) {
-                    String state = (String) sign.getRegion().getOption("state");
-
-                    String[] output = signOutput.get(state);
-                    HashMap<String, String> replacementMap = sign.getRegion().getReplacementMap();
-
-                    for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-                        lines[i] = replaceTokens(output[i], replacementMap);
-                    }
-                    return true;
-                }
-			}
+            updateSignLines(sign.getRegion(), lines);
+            return true;
 		}
 		return false;
 	}
 
 	@Override
 	public void updateSign(Sign sign) {
-		if (sign.getRegion().getTemplate().equals(this)) {
-            if(sign.getRegion().isOption("state")) {
-                String state = (String) sign.getRegion().getOption("state");
+        if (sign == null) {
+            throw new IllegalArgumentException("Sign must not be null");
+        }
 
-                String[] lines = signOutput.get(state).clone();
-                for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-                    lines[i] = replaceTokens(lines[i], sign.getRegion().getReplacementMap());
-                }
-                sign.setContent(lines);
-            }
-		}
+        String[] lines = new String[SIGN_LINE_COUNT];
+        updateSignLines(sign.getRegion(), lines);
+        sign.setContent(lines);
 	}
+
+    private void updateSignLines(Region region, String[] lines) {
+        if(region.getTemplate().equals(this)) {
+            if(region.isOption("state")) {
+                String state = (String) region.getOption("state");
+
+                String[] outputLines = signOutput.get(state);
+                if(outputLines != null) {
+
+                    // Set lines in the input String array
+                    for (int i = 0; i < SIGN_LINE_COUNT; i++) {
+                        lines[i] = replaceTokens(outputLines[i], region.getReplacementMap());
+                    }
+                }
+            }
+        }
+    }
 
 	private static String replaceTokens(String text, Map<String, String> replacementMap) {
 		final Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");

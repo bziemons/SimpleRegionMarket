@@ -151,19 +151,29 @@ public class SimpleRegionMarket extends JavaPlugin {
 	private void except(Throwable t) {
 		disable = true;
 		getLogger().severe("We got a problem here. Disabling plugin..");
-		if (PRINT_STACKTRACE) {
-			t.printStackTrace();
-		} else {
-			getLogger().severe(t.toString());
-			for (StackTraceElement element : t.getStackTrace()) {
-				getLogger().severe(element.toString());
-			}
-		}
+        printError(t);
 
 		if (!loading) {
 			getPluginLoader().disablePlugin(this);
 		}
 	}
+
+    public void printError(Throwable t) {
+        if (PRINT_STACKTRACE) {
+            t.printStackTrace();
+        } else {
+            getLogger().severe(t.toString());
+            for (StackTraceElement element : t.getStackTrace()) {
+                getLogger().severe(element.toString());
+            }
+
+            Throwable cause = t.getCause();
+            if(cause != null) {
+                getLogger().severe("=== Caused by:");
+                printError(cause);
+            }
+        }
+    }
 
 	public static String getCopyright() {
 		return "(c) 2013  theZorro266 and SRM Team";

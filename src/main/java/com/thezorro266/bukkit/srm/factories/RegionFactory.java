@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import lombok.Getter;
 
 import org.bukkit.Bukkit;
@@ -35,6 +34,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
@@ -164,17 +164,21 @@ public class RegionFactory {
 	}
 
 	public Region createRegion(Template template, World world, ProtectedRegion worldguardRegion) {
-		Region r = new Region(template, world, worldguardRegion);
+		Region region = new Region(template, world, worldguardRegion);
 
-		SimpleRegionMarket.getInstance().getWorldHelper().putRegion(r, world);
-		template.getRegionList().add(r);
+		SimpleRegionMarket.getInstance().getWorldHelper().putRegion(region, world);
+		template.getRegionList().add(region);
 
 		++regionCount;
 
-		return r;
+		return region;
 	}
 
 	public void destroyRegion(Region region) {
+        for(Sign sign : region.getSignList()) {
+            sign.clear();
+        }
+
 		region.getTemplate().getRegionList().remove(region);
 
 		--regionCount;
@@ -203,15 +207,11 @@ public class RegionFactory {
 		ConfigurationSection signSection = config.getConfigurationSection(path + "signs");
 		if (signSection != null) {
 			for (String signKey : signSection.getKeys(false)) {
-				Sign sign;
 				try {
-					sign = SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+					SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
 				} catch (IllegalArgumentException e) {
-					throw new ContentLoadException("Could not create sign " + signKey, e);
+					throw new ContentLoadException(String.format("Could not create sign %s from region %s", signKey, region.getName()), e);
 				}
-
-				region.signList.add(sign);
-				template.updateSign(sign);
 			}
 		}
 	}

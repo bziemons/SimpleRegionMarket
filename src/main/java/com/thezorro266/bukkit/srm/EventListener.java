@@ -18,6 +18,8 @@
 
 package com.thezorro266.bukkit.srm;
 
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +32,8 @@ import com.thezorro266.bukkit.srm.factories.SignFactory;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.templates.Template;
+
+import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
 
 public class EventListener implements Listener {
 	public EventListener() {
@@ -49,12 +53,9 @@ public class EventListener implements Listener {
 			}
 
 			for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
-				String[] lines = event.getLines().clone();
+				String[] lines = event.getLines();
 				if (template.isSignApplicable(Location.fromBlock(event.getBlock()), lines)) {
 					if (template.createSign(player, event.getBlock(), lines)) {
-						for (int i = 0; i < lines.length; i++) {
-							event.setLine(i, lines[i]);
-						}
 						break;
 					}
 				}
@@ -67,7 +68,17 @@ public class EventListener implements Listener {
 		if (!event.isCancelled()) {
 			Sign sign = SignFactory.instance.getSignFromLocation(Location.fromBlock(event.getBlock()));
 			if (sign != null) {
-				if (!sign.getRegion().getTemplate().breakSign(event.getPlayer(), sign)) {
+				if (sign.getRegion().getTemplate().breakSign(event.getPlayer(), sign)) {
+                    try {
+                        SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(sign.getRegion());
+                    } catch (ContentSaveException e) {
+                        if(event.getPlayer() != null)
+                            event.getPlayer().sendMessage(ChatColor.RED + "Could not save region");
+
+                        SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + sign.getRegion().getName());
+                        SimpleRegionMarket.getInstance().printError(e);
+                    }
+                } else {
 					event.setCancelled(true);
 				}
 			}

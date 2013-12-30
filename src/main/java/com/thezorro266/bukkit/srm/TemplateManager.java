@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
@@ -46,16 +47,16 @@ import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
-	private static final String TEMPLATES_FOLDER = "templates";
+	private static final String REGIONS_FOLDER = "regions";
 	private static final String AGENTS_FILENAME = "agents.yml";
-	private static final String TEMPLATE_FILENAME = "templates.yml";
+	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml";
 	private static final int TEMPLATE_VERSION = 1;
 
 	@Getter
 	private List<Template> templateList = null;
 
 	public void load() throws TemplateFormatException, IOException {
-		File templateFile = new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATE_FILENAME);
+		File templateFile = new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATE_CONFIG_FILENAME);
 
 		if (templateFile.exists()) {
 			if (templateFile.canRead()) {
@@ -76,7 +77,7 @@ public class TemplateManager {
 					templateYaml.save(templateFile);
 				}
 			} else {
-				throw new IOException(String.format("Cannot read %s", TEMPLATE_FILENAME));
+				throw new IOException(String.format("Cannot read %s", TEMPLATE_CONFIG_FILENAME));
 			}
 		} else {
 			// Load very old agents file, if exist
@@ -95,7 +96,7 @@ public class TemplateManager {
 	}
 
 	private void loadDefault() throws TemplateFormatException, IOException {
-		SimpleRegionMarket.getInstance().saveResource(TEMPLATE_FILENAME, false);
+		SimpleRegionMarket.getInstance().saveResource(TEMPLATE_CONFIG_FILENAME, false);
 		load();
 	}
 
@@ -298,7 +299,7 @@ public class TemplateManager {
 	
 	public void loadContent() throws ContentLoadException {
 		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATES_FOLDER), template.getId().toLowerCase());
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
 			
 			// Search through template dir, if exists
 			if(templateDir.exists()) {
@@ -337,40 +338,111 @@ public class TemplateManager {
 	}
 	
 	public void saveContent() throws ContentSaveException {
-		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATES_FOLDER), template.getId().toLowerCase());
-			
-			// Create template folder in srm data dir
-			if(!templateDir.exists()) {
-				if(!templateDir.mkdirs()) {
-					throw new ContentSaveException("Could not create template dir");
-				}
-			}
-			
-			for (Region region : template.getRegionList()) {
-				File regionFolder = new File(templateDir, region.getWorld().getName());
-				
-				// Create world folder in template folder
-				if(!regionFolder.exists()) {
-					if(!regionFolder.mkdirs()) {
-						throw new ContentSaveException("Could not create region dir");
-					}
-				}
-				
-				YamlConfiguration regionConfig = new YamlConfiguration();
-				
-				// Let the region put the stuff in
-				region.saveToConfiguration(regionConfig, "");
-
-				File regionFile = new File(regionFolder, String.format("%s.yml", region.getName()));
-				
-				// Save
-				try {
-					regionConfig.save(regionFile);
-				} catch (IOException e) {
-					throw new ContentSaveException(region, e);
-				}
-			}
-		}
+        for(World world : Bukkit.getWorlds()) {
+            saveContent(world);
+        }
 	}
+
+    public void saveContent(World world) throws ContentSaveException {
+        if(world == null) {
+            throw new IllegalArgumentException("World cannot be null");
+        }
+
+        for (Template template : templateList) {
+            File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
+
+            // Get the world folder
+            File worldFolder = new File(templateDir, world.getName());
+            File[] regionFiles = worldFolder.listFiles();
+            ArrayList<File> files;
+            if(regionFiles != null) {
+                files = new ArrayList<File>(Arrays.asList(regionFiles));
+            } else {
+                // empty ArrayList
+                files = new ArrayList<File>(0);
+            }
+
+            for (Region region : template.getRegionList()) {
+                if(region.getWorld().equals(world)) {
+                    File regionFile = new File(worldFolder, String.format("%s.yml", region.getName()));
+                    files.remove(regionFile);
+                    saveRegion(region, regionFile);
+                }
+            }
+
+            for(File toDelete : files) {
+                if(!toDelete.delete()) {
+                    SimpleRegionMarket.getInstance().getLogger().warning("Could not remove file " + toDelete.getPath());
+                }
+            }
+        }
+    }
+
+    public void saveRegion(Region region) throws ContentSaveException {
+        if(region == null) {
+            throw new IllegalArgumentException("Region cannot be null");
+        }
+
+        File regionFile = new File(
+                new File(
+                        new File(
+                                new File(
+                                        SimpleRegionMarket.getInstance().getDataFolder(),
+                                        REGIONS_FOLDER
+                                ),
+                                region.getTemplate().getId().toLowerCase()
+                        ),
+                        region.getWorld().getName()
+                ),
+                String.format("%s.yml", region.getName())
+        );
+
+        saveRegion(region, regionFile);
+    }
+
+    public void removeRegion(Region region) {
+        if(region == null) {
+            throw new IllegalArgumentException("Region cannot be null");
+        }
+
+        File regionFile = new File(
+                new File(
+                        new File(
+                                new File(
+                                        SimpleRegionMarket.getInstance().getDataFolder(),
+                                        REGIONS_FOLDER
+                                ),
+                                region.getTemplate().getId().toLowerCase()
+                        ),
+                        region.getWorld().getName()
+                ),
+                String.format("%s.yml", region.getName())
+        );
+
+        regionFile.delete();
+    }
+
+    public void saveRegion(Region region, File file) throws ContentSaveException {
+        if(region == null) {
+            throw new IllegalArgumentException("Region cannot be null");
+        }
+        if(file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+
+        // Create folders leading to the region config file
+        file.getParentFile().mkdirs();
+
+        YamlConfiguration regionConfig = new YamlConfiguration();
+
+        // Let the region put the stuff in
+        region.saveToConfiguration(regionConfig, "");
+
+        // Save
+        try {
+            regionConfig.save(file);
+        } catch (IOException e) {
+            throw new ContentSaveException(region, e);
+        }
+    }
 }

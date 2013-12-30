@@ -18,199 +18,218 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.thezorro266.bukkit.srm.SimpleRegionMarket;
-import com.thezorro266.bukkit.srm.factories.RegionFactory;
-import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
-import com.thezorro266.bukkit.srm.helpers.Location;
+import java.util.HashMap;
+
+import com.thezorro266.bukkit.srm.factories.SignFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
+import com.thezorro266.bukkit.srm.helpers.Location;
 
 public class TemplateSell extends OwnableRegionTemplate {
-    protected double priceMin = 0;
-    protected double priceMax = -1;
-    protected boolean removeSigns = true;
-    protected boolean buyerIsOwner = true;
+	protected double priceMin = 0;
+	protected double priceMax = -1;
+	protected boolean removeSigns = true;
+	protected boolean buyerIsOwner = true;
 
-    public TemplateSell(ConfigurationSection templateConfigSection) {
-        super(templateConfigSection);
+	public TemplateSell(ConfigurationSection templateConfigSection) {
+		super(templateConfigSection);
 
-        type = "sell";
+		type = "sell";
 
-        if (templateConfigSection.contains("price.min")) {
-            priceMin = templateConfigSection.getDouble("price.min");
+		if (templateConfigSection.contains("price.min")) {
+			priceMin = templateConfigSection.getDouble("price.min");
+		}
+		if (templateConfigSection.contains("price.max")) {
+			priceMax = templateConfigSection.getDouble("price.max");
+		}
+		if (templateConfigSection.contains("removesigns")) {
+			removeSigns = templateConfigSection.getBoolean("removesigns");
+		}
+		if (templateConfigSection.contains("buyer")) {
+			String buyer = templateConfigSection.getString("buyer");
+			if (buyer.equalsIgnoreCase("owner")) {
+				buyerIsOwner = true;
+			} else if (buyer.equalsIgnoreCase("member")) {
+				buyerIsOwner = false;
+			}
+		}
+	}
+
+	@Override
+	public boolean isRegionOccupied(Region region) {
+		return region.getOption("state").equals("occupied");
+	}
+
+	@Override
+	public boolean setRegionOccupied(Region region, boolean isOccupied) {
+        if(!isOccupied) {
+            region.setOption("buyer", null);
         }
-        if (templateConfigSection.contains("price.max")) {
-            priceMax = templateConfigSection.getDouble("price.max");
-        }
-        if (templateConfigSection.contains("removesigns")) {
-            removeSigns = templateConfigSection.getBoolean("removesigns");
-        }
-        if (templateConfigSection.contains("buyer")) {
-            String buyer = templateConfigSection.getString("buyer");
-            if (buyer.equalsIgnoreCase("owner")) {
-                buyerIsOwner = true;
-            } else if (buyer.equalsIgnoreCase("member")) {
-                buyerIsOwner = false;
-            }
-        }
-    }
+		region.setOption("state", (isOccupied ? "occupied" : "free"));
+		return true;
+	}
 
+	@Override
+	public boolean clearRegion(Region region) {
+		setRegionOccupied(region, false);
+		return super.clearRegion(region);
+	}
 
-    @Override
-    public boolean isRegionOccupied(Region region) {
-        return region.getOption("state").equals("occupied");
-    }
+	@Override
+	public boolean breakSign(Player player, Sign sign) {
+		if (sign.getRegion().getSignList().size() > 1 || removeSigns) {
+            SignFactory.instance.destroySign(sign);
+			return true;
+		} else {
+			player.sendMessage("You're not allowed to break this sign");
+			return false;
+		}
+	}
 
-    @Override
-    public boolean setRegionOccupied(Region region, boolean isOccupied) {
-        region.setOption("state", (isOccupied ? "occupied" : "free"));
-        return true;
-    }
+	@Override
+	public void clickSign(Player player, Sign sign) {
+		Region region = sign.getRegion();
+		if (isRegionOccupied(region)) {
+			if (isRegionOwner(player, region)) {
+				player.sendMessage("This is your region.");
+			} else {
+				player.sendMessage("This region is already sold.");
+			}
+		} else {
+			// TODO: Player permissions
+			// TODO: Player money
+			clearRegion(region);
+			if (buyerIsOwner) {
+				setRegionOwners(region, new OfflinePlayer[] { player });
+			} else {
+				setRegionMembers(region, new OfflinePlayer[] { player });
+			}
 
-    @Override
-    public boolean clearRegion(Region region) {
-        region.setOption("buyer", null);
-        setRegionOccupied(region, false);
-        return super.clearRegion(region);
-    }
+			region.setOption("buyer", player.getName());
+			setRegionOccupied(region, true);
 
-    @Override
-    public boolean breakSign(Player player, Sign sign) {
-        if (sign.getRegion().getSignList().size() > 1 || removeSigns) {
-            sign.getRegion().getSignList().remove(sign);
-            return true;
-        } else {
-            player.sendMessage("You're not allowed to break this sign");
-            return false;
-        }
-    }
+			try {
+				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+			} catch (ContentSaveException e) {
+				player.sendMessage(ChatColor.RED + "Could not save region");
+				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+                SimpleRegionMarket.getInstance().printError(e);
+			}
 
-    @Override
-    public void clickSign(Player player, Sign sign) {
-        Region region = sign.getRegion();
-        if (isRegionOccupied(region)) {
-            if (isRegionOwner(player, region)) {
-                player.sendMessage("This is your region.");
-            } else {
-                player.sendMessage("This region is already sold.");
-            }
-        } else {
-            // TODO: Player permissions
-            // TODO: Player money
-            clearRegion(region);
-            if (buyerIsOwner) {
-                setRegionOwners(region, new OfflinePlayer[]{player});
-            } else {
-                setRegionMembers(region, new OfflinePlayer[]{player});
-            }
+			player.sendMessage("You're now the owner of this region");
+		}
+		region.updateSigns();
+	}
 
-            region.setOption("price", null);
-            region.setOption("account", null);
-            region.setOption("buyer", player.getName());
-            setRegionOccupied(region, true);
+	@Override
+	public void replacementMap(Region region, HashMap<String, String> replacementMap) {
+		if (region.isOption("price")) {
+			String strPrice;
+			Double price = (Double) region.getOption("price");
+			try {
+				strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
+			} catch (Throwable e) {
+				strPrice = String.format("%.2f", price);
+			}
+			replacementMap.put("price", strPrice);
+		}
 
-            player.sendMessage("You're now the owner of this region");
-        }
-        region.updateSigns();
-    }
+		if (region.isOption("account"))
+			replacementMap.put("account", region.getOption("account").toString());
 
-    @Override
-    public void replacementMap(Region region, HashMap<String, String> replacementMap) {
-        if (region.isOption("price")) {
-            String strPrice;
-            Double price = (Double) region.getOption("price");
+		if (region.isOption("buyer"))
+			replacementMap.put("buyer", region.getOption("buyer").toString());
+	}
+
+	@Override
+	public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
+		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
+
+		if (worldguardRegion != null) {
+            Region region = null;
+			for (Region regionEntry : regionList) {
+				if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
+                    region = regionEntry;
+					break;
+				}
+			}
+
+			if (region == null) {
+                region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
+
+				double price;
+				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
+					String priceString = inputMap.remove("price");
+					if (priceString != null) {
+						try {
+							price = Double.parseDouble(priceString);
+						} catch (final Exception e) {
+							player.sendMessage("Price not found.");
+							return null;
+						}
+					} else {
+						price = priceMin;
+					}
+				} else {
+					price = 0;
+				}
+
+				if (priceMin > price && (priceMax == -1 || price < priceMax)) {
+					String priceMinString;
+					String priceMaxString;
+					try {
+						priceMinString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMin);
+						priceMaxString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMax);
+					} catch (Throwable e) {
+						priceMinString = String.format("%.2f", priceMin);
+						priceMaxString = String.format("%.2f", priceMax);
+					}
+					player.sendMessage(String.format(ChatColor.RED + "The price must be between %s and %s", priceMinString, priceMaxString));
+					return null;
+				}
+
+				String account = player.getName();
+				{
+					String accountString = inputMap.remove("account");
+					if (accountString != null) {
+						if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+							if (accountString.equalsIgnoreCase("none")) {
+								account = "";
+							} else {
+								account = accountString;
+							}
+						}
+					}
+				}
+
+				region.setOption("price", price);
+				region.setOption("account", account);
+				clearRegion(region);
+			}
+
+            Sign sign = region.addBlockAsSign(block);
+
             try {
-                strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
-            } catch (Throwable e) {
-                strPrice = String.format("%.2f", price);
-            }
-            replacementMap.put("price", strPrice);
-        }
-
-        if (region.isOption("account"))
-            replacementMap.put("account", region.getOption("account").toString());
-
-        if (region.isOption("buyer"))
-            replacementMap.put("buyer", region.getOption("buyer").toString());
-    }
-
-    @Override
-    public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
-        ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
-
-        if (worldguardRegion != null) {
-            boolean existentRegion = false;
-            for (Region regionEntry : regionList) {
-                if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
-                    existentRegion = true;
-                    break;
-                }
+                SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+            } catch (ContentSaveException e) {
+                SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+                SimpleRegionMarket.getInstance().printError(e);
             }
 
-            if (!existentRegion) {
-                Region region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
-
-                double price;
-                if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
-                    String priceString = inputMap.remove("price");
-                    if (priceString != null) {
-                        try {
-                            price = Double.parseDouble(priceString);
-                        } catch (final Exception e) {
-                            player.sendMessage("Price not found.");
-                            return null;
-                        }
-                    } else {
-                        price = priceMin;
-                    }
-                } else {
-                    price = 0;
-                }
-
-                if (priceMin > price && (priceMax == -1 || price < priceMax)) {
-                    String priceMinString;
-                    String priceMaxString;
-                    try {
-                        priceMinString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMin);
-                        priceMaxString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMax);
-                    } catch (Throwable e) {
-                        priceMinString = String.format("%.2f", priceMin);
-                        priceMaxString = String.format("%.2f", priceMax);
-                    }
-                    player.sendMessage(String.format(ChatColor.RED + "The price must be between %s and %s", priceMinString, priceMaxString));
-                    return null;
-                }
-
-                String account = player.getName();
-                {
-                    String accountString = inputMap.remove("account");
-                    if (accountString != null) {
-                        if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
-                            if (accountString.equalsIgnoreCase("none")) {
-                                account = "";
-                            } else {
-                                account = accountString;
-                            }
-                        }
-                    }
-                }
-
-                region.setOption("price", price);
-                region.setOption("account", account);
-                clearRegion(region);
-
-                return region.addBlockAsSign(block);
-            }
-        } else {
-            player.sendMessage(ChatColor.RED + "Could not find the region.");
-        }
-        return null;
-    }
+            return sign;
+		} else {
+			player.sendMessage(ChatColor.RED + "Could not find the region.");
+		}
+		return null;
+	}
 }

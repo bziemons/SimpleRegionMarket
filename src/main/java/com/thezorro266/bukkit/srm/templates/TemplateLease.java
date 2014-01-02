@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,29 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import org.bukkit.configuration.ConfigurationSection;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
+import org.bukkit.entity.Player;
 
-public class TemplateLet extends TemplateSell implements TimedTemplate {
+public class TemplateLease extends TemplateSell implements TimedTemplate {
 
-	public TemplateLet(ConfigurationSection templateConfigSection) {
+	public TemplateLease(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
-		type = "let";
+		type = "lease";
 	}
 
-	@Override
-	public void schedule() {
-		// TODO Auto-generated method stub
+    @Override
+    public void schedule() {
 
-	}
+    }
 
-	/*
+    @Override
+    public boolean cancel(RegionFactory.Region region, Player player) {
+        return false;
+    }
+
+    /*
 	@Override
 	public void takeRegion(Player newOwner, String world, String region) {
 		final ProtectedRegion protectedRegion = AlphaRegionMarket.instance.wgManager.getProtectedRegion(Bukkit.getWorld(world), region);

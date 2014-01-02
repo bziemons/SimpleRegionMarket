@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,13 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import org.bukkit.configuration.ConfigurationSection;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
+import org.bukkit.entity.Player;
 
-public class TemplateBid extends TemplateSell implements TimedTemplate {
-	public TemplateBid(ConfigurationSection templateConfigSection) {
+public class TemplateAuction extends TemplateSell implements TimedTemplate {
+	public TemplateAuction(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		type = "bid";
 	}
@@ -33,7 +35,12 @@ public class TemplateBid extends TemplateSell implements TimedTemplate {
 
 	}
 
-	/*
+    @Override
+    public boolean cancel(RegionFactory.Region region, Player player) {
+        return false;
+    }
+
+    /*
 	@Override
 	public void otherClicksSign(Player player, String world, String region) {
 	    String pr = playersBid.get(player.getName());

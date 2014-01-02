@@ -16,19 +16,19 @@ sell:
   output.occupied.2: ''
   output.occupied.3: '[[buyer]]'
   output.occupied.4: ''
-let:
-  type: TemplateLet
+lease:
+  type: TemplateLease
   removesigns: false
   buyer: member
   price.min: 0
   price.max: -1
   renttime.min: 60000
   renttime.max: -1
-  input.1: '[LET]'
+  input.1: '[LEASE]'
   input.2: '[[region]]'
   input.3: '[[price:time]]'
   input.4: '[[account]]'
-  output.free.1: FOR LET
+  output.free.1: FOR LEASE
   output.free.2: '[[region]]'
   output.free.3: '[[price]]'
   output.free.4: '[[time]]'
@@ -56,22 +56,22 @@ rent:
   output.occupied.2: '[[timeleft]]'
   output.occupied.3: ''
   output.occupied.4: '[[owner]]'
-bid:
-  type: TemplateBid
+auction:
+  type: TemplateAuction
   buyer: owner
   price.min: 0
   price.max: -1
-  bidtime.min: 60000
-  bidtime.max: -1
-  input.1: '[BID]'
+  auctiontime.min: 60000
+  auctiontime.max: -1
+  input.1: '[AUCTION]'
   input.2: '[[region]]'
   input.3: '[[price:time]]'
   input.4: '[[account]]'
-  output.free.1: BID
+  output.free.1: AUCTION
   output.free.2: '[[region]]'
   output.free.3: '[[timeleft]]'
   output.free.4: '[[highestbidder]] : [[highestpay]]'
-  output.occupied.1: BIDDEN
-  output.occupied.2: '[[region]]'
-  output.occupied.3: '[[highestbidder]]'
+  output.occupied.1: SOLD
+  output.occupied.2: ''
+  output.occupied.3: '[[buyer]]'
   output.occupied.4: '[[highestpay]]'

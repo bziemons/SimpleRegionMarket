@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -195,13 +195,18 @@ public class TemplateManager {
 					if (type.equalsIgnoreCase("sell")) {
 						templateYaml.set(templateId + ".type", "TemplateSell");
 					} else if (type.equalsIgnoreCase("let")) {
-						templateYaml.set(templateId + ".type", "TemplateLet");
+						templateYaml.set(templateId + ".type", "TemplateLease");
 					} else if (type.equalsIgnoreCase("rent")) {
 						templateYaml.set(templateId + ".type", "TemplateRent");
 					} else if (type.equalsIgnoreCase("bid")) {
-						templateYaml.set(templateId + ".type", "TemplateBid");
+						templateYaml.set(templateId + ".type", "TemplateAuction");
 					}
 				}
+
+                if (templateYaml.isSet(templateId + ".bidtime")) {
+                    templateYaml.set(templateId + ".auctiontime", templateYaml.get(templateId + ".bidtime"));
+                }
+
 				if (templateYaml.isSet(templateId + ".input.id")) {
 					templateYaml.set(templateId + ".input.1", templateYaml.getString(templateId + ".input.id"));
 					templateYaml.set(templateId + ".input.id", null);
@@ -241,17 +246,17 @@ public class TemplateManager {
 							// occupied [[player]] => [[buyer]]
 							str = str.replaceAll("[[player]]", "[[buyer]]");
 
-						} else if (type.equalsIgnoreCase("let")) {
+						} else if (type.equalsIgnoreCase("TemplateLease")) {
 
 							// occupied [[player]] => [[owner]]
 							str = str.replaceAll("[[player]]", "[[owner]]");
 
-						} else if (type.equalsIgnoreCase("rent")) {
+						} else if (type.equalsIgnoreCase("TemplateRent")) {
 
 							// occupied [[player]] => [[owner]]
 							str = str.replaceAll("[[player]]", "[[owner]]");
 
-						} else if (type.equalsIgnoreCase("bid")) {
+						} else if (type.equalsIgnoreCase("TemplateAuction")) {
 
 							// occupied [[player]] => [[highestbidder]]
 							str = str.replaceAll("[[player]]", "[[highestbidder]]");
@@ -328,7 +333,7 @@ public class TemplateManager {
 									.getInstance()
 									.getLogger()
 									.warning(
-											String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
+                                            String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
 						}
 					}
 				}

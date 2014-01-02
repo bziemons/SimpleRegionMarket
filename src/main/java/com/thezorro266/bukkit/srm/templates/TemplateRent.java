@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ package com.thezorro266.bukkit.srm.templates;
 
 import org.bukkit.configuration.ConfigurationSection;
 
-public class TemplateRent extends TemplateLet {
+public class TemplateRent extends TemplateLease {
 
 	public TemplateRent(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);

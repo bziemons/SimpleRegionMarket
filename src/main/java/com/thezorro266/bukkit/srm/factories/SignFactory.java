@@ -78,17 +78,32 @@ public class SignFactory {
 		String regionName = region.getName();
 		String configRegionName = config.getString(path + "region");
 		if (regionName.equals(configRegionName)) {
-			Location location = Location.loadFromConfiguration(config, path + "location.");
+			Location location;
+			try {
+				location = Location.loadFromConfiguration(config, path + "location.");
+			} catch (ContentLoadException e) {
+				throw new ContentLoadException("Could not load location", e);
+			} catch (IllegalArgumentException e) {
+				throw new ContentLoadException("Could not create location", e);
+			}
 			boolean isWallSign = config.getBoolean(path + "is_wall_sign");
 			BlockFace direction = BlockFace.valueOf(config.getString(path + "direction"));
 
-			Sign sign = createSign(region, location, isWallSign, direction);
+			Sign sign;
+			try {
+				sign = createSign(region, location, isWallSign, direction);
+			} catch (IllegalArgumentException e) {
+				throw new ContentLoadException("Could not create sign", e);
+			}
 
-			// Set sign options from values from options path
-			Set<Map.Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
-			for (Map.Entry<String, Object> optionEntry : optionEntrySet) {
-				if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
-					sign.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+			// Check, if there are options
+			if (config.isSet(path + "options")) {
+				// Set sign options from values from options path
+				Set<Map.Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+				for (Map.Entry<String, Object> optionEntry : optionEntrySet) {
+					if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
+						sign.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+					}
 				}
 			}
 

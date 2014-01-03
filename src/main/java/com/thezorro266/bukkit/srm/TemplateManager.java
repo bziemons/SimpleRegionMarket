@@ -289,9 +289,11 @@ public class TemplateManager {
 	}
 
 	public Template getTemplateFromId(String id) {
-		for (Template template : templateList) {
-			if (template.getId().equalsIgnoreCase(id)) {
-				return template;
+		if (id != null) {
+			for (Template template : templateList) {
+				if (template.getId().equalsIgnoreCase(id)) {
+					return template;
+				}
 			}
 		}
 		return null;
@@ -310,23 +312,30 @@ public class TemplateManager {
 						World world = Bukkit.getWorld(worldStr);
 
 						if (world != null) {
-							for (File regionFile : worldDir.listFiles()) {
-								// Create a fresh YamlConfiguration
-								YamlConfiguration regionConfig = new YamlConfiguration();
+							File[] files = worldDir.listFiles();
+							if (files != null) {
+								for (File regionFile : files) {
+									// Create a fresh YamlConfiguration
+									YamlConfiguration regionConfig = new YamlConfiguration();
 
-								// Open the region configuration file and try to load it
-								try {
-									regionConfig.load(regionFile);
-								} catch (FileNotFoundException e) {
-									throw new ThisShouldNeverHappenException("The region file does not exist, but it did a few nanoseconds ago");
-								} catch (IOException e) {
-									throw new ContentLoadException("Problem when loading region file", e);
-								} catch (InvalidConfigurationException e) {
-									throw new ContentLoadException("Yaml region file with wrong configuration", e);
+									// Open the region configuration file and try to load it
+									try {
+										regionConfig.load(regionFile);
+									} catch (FileNotFoundException e) {
+										throw new ThisShouldNeverHappenException("The region file does not exist, but it did a few nanoseconds ago");
+									} catch (IOException e) {
+										throw new ContentLoadException("Problem when loading region file", e);
+									} catch (InvalidConfigurationException e) {
+										throw new ContentLoadException("Yaml region file with wrong configuration", e);
+									}
+
+									// Let the RegionFactory do the rest
+									try {
+										RegionFactory.instance.loadFromConfiguration(regionConfig, "");
+									} catch (ContentLoadException e) {
+										throw new ContentLoadException("There was a problem reading the region file " + regionFile.getPath());
+									}
 								}
-
-								// Let the RegionFactory do the rest
-								RegionFactory.instance.loadFromConfiguration(regionConfig, "");
 							}
 						} else {
 							SimpleRegionMarket

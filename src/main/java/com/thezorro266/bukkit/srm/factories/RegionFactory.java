@@ -97,14 +97,17 @@ public class RegionFactory {
 		try {
 			region = createRegion(template, world, worldguardRegion);
 		} catch (IllegalArgumentException e) {
-			throw new ContentLoadException("Could not create region " + config.getString(path + "worldguard_region"), e);
+			throw new ContentLoadException("Could not create region", e);
 		}
 
-		// Set region options from values from options path
-		Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
-		for (Entry<String, Object> optionEntry : optionEntrySet) {
-			if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
-				region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+		// Check if there are options
+		if (config.isSet(path + "options")) {
+			// Set region options from values from options path
+			Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+			for (Entry<String, Object> optionEntry : optionEntrySet) {
+				if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
+					region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+				}
 			}
 		}
 
@@ -112,9 +115,9 @@ public class RegionFactory {
 		if (signSection != null) {
 			for (String signKey : signSection.getKeys(false)) {
 				try {
-					SignFactory.instance.loadFromConfiguration(config, region, String.format("%ssigns.%s.", path, signKey));
+					SignFactory.instance.loadFromConfiguration(config, region, path + String.format("signs.%s.", signKey));
 				} catch (IllegalArgumentException e) {
-					throw new ContentLoadException(String.format("Could not create sign %s from region %s", signKey, region.getName()), e);
+					throw new ContentLoadException("Could not create sign " + signKey, e);
 				}
 			}
 		}

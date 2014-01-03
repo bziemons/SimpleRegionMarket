@@ -23,6 +23,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.Configuration;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 
 public @Data
 class Location {
@@ -46,8 +47,16 @@ class Location {
 		this(loc.world, loc.x, loc.y, loc.z);
 	}
 
-	public static Location loadFromConfiguration(Configuration config, String path) {
-		World world = Bukkit.getWorld(config.getString(path + "world"));
+	public static Location loadFromConfiguration(Configuration config, String path) throws ContentLoadException {
+		String worldString = config.getString(path + "world");
+		if (worldString == null) {
+			throw new ContentLoadException("Failed to load Location, world could not be found");
+		}
+		World world = Bukkit.getWorld(worldString);
+
+		if (!config.isSet(path + "x") || !config.isSet(path + "y") || !config.isSet(path + "z")) {
+			throw new ContentLoadException("Failed to load x, y or z coordinate");
+		}
 		int x = config.getInt(path + "x");
 		int y = config.getInt(path + "y");
 		int z = config.getInt(path + "z");

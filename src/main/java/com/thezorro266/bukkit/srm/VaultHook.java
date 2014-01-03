@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm;
 
+import java.text.MessageFormat;
 import lombok.Getter;
 import net.milkbowl.vault.Vault;
 import net.milkbowl.vault.economy.Economy;
@@ -28,29 +29,41 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class VaultHook {
+	public static final String VAULT_PLGUIN_NAME = "Vault"; // NON-NLS
 	@Getter
 	private Permission permission = null;
 	@Getter
 	private Economy economy = null;
 
 	public void load() {
-		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("Vault");
+		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin(VAULT_PLGUIN_NAME);
 
 		if (plugin == null || !(plugin instanceof Vault)) {
-			SimpleRegionMarket.getInstance().getLogger().info("Vault not found. No economy enabled. Permissions system: Bukkit's SuperPerms");
+			SimpleRegionMarket.getInstance().getLogger().info(LanguageSupport.instance.getString("vault.notfound"));
 		} else {
-			SimpleRegionMarket.getInstance().getLogger().info("Vault found. Hooking into permissions and economy system..");
+			SimpleRegionMarket.getInstance().getLogger().info(LanguageSupport.instance.getString("vault.found"));
 			permission = setupPermissions();
 			if (permission != null) {
-				SimpleRegionMarket.getInstance().getLogger().info(String.format("  Detected %s as permissions system.", permission.getName()));
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.info(MessageFormat.format(
+								LanguageSupport.instance.getString("vault.detected.permissionssystem"),
+								permission.getName()));
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().info("  No permissions system found. Using Bukkit's SuperPerms");
+				SimpleRegionMarket.getInstance().getLogger()
+						.info(LanguageSupport.instance.getString("vault.notdetected.permissionssystem"));
 			}
 			economy = setupEconomy();
 			if (economy != null) {
-				SimpleRegionMarket.getInstance().getLogger().info(String.format("  Detected %s as economy system.", economy.getName()));
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.info(MessageFormat.format(LanguageSupport.instance.getString("vault.detected.economysystem"),
+								economy.getName()));
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().info("  No economy system found.");
+				SimpleRegionMarket.getInstance().getLogger()
+						.info(LanguageSupport.instance.getString("vault.notdetected.economysystem"));
 			}
 		}
 	}
@@ -65,7 +78,8 @@ public class VaultHook {
 	}
 
 	private Economy setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServer().getServicesManager()
+				.getRegistration(net.milkbowl.vault.economy.Economy.class);
 		if (economyProvider != null) {
 			return economyProvider.getProvider();
 		}

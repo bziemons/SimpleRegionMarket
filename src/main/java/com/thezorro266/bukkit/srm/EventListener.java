@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm;
 
+import java.text.MessageFormat;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +35,8 @@ import com.thezorro266.bukkit.srm.templates.Template;
 
 public class EventListener implements Listener {
 	public EventListener() {
-		SimpleRegionMarket.getInstance().getServer().getPluginManager().registerEvents(this, SimpleRegionMarket.getInstance());
+		SimpleRegionMarket.getInstance().getServer().getPluginManager()
+				.registerEvents(this, SimpleRegionMarket.getInstance());
 	}
 
 	@EventHandler
@@ -70,9 +72,17 @@ public class EventListener implements Listener {
 						SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(sign.getRegion());
 					} catch (ContentSaveException e) {
 						if (event.getPlayer() != null)
-							event.getPlayer().sendMessage(ChatColor.RED + "Could not save region");
+							event.getPlayer()
+									.sendMessage(
+											ChatColor.RED
+													+ LanguageSupport.instance
+															.getString("region.save.problem.playermsg"));
 
-						SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + sign.getRegion().getName());
+						SimpleRegionMarket
+								.getInstance()
+								.getLogger()
+								.severe(MessageFormat.format(LanguageSupport.instance
+										.getString("region.save.problem.console"), sign.getRegion().getName()));
 						SimpleRegionMarket.getInstance().printError(e);
 					}
 				} else {

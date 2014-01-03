@@ -18,17 +18,6 @@
 
 package com.thezorro266.bukkit.srm.factories;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
-import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.ConfigurationSection;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -40,6 +29,18 @@ import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.helpers.Options;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class RegionFactory {
 	public static final RegionFactory instance = new RegionFactory();
@@ -174,7 +175,7 @@ public class RegionFactory {
 
 		public HashMap<String, String> getReplacementMap() {
 			if (!(template instanceof SignTemplate)) {
-				throw new IllegalStateException(String.format("Template '%s' is not a sign template", template.getId()));
+				throw new IllegalStateException(String.format("Template '%s' is not a sign template", template.getId())); //NON-NLS
 			}
 
 			HashMap<String, String> replacementMap = new HashMap<String, String>();
@@ -215,6 +216,7 @@ public class RegionFactory {
 			}
 		}
 
+		@SuppressWarnings("HardCodedStringLiteral")
 		@Override
 		public String toString() {
 			return String.format("Region[%s,w:%s,t:%s]", getName(), world.getName(), template.toString());

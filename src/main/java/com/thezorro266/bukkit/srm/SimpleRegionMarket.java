@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
 package com.thezorro266.bukkit.srm;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
-import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.exceptions.TemplateFormatException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import com.thezorro266.bukkit.srm.helpers.LocationSignHelper;
@@ -32,6 +32,7 @@ import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class SimpleRegionMarket extends JavaPlugin {
 	private static final boolean PRINT_STACKTRACE = false;
+	public static final String SRM_COMMAND = "regionmarket"; //NON-NLS
 	@Getter
 	private static SimpleRegionMarket instance = null;
 	@Getter
@@ -58,16 +59,11 @@ public class SimpleRegionMarket extends JavaPlugin {
 	}
 
 	public static String getCopyright() {
-		return "(c) 2013  theZorro266 and SRM Team";
+		return "(c) 2013  theZorro266 and SRM Team"; //NON-NLS
 	}
 
 	@Override
 	public void onDisable() {
-		try {
-			saveRegions();
-		} catch (ContentSaveException e) {
-			e.printStackTrace();
-		}
 		instance = null;
 	}
 
@@ -85,7 +81,9 @@ public class SimpleRegionMarket extends JavaPlugin {
 				return;
 			}
 		}
-		getLogger().info(String.format("Loaded %d templates in %dms", templateManager.getTemplateList().size(), (System.nanoTime() - start) / 1000000L));
+		getLogger().info(
+				MessageFormat.format(LanguageSupport.instance.getString("template.load.report"), templateManager
+						.getTemplateList().size(), (System.nanoTime() - start) / 1000000L));
 	}
 
 	@Override
@@ -107,7 +105,9 @@ public class SimpleRegionMarket extends JavaPlugin {
 				except(e);
 			}
 		}
-		getLogger().info(String.format("Loaded %d regions in %dms", RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+		getLogger().info(
+				MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
+						RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
 
 		// Check if the plugin should be disabled because of an exception
 		if (disable) {
@@ -120,7 +120,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		new EventListener();
 
 		// Set command executor
-		getCommand("regionmarket").setExecutor(new CommandHandler());
+		getCommand(SRM_COMMAND).setExecutor(new CommandHandler());
 
 		// Set up async timer
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
@@ -135,21 +135,9 @@ public class SimpleRegionMarket extends JavaPlugin {
 		}, 1200L, 1200L);
 	}
 
-	void saveRegions() throws ContentSaveException {
-		if (!loading) {
-			long start = System.nanoTime();
-			{
-				templateManager.saveContent();
-			}
-			getLogger().info(String.format("Saved %d regions in %dms", RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
-		} else {
-			getLogger().info("Not saving anything, because I didn't even load");
-		}
-	}
-
 	private void except(Throwable t) {
 		disable = true;
-		getLogger().severe("We got a problem here. Disabling plugin..");
+		getLogger().severe(LanguageSupport.instance.getString("plugin.problem.unload"));
 		printError(t);
 
 		if (!loading) {
@@ -168,7 +156,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 			Throwable cause = t.getCause();
 			if (cause != null) {
-				getLogger().severe("=== Caused by:");
+				getLogger().severe("=== Caused by:"); //NON-NLS
 				printError(cause);
 			}
 		}

@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,11 @@
 
 package com.thezorro266.bukkit.srm.factories;
 
-import java.util.Map;
-import java.util.Set;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Options;
 import lombok.Data;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -27,11 +30,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import com.thezorro266.bukkit.srm.SimpleRegionMarket;
-import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
-import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.Options;
+
+import java.util.Map;
+import java.util.Set;
 
 public class SignFactory {
 	public static final SignFactory instance = new SignFactory();
@@ -113,7 +114,8 @@ public class SignFactory {
 		}
 	}
 
-	public @Data
+	public
+	@Data
 	class Sign {
 		public static final int SIGN_LINE_COUNT = 4;
 		final Region region;
@@ -181,6 +183,7 @@ public class SignFactory {
 			}
 		}
 
+		@SuppressWarnings("HardCodedStringLiteral")
 		@Override
 		public String toString() {
 			return String.format("Sign[r:%s,l:%s]", region.getName(), location);

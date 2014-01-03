@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -25,6 +26,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.LanguageSupport;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
@@ -65,15 +67,15 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public boolean isRegionOccupied(Region region) {
-        return region.getOptions().get("state").equals("occupied");
+		return region.getOptions().get("state").equals("occupied");
 	}
 
 	@Override
 	public boolean setRegionOccupied(Region region, boolean isOccupied) {
 		if (!isOccupied) {
-            region.getOptions().set("buyer", null);
+			region.getOptions().set("buyer", null);
 		}
-        region.getOptions().set("state", (isOccupied ? "occupied" : "free"));
+		region.getOptions().set("state", (isOccupied ? "occupied" : "free"));
 		return true;
 	}
 
@@ -89,7 +91,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 			SignFactory.instance.destroySign(sign);
 			return true;
 		} else {
-			player.sendMessage("You're not allowed to break this sign");
+			player.sendMessage(LanguageSupport.instance.getString("sign.break.not.allowed"));
 			return false;
 		}
 	}
@@ -99,9 +101,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 		Region region = sign.getRegion();
 		if (isRegionOccupied(region)) {
 			if (isRegionOwner(player, region)) {
-				player.sendMessage("This is your region.");
+				player.sendMessage(LanguageSupport.instance.getString("region.yours"));
 			} else {
-				player.sendMessage("This region is already sold.");
+				player.sendMessage(LanguageSupport.instance.getString("region.already.sold"));
 			}
 		} else {
 			// TODO: Player permissions
@@ -113,18 +115,22 @@ public class TemplateSell extends OwnableRegionTemplate {
 				setRegionMembers(region, new OfflinePlayer[] { player });
 			}
 
-            region.getOptions().set("buyer", player.getName());
+			region.getOptions().set("buyer", player.getName());
 			setRegionOccupied(region, true);
 
 			try {
 				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
 			} catch (ContentSaveException e) {
-				player.sendMessage(ChatColor.RED + "Could not save region");
-				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+				player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("region.save.problem.player"));
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.severe(MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"),
+								region.getName()));
 				SimpleRegionMarket.getInstance().printError(e);
 			}
 
-			player.sendMessage("You're now the owner of this region");
+			player.sendMessage(LanguageSupport.instance.getString("region.new.owner"));
 		}
 		region.updateSigns();
 	}
@@ -151,7 +157,8 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
-		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
+		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block),
+				inputMap.remove("region"));
 
 		if (worldguardRegion != null) {
 			Region region = null;
@@ -172,7 +179,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 						try {
 							price = Double.parseDouble(priceString);
 						} catch (final Exception e) {
-							player.sendMessage("Price not found.");
+							player.sendMessage(LanguageSupport.instance.getString("price.not.found"));
 							return null;
 						}
 					} else {
@@ -192,7 +199,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 						priceMinString = String.format("%.2f", priceMin);
 						priceMaxString = String.format("%.2f", priceMax);
 					}
-					player.sendMessage(String.format(ChatColor.RED + "The price must be between %s and %s", priceMinString, priceMaxString));
+					player.sendMessage(MessageFormat.format(
+							ChatColor.RED + LanguageSupport.instance.getString("price.must.between"), priceMinString,
+							priceMaxString));
 					return null;
 				}
 
@@ -200,7 +209,8 @@ public class TemplateSell extends OwnableRegionTemplate {
 				{
 					String accountString = inputMap.remove("account");
 					if (accountString != null) {
-						if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+						if (SimpleRegionMarket.getInstance().getVaultHook()
+								.hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
 							if (accountString.equalsIgnoreCase("none")) {
 								account = "";
 							} else {
@@ -220,13 +230,17 @@ public class TemplateSell extends OwnableRegionTemplate {
 			try {
 				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
 			} catch (ContentSaveException e) {
-				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.severe(MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"),
+								region.getName()));
 				SimpleRegionMarket.getInstance().printError(e);
 			}
 
 			return sign;
 		} else {
-			player.sendMessage(ChatColor.RED + "Could not find the region.");
+			player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("sign.make.region.not.found"));
 		}
 		return null;
 	}

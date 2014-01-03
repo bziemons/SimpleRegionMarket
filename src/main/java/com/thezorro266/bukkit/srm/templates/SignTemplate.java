@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
@@ -62,8 +61,8 @@ public abstract class SignTemplate extends Template {
 					matcher.appendReplacement(buffer, "");
 					buffer.append(replacement);
 				}
-			} catch (final Exception e) {
-				SimpleRegionMarket.getInstance().getLogger().info("Replacement map has a misconfiguration at " + matcher.group(1));
+			} catch (Throwable e) {
+				throw new RuntimeException("Replacement map has a misconfiguration at " + matcher.group(1), e);
 			}
 		}
 		matcher.appendTail(buffer);

@@ -22,6 +22,7 @@ import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_CO
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,10 +44,11 @@ import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
-	private static final String REGIONS_FOLDER = "regions";
-	private static final String AGENTS_FILENAME = "agents.yml";
-	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml";
+	private static final String REGIONS_FOLDER = "regions"; //NON-NLS
+	private static final String AGENTS_FILENAME = "agents.yml"; //NON-NLS
+	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml"; //NON-NLS
 	private static final int TEMPLATE_VERSION = 1;
+	public static final String REGIONS_YML_FORMAT_STRING = "%s.yml"; //NON-NLS
 
 	@Getter
 	private List<Template> templateList = null;
@@ -73,7 +75,7 @@ public class TemplateManager {
 					templateYaml.save(templateFile);
 				}
 			} else {
-				throw new IOException(String.format("Cannot read %s", TEMPLATE_CONFIG_FILENAME));
+				throw new IOException("Cannot read " + TEMPLATE_CONFIG_FILENAME);
 			}
 		} else {
 			// Load very old agents file, if exist
@@ -110,7 +112,8 @@ public class TemplateManager {
 		}
 
 		if (tokenHotel == null || tokenAgent == null) {
-			SimpleRegionMarket.getInstance().getLogger().severe("Could not import old config.");
+			SimpleRegionMarket.getInstance().getLogger()
+					.severe(LanguageSupport.instance.getString("config.import.old.failed"));
 			throw new RuntimeException("There were no templates with the IDs SELL and HOTEL found");
 		}
 
@@ -122,13 +125,15 @@ public class TemplateManager {
 			}
 			path = agentsYaml.getConfigurationSection(world);
 			for (final String region : path.getKeys(false)) {
-				ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(realWorld, region);
+				ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+						.getProtectedRegion(realWorld, region);
 				if (protectedRegion == null) {
 					continue;
 				}
 				path = agentsYaml.getConfigurationSection(world).getConfigurationSection(region);
 				for (final String signnr : path.getKeys(false)) {
-					path = agentsYaml.getConfigurationSection(world).getConfigurationSection(region).getConfigurationSection(signnr);
+					path = agentsYaml.getConfigurationSection(world).getConfigurationSection(region)
+							.getConfigurationSection(signnr);
 					if (path == null) {
 						continue;
 					}
@@ -185,6 +190,7 @@ public class TemplateManager {
 		load();
 	}
 
+	@SuppressWarnings("HardCodedStringLiteral")
 	private void update(File templateFile, YamlConfiguration templateYaml) throws TemplateFormatException, IOException {
 
 		// Old
@@ -219,7 +225,8 @@ public class TemplateManager {
 				}
 				if (templateYaml.isSet(templateId + ".output")) {
 					for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-						templateYaml.set(templateId + ".output.free." + (i + 1), templateYaml.get(templateId + ".output." + (i + 1)));
+						templateYaml.set(templateId + ".output.free." + (i + 1),
+								templateYaml.get(templateId + ".output." + (i + 1)));
 						templateYaml.set(templateId + ".output." + (i + 1), null);
 					}
 				}
@@ -231,7 +238,8 @@ public class TemplateManager {
 				}
 				if (templateYaml.isSet(templateId + ".taken")) {
 					for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-						templateYaml.set(templateId + ".output.occupied." + (i + 1), templateYaml.get(templateId + ".taken." + (i + 1)));
+						templateYaml.set(templateId + ".output.occupied." + (i + 1),
+								templateYaml.get(templateId + ".taken." + (i + 1)));
 					}
 					templateYaml.set(templateId + ".taken", null);
 				}
@@ -301,7 +309,8 @@ public class TemplateManager {
 
 	public void loadContent() throws ContentLoadException {
 		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
+					template.getId().toLowerCase());
 
 			// Search through template dir, if exists
 			if (templateDir.exists()) {
@@ -322,7 +331,8 @@ public class TemplateManager {
 									try {
 										regionConfig.load(regionFile);
 									} catch (FileNotFoundException e) {
-										throw new ThisShouldNeverHappenException("The region file does not exist, but it did a few nanoseconds ago");
+										throw new ThisShouldNeverHappenException(
+												"The region file does not exist, but it did a few nanoseconds ago");
 									} catch (IOException e) {
 										throw new ContentLoadException("Problem when loading region file", e);
 									} catch (InvalidConfigurationException e) {
@@ -333,7 +343,8 @@ public class TemplateManager {
 									try {
 										RegionFactory.instance.loadFromConfiguration(regionConfig, "");
 									} catch (ContentLoadException e) {
-										throw new ContentLoadException("There was a problem reading the region file " + regionFile.getPath());
+										throw new ContentLoadException("There was a problem reading the region file "
+												+ regionFile.getPath());
 									}
 								}
 							}
@@ -342,7 +353,9 @@ public class TemplateManager {
 									.getInstance()
 									.getLogger()
 									.warning(
-											String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
+											MessageFormat.format(
+													LanguageSupport.instance.getString("template.load.world.not.found"),
+													worldStr, template.getId()));
 						}
 					}
 				}
@@ -362,7 +375,8 @@ public class TemplateManager {
 		}
 
 		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER), template.getId().toLowerCase());
+			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
+					template.getId().toLowerCase());
 
 			// Get the world folder
 			File worldFolder = new File(templateDir, world.getName());
@@ -377,7 +391,7 @@ public class TemplateManager {
 
 			for (Region region : template.getRegionList()) {
 				if (region.getWorld().equals(world)) {
-					File regionFile = new File(worldFolder, String.format("%s.yml", region.getName()));
+					File regionFile = new File(worldFolder, String.format(REGIONS_YML_FORMAT_STRING, region.getName()));
 					files.remove(regionFile);
 					saveRegion(region, regionFile);
 				}
@@ -385,7 +399,13 @@ public class TemplateManager {
 
 			for (File toDelete : files) {
 				if (!toDelete.delete()) {
-					SimpleRegionMarket.getInstance().getLogger().warning("Could not remove file " + toDelete.getPath());
+					SimpleRegionMarket
+							.getInstance()
+							.getLogger()
+							.warning(
+									MessageFormat.format(
+											LanguageSupport.instance.getString("region.save.could.not.remove.file"),
+											toDelete.getPath()));
 				}
 			}
 		}
@@ -407,7 +427,7 @@ public class TemplateManager {
 						),
 						region.getWorld().getName()
 				),
-				String.format("%s.yml", region.getName())
+				String.format(REGIONS_YML_FORMAT_STRING, region.getName())
 				);
 
 		saveRegion(region, regionFile);
@@ -429,10 +449,18 @@ public class TemplateManager {
 						),
 						region.getWorld().getName()
 				),
-				String.format("%s.yml", region.getName())
+				String.format(REGIONS_YML_FORMAT_STRING, region.getName())
 				);
 
-		regionFile.delete();
+		if (!regionFile.delete()) {
+			SimpleRegionMarket
+					.getInstance()
+					.getLogger()
+					.warning(
+							MessageFormat.format(
+									LanguageSupport.instance.getString("region.save.could.not.remove.file"),
+									regionFile.getPath()));
+		}
 	}
 
 	public void saveRegion(Region region, File file) throws ContentSaveException {

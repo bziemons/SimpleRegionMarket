@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,12 +37,13 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 
 public class WorldGuardManager {
+	private static final String WORLD_GUARD_PLUGIN_NAME = "WorldGuard"; // NON-NLS
 	private WorldGuardPlugin worldguardPlugin;
 	private WeakHashMap<RegionFactory.Region, WeakReference<WorldGuardOwnable>> ownableMap = new WeakHashMap<RegionFactory.Region, WeakReference<WorldGuardOwnable>>();
 
 	public WorldGuardOwnable getOwnable(RegionFactory.Region region) {
 		WorldGuardOwnable wgo;
-		if (ownableMap.containsValue(region)) {
+		if (ownableMap.containsKey(region)) {
 			WeakReference<WorldGuardOwnable> wr = ownableMap.get(region);
 			wgo = wr.get();
 			if (wgo != null) {
@@ -56,10 +57,10 @@ public class WorldGuardManager {
 	}
 
 	public void load() {
-		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+		Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin(WORLD_GUARD_PLUGIN_NAME);
 
 		if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-			throw new UnknownDependencyException("No WorldGuard installed or WorldGuard not enabled");
+			throw new UnknownDependencyException(LanguageSupport.instance.getString("worldguard.notloaded"));
 		} else {
 			worldguardPlugin = (WorldGuardPlugin) plugin;
 		}
@@ -205,7 +206,8 @@ public class WorldGuardManager {
 				org.bukkit.Location loc = player.getPlayer().getLocation();
 				return new Vector(loc.getX(), loc.getY(), loc.getZ());
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to get a position of an offline player");
+				SimpleRegionMarket.getInstance().getLogger()
+						.warning(LanguageSupport.instance.getString("worldguard.offlineplayer.getposition"));
 				return new Vector(0, 0, 0);
 			}
 		}
@@ -215,7 +217,8 @@ public class WorldGuardManager {
 			if (player.isOnline()) {
 				player.getPlayer().kickPlayer(msg);
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to kick an offline player");
+				SimpleRegionMarket.getInstance().getLogger()
+						.warning(LanguageSupport.instance.getString("worldguard.offlineplayer.kick"));
 			}
 		}
 
@@ -225,7 +228,8 @@ public class WorldGuardManager {
 				player.getPlayer().setBanned(true);
 				player.getPlayer().kickPlayer(msg);
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to ban an offline player");
+				SimpleRegionMarket.getInstance().getLogger()
+						.warning(LanguageSupport.instance.getString("worldguard.offlineplayer.ban"));
 			}
 		}
 
@@ -234,7 +238,8 @@ public class WorldGuardManager {
 			if (player.isOnline()) {
 				player.getPlayer().sendMessage(msg);
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to message an offline player");
+				SimpleRegionMarket.getInstance().getLogger()
+						.warning(LanguageSupport.instance.getString("worldguard.offlineplayer.message"));
 			}
 		}
 
@@ -246,9 +251,11 @@ public class WorldGuardManager {
 		@Override
 		public boolean hasPermission(String perm) {
 			if (player.isOnline()) {
-				return SimpleRegionMarket.getInstance().getWorldGuardManager().getWorldGuard().hasPermission(player.getPlayer(), perm);
+				return SimpleRegionMarket.getInstance().getWorldGuardManager().getWorldGuard()
+						.hasPermission(player.getPlayer(), perm);
 			} else {
-				SimpleRegionMarket.getInstance().getLogger().warning("WorldGuard tried to get the permissions of an offline player");
+				SimpleRegionMarket.getInstance().getLogger()
+						.warning(LanguageSupport.instance.getString("worldguard.offlineplayer.getpermission"));
 				return true;
 			}
 		}

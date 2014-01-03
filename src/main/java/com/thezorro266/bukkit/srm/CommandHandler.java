@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -49,13 +50,16 @@ public class CommandHandler implements CommandExecutor {
 			return false;
 		}
 
-		if (args[0].equalsIgnoreCase("version") || args[0].equalsIgnoreCase("v")) {
-			sender.sendMessage(String.format(ChatColor.YELLOW + "Loaded version %s, %s", SimpleRegionMarket.getInstance().getDescription().getVersion(),
-					SimpleRegionMarket.getCopyright()));
-		} else if (args[0].equalsIgnoreCase("release")) {
+		if (args[0].equalsIgnoreCase("version") || args[0].equalsIgnoreCase("v")) { //NON-NLS
+			String versionString = MessageFormat.format(LanguageSupport.instance.getString("command.version"),
+					SimpleRegionMarket.getInstance()
+							.getDescription().getVersion());
+			String copyrightString = SimpleRegionMarket.getCopyright();
+			sender.sendMessage(ChatColor.YELLOW + String.format("%s, %s", versionString, copyrightString)); //NON-NLS
+		} else if (args[0].equalsIgnoreCase("release")) { //NON-NLS
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_RELEASE)) {
 				if (args.length < 2) {
-					sender.sendMessage("Usage: /rm release <region> (<world>) - Removes the owners and members from the region");
+					sender.sendMessage(LanguageSupport.instance.getString("command.release"));
 					return true;
 				} else {
 					final String region = args[1];
@@ -71,41 +75,54 @@ public class CommandHandler implements CommandExecutor {
 					Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
 					if (realRegion == null) {
 						if (realWorld == null) {
-							sender.sendMessage(String.format("Region %s was not found in any world.", region));
+							sender.sendMessage(MessageFormat.format(
+									LanguageSupport.instance.getString("region.not.found"), region));
 						} else {
-							sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
+							sender.sendMessage(MessageFormat.format(
+									LanguageSupport.instance.getString("region.in.world.not.found"), region, world));
 						}
 					} else {
 						if (realRegion.getTemplate() instanceof OwnableTemplate) {
 							OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
 							if (ot.isRegionOccupied(realRegion)) {
 								ot.clearRegion(realRegion);
-								sender.sendMessage(String.format("Region %s in world %s has been released.", region, world));
+								sender.sendMessage(MessageFormat.format(
+										LanguageSupport.instance.getString("region.in.world.released"), region, world));
 
 								realRegion.updateSigns();
 
 								try {
 									SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(realRegion);
 								} catch (ContentSaveException e) {
-									sender.sendMessage(ChatColor.RED + "Could not save region");
-									SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + realRegion.getName());
+									sender.sendMessage(ChatColor.RED
+											+ LanguageSupport.instance.getString("region.save.problem.player"));
+									SimpleRegionMarket
+											.getInstance()
+											.getLogger()
+											.severe(MessageFormat.format(
+													LanguageSupport.instance.getString("region.save.problem.console"),
+													realRegion.getName()));
 									SimpleRegionMarket.getInstance().printError(e);
 								}
 							} else {
-								sender.sendMessage(String.format("Region %s in world %s is already free.", region, world));
+								sender.sendMessage(MessageFormat.format(
+										LanguageSupport.instance.getString("region.in.world.already.free"), region,
+										world));
 							}
 						} else {
-							sender.sendMessage(String.format("Region %s in world %s cannot be owned.", region, world));
+							sender.sendMessage(MessageFormat.format(
+									LanguageSupport.instance.getString("region.in.world.cannot.be.owned"), region,
+									world));
 						}
 					}
 				}
 			} else {
-				sender.sendMessage("You do not have permission to do this.");
+				sender.sendMessage(LanguageSupport.instance.getString("player.no.permission"));
 			}
-		} else if (args[0].equalsIgnoreCase("remove")) {
+		} else if (args[0].equalsIgnoreCase("remove")) { //NON-NLS
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_REMOVE)) {
 				if (args.length < 2) {
-					sender.sendMessage("Usage: /rm remove <region> (<world>) - Removes the region out of the system");
+					sender.sendMessage(LanguageSupport.instance.getString("command.remove"));
 					return true;
 				} else {
 					final String region = args[1];
@@ -121,9 +138,11 @@ public class CommandHandler implements CommandExecutor {
 					Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
 					if (realRegion == null) {
 						if (realWorld == null) {
-							sender.sendMessage(String.format("Region %s was not found in any world.", region));
+							sender.sendMessage(MessageFormat.format(
+									LanguageSupport.instance.getString("region.not.found"), region));
 						} else {
-							sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
+							sender.sendMessage(MessageFormat.format(
+									LanguageSupport.instance.getString("region.in.world.not.found"), region, world));
 						}
 					} else {
 						if (realRegion.getTemplate() instanceof OwnableTemplate) {
@@ -132,27 +151,29 @@ public class CommandHandler implements CommandExecutor {
 
 						SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(realRegion);
 						RegionFactory.instance.destroyRegion(realRegion);
-						sender.sendMessage(String.format("Region %s in world %s was removed.", region, world));
+						sender.sendMessage(MessageFormat.format(
+								LanguageSupport.instance.getString("region.in.world.removed"), region, world));
 					}
 				}
 			} else {
-				sender.sendMessage("You do not have permission to do this.");
+				sender.sendMessage(LanguageSupport.instance.getString("player.no.permission"));
 			}
-		} else if (args[0].equalsIgnoreCase("list")) { // TODO Can list own and rented regions
+		} else if (args[0].equalsIgnoreCase("list")) { //NON-NLS TODO Can list own and rented regions
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_LIST)) {
-				sender.sendMessage("Not yet implemented");
+				sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
 			} else {
-				sender.sendMessage("You do not have permission to do this.");
+				sender.sendMessage(LanguageSupport.instance.getString("player.no.permission"));
 			}
-		} else if (args[0].equalsIgnoreCase("addmember")) {
+		} else if (args[0].equalsIgnoreCase("addmember")) { //NON-NLS
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OWN)
-					|| SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
+					|| SimpleRegionMarket.getInstance().getVaultHook()
+							.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
 				if (args.length < 3) {
-					sender.sendMessage("Usage: /rm addmember <player> <region> (<world>) - Adds the player as a member to the region");
+					sender.sendMessage(LanguageSupport.instance.getString("command.addmember"));
 				} else {
 					final Player givenPlayer = Bukkit.getPlayer(args[1]);
 					if (givenPlayer == null) {
-						sender.sendMessage("The given player was not found.");
+						sender.sendMessage(LanguageSupport.instance.getString("player.not.found"));
 						return true;
 					}
 					final String region = args[2];
@@ -172,7 +193,8 @@ public class CommandHandler implements CommandExecutor {
 						sender.sendMessage("The given world was not found.");
 						return true;
 					}
-					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(worldWorld, region);
+					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+							.getProtectedRegion(worldWorld, region);
 					if (protectedRegion == null) {
 						final ArrayList<String> list = new ArrayList<String>();
 						list.add(region);
@@ -213,7 +235,8 @@ public class CommandHandler implements CommandExecutor {
 					}
 
 					if (found) {
-						sender.sendMessage(String.format("Added %s to the region %s in world %s as member.", givenPlayer.getName(), region, world));
+						sender.sendMessage(String.format("Added %s to the region %s in world %s as member.",
+								givenPlayer.getName(), region, world));
 					} else {
 						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
 					}
@@ -223,7 +246,8 @@ public class CommandHandler implements CommandExecutor {
 			}
 		} else if (args[0].equalsIgnoreCase("remmember") || args[0].equalsIgnoreCase("removemember")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OWN)
-					|| SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
+					|| SimpleRegionMarket.getInstance().getVaultHook()
+							.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm removemember <player> <region> (<world>) - Removes the member from the region");
 				} else {
@@ -249,7 +273,8 @@ public class CommandHandler implements CommandExecutor {
 						sender.sendMessage("The given world was not found.");
 						return true;
 					}
-					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(worldWorld, region);
+					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+							.getProtectedRegion(worldWorld, region);
 					if (protectedRegion == null) {
 						final ArrayList<String> list = new ArrayList<String>();
 						list.add(region);
@@ -290,7 +315,8 @@ public class CommandHandler implements CommandExecutor {
 					}
 
 					if (found) {
-						sender.sendMessage(String.format("Removed the member %s from the region %s in world %s.", givenPlayer.getName(), region, world));
+						sender.sendMessage(String.format("Removed the member %s from the region %s in world %s.",
+								givenPlayer.getName(), region, world));
 					} else {
 						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
 					}
@@ -300,7 +326,8 @@ public class CommandHandler implements CommandExecutor {
 			}
 		} else if (args[0].equalsIgnoreCase("addowner")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OWN)
-					|| SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
+					|| SimpleRegionMarket.getInstance().getVaultHook()
+							.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm addowner <player> <region> (<world>) - Adds the player as an owner to the region");
 				} else {
@@ -326,7 +353,8 @@ public class CommandHandler implements CommandExecutor {
 						sender.sendMessage("The given world was not found.");
 						return true;
 					}
-					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(worldWorld, region);
+					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+							.getProtectedRegion(worldWorld, region);
 					if (protectedRegion == null) {
 						final ArrayList<String> list = new ArrayList<String>();
 						list.add(region);
@@ -367,7 +395,8 @@ public class CommandHandler implements CommandExecutor {
 					}
 
 					if (found) {
-						sender.sendMessage(String.format("Added %s to the region %s in world %s as owner.", givenPlayer.getName(), region, world));
+						sender.sendMessage(String.format("Added %s to the region %s in world %s as owner.",
+								givenPlayer.getName(), region, world));
 					} else {
 						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
 					}
@@ -377,7 +406,8 @@ public class CommandHandler implements CommandExecutor {
 			}
 		} else if (args[0].equalsIgnoreCase("remowner") || args[0].equalsIgnoreCase("removeowner")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OWN)
-					|| SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
+					|| SimpleRegionMarket.getInstance().getVaultHook()
+							.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm removeowner <player> <region> (<world>) - Removes the owner from the region");
 				} else {
@@ -403,7 +433,8 @@ public class CommandHandler implements CommandExecutor {
 						sender.sendMessage("The given world was not found.");
 						return true;
 					}
-					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager().getProtectedRegion(worldWorld, region);
+					final ProtectedRegion protectedRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
+							.getProtectedRegion(worldWorld, region);
 					if (protectedRegion == null) {
 						final ArrayList<String> list = new ArrayList<String>();
 						list.add(region);
@@ -444,7 +475,8 @@ public class CommandHandler implements CommandExecutor {
 					}
 
 					if (found) {
-						sender.sendMessage(String.format("Added %s to the region %s in world %s as owner.", givenPlayer.getName(), region, world));
+						sender.sendMessage(String.format("Added %s to the region %s in world %s as owner.",
+								givenPlayer.getName(), region, world));
 					} else {
 						sender.sendMessage(String.format("Region %s was not found in world %s.", region, world));
 					}

@@ -4,7 +4,7 @@
 
     <groupId>com.thezorro266.bukkit</groupId>
     <artifactId>srm</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Simple Region Market</name>
@@ -13,8 +13,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <majorversion>0.0.1</majorversion>
-        <state>dev</state>
+        <majorversion>0.1</majorversion>
+        <state>indev</state>
         <bukkit.version>1.7.2-R0.3-SNAPSHOT</bukkit.version>
         <worldguard.version>5.8.1-SNAPSHOT</worldguard.version>
         <vault.version>1.2.27</vault.version>
@@ -40,33 +40,37 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>${bukkit.version}</version>
+            <scope>compile</scope>
             <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldguard</artifactId>
             <version>${worldguard.version}</version>
+            <scope>compile</scope>
             <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>Vault</artifactId>
             <version>${vault.version}</version>
+            <scope>compile</scope>
             <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.12.2</version>
             <scope>provided</scope>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
     <build>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <finalName>SimpleRegionMarket</finalName>
+        <defaultGoal>install</defaultGoal>
+
         <pluginManagement>
             <plugins>
                 <plugin>

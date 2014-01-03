@@ -59,7 +59,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 	}
 
 	public static String getCopyright() {
-		return "(c) 2013  theZorro266 and SRM Team"; //NON-NLS
+		return "(c) 2013-2014  theZorro266 and SRM Team"; //NON-NLS
 	}
 
 	@Override
@@ -88,26 +88,33 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		// Try to load dependencies
-		try {
-			vaultHook.load();
-			worldGuardManager.load();
-		} catch (Throwable e) {
-			except(e);
-		}
-
-		// Load regions in templates
-		long start = System.nanoTime();
-		{
+		if (!disable) {
+			// Try to load dependencies
 			try {
-				templateManager.loadContent();
-			} catch (ContentLoadException e) {
+				vaultHook.load();
+				worldGuardManager.load();
+			} catch (Throwable e) {
 				except(e);
 			}
 		}
-		getLogger().info(
-				MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
-						RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+
+		if (!disable) {
+			// Load regions in templates
+			long start = System.nanoTime();
+			{
+				try {
+					templateManager.loadContent();
+				} catch (ContentLoadException e) {
+					except(e);
+				}
+			}
+			
+			if (!disable) {
+				getLogger().info(
+						MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
+								RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+			}
+		}
 
 		// Check if the plugin should be disabled because of an exception
 		if (disable) {

@@ -58,9 +58,9 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 	public boolean setRegionOccupied(RegionFactory.Region region, boolean isOccupied) {
 		if (!isOccupied) {
 			// TODO: Unset renttime
-			region.setOption("owner", null);
+			region.getOptions().set("owner", null);
 		}
-		region.setOption("state", (isOccupied ? "occupied" : "free"));
+		region.getOptions().set("state", (isOccupied ? "occupied" : "free"));
 		return true;
 	}
 
@@ -84,7 +84,7 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 			}
 
 			// TODO: Set renttime
-			region.setOption("owner", player.getName());
+			region.getOptions().set("owner", player.getName());
 			setRegionOccupied(region, true);
 
 			try {
@@ -170,8 +170,8 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 
 				// TODO: Check for renttime
 
-				region.setOption("price", price);
-				region.setOption("account", account);
+				region.getOptions().set("price", price);
+				region.getOptions().set("account", account);
 				clearRegion(region);
 			}
 

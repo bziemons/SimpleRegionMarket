@@ -65,15 +65,15 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public boolean isRegionOccupied(Region region) {
-		return region.getOption("state").equals("occupied");
+        return region.getOptions().get("state").equals("occupied");
 	}
 
 	@Override
 	public boolean setRegionOccupied(Region region, boolean isOccupied) {
 		if (!isOccupied) {
-			region.setOption("buyer", null);
+            region.getOptions().set("buyer", null);
 		}
-		region.setOption("state", (isOccupied ? "occupied" : "free"));
+        region.getOptions().set("state", (isOccupied ? "occupied" : "free"));
 		return true;
 	}
 
@@ -113,7 +113,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 				setRegionMembers(region, new OfflinePlayer[] { player });
 			}
 
-			region.setOption("buyer", player.getName());
+            region.getOptions().set("buyer", player.getName());
 			setRegionOccupied(region, true);
 
 			try {
@@ -131,9 +131,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public void replacementMap(Region region, HashMap<String, String> replacementMap) {
-		if (region.isOption("price")) {
+		if (region.getOptions().exists("price")) {
 			String strPrice;
-			Double price = (Double) region.getOption("price");
+			Double price = (Double) region.getOptions().get("price");
 			try {
 				strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
 			} catch (Throwable e) {
@@ -142,11 +142,11 @@ public class TemplateSell extends OwnableRegionTemplate {
 			replacementMap.put("price", strPrice);
 		}
 
-		if (region.isOption("account"))
-			replacementMap.put("account", region.getOption("account").toString());
+		if (region.getOptions().exists("account"))
+			replacementMap.put("account", region.getOptions().get("account").toString());
 
-		if (region.isOption("buyer"))
-			replacementMap.put("buyer", region.getOption("buyer").toString());
+		if (region.getOptions().exists("buyer"))
+			replacementMap.put("buyer", region.getOptions().get("buyer").toString());
 	}
 
 	@Override
@@ -210,8 +210,8 @@ public class TemplateSell extends OwnableRegionTemplate {
 					}
 				}
 
-				region.setOption("price", price);
-				region.setOption("account", account);
+				region.getOptions().set("price", price);
+				region.getOptions().set("account", account);
 				clearRegion(region);
 			}
 

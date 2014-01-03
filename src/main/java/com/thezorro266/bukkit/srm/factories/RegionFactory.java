@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.thezorro266.bukkit.srm.helpers.Options;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -102,7 +104,7 @@ public class RegionFactory {
 		Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
 		for (Entry<String, Object> optionEntry : optionEntrySet) {
 			if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
-				region.setOption(optionEntry.getKey(), optionEntry.getValue());
+                region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
 			}
 		}
 
@@ -127,7 +129,8 @@ public class RegionFactory {
 		final ProtectedRegion worldguardRegion;
 		@Getter
 		ArrayList<Sign> signList;
-		HashMap<String, Object> options;
+		@Getter
+        private final Options options;
 
 		private Region(Template template, World world, ProtectedRegion worldguardRegion) {
 			if (template == null) {
@@ -144,7 +147,7 @@ public class RegionFactory {
 			this.world = world;
 			this.worldguardRegion = worldguardRegion;
 			signList = new ArrayList<Sign>();
-			options = new HashMap<String, Object>();
+            options = new Options();
 		}
 
 		public String getName() {
@@ -162,22 +165,6 @@ public class RegionFactory {
 		public void updateSigns() {
 			for (Sign sign : signList) {
 				template.updateSign(sign);
-			}
-		}
-
-		public boolean isOption(String optionAlias) {
-			return options.get(optionAlias) != null;
-		}
-
-		public Object getOption(String optionAlias) {
-			return options.get(optionAlias);
-		}
-
-		public void setOption(String optionAlias, Object value) {
-			if (value == null) {
-				options.remove(optionAlias);
-			} else {
-				options.put(optionAlias, value);
 			}
 		}
 
@@ -217,9 +204,11 @@ public class RegionFactory {
 		}
 
 		private void saveOptions(Configuration config, String path) {
-			for (Entry<String, Object> optionEntry : options.entrySet()) {
-				config.set(path + optionEntry.getKey(), optionEntry.getValue());
-			}
+            synchronized (options) {
+                for (Entry<String, Object> optionEntry : options) {
+                    config.set(path + optionEntry.getKey(), optionEntry.getValue());
+                }
+            }
 		}
 
 		@Override

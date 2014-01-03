@@ -143,8 +143,8 @@ public abstract class SignTemplate extends Template {
 
 	private void updateSignLines(Region region, String[] lines) {
 		if (region.getTemplate().equals(this)) {
-			if (region.isOption("state")) {
-				String state = (String) region.getOption("state");
+			if (region.getOptions().exists("state")) {
+				String state = (String) region.getOptions().get("state");
 
 				String[] outputLines = signOutput.get(state);
 				if (outputLines != null) {

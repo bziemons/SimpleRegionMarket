@@ -32,7 +32,6 @@ import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
 
 public abstract class Template {
-
 	public static final String ID_NONE = "none";
 	public static final String TYPE_UNKNOWN = "Unknown";
 	// TODO: Make options class

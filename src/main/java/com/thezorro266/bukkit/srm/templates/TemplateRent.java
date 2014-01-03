@@ -21,7 +21,6 @@ package com.thezorro266.bukkit.srm.templates;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class TemplateRent extends TemplateLease {
-
 	public TemplateRent(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		type = "rent";

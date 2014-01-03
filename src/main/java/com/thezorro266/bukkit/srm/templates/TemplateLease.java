@@ -18,29 +18,28 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import org.bukkit.configuration.ConfigurationSection;
-import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 import org.bukkit.entity.Player;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class TemplateLease extends TemplateSell implements TimedTemplate {
-
 	public TemplateLease(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
 		type = "lease";
 	}
 
-    @Override
-    public void schedule() {
+	@Override
+	public void schedule() {
 
-    }
+	}
 
-    @Override
-    public boolean cancel(RegionFactory.Region region, Player player) {
-        return false;
-    }
+	@Override
+	public boolean cancel(RegionFactory.Region region, Player player) {
+		return false;
+	}
 
-    /*
+	/*
 	@Override
 	public void takeRegion(Player newOwner, String world, String region) {
 		final ProtectedRegion protectedRegion = AlphaRegionMarket.instance.wgManager.getProtectedRegion(Bukkit.getWorld(world), region);

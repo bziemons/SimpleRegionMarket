@@ -47,7 +47,7 @@ public class TemplateManager {
 	private static final String AGENTS_FILENAME = "agents.yml";
 	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml";
 	private static final int TEMPLATE_VERSION = 1;
-	
+
 	@Getter
 	private List<Template> templateList = null;
 
@@ -110,7 +110,7 @@ public class TemplateManager {
 		}
 
 		if (tokenHotel == null || tokenAgent == null) {
-			SimpleRegionMarket.getInstance().getLogger().severe("Could not import old config. Stopping..");
+			SimpleRegionMarket.getInstance().getLogger().severe("Could not import old config.");
 			throw new RuntimeException("There were no templates with the IDs SELL and HOTEL found");
 		}
 
@@ -203,9 +203,9 @@ public class TemplateManager {
 					}
 				}
 
-                if (templateYaml.isSet(templateId + ".bidtime")) {
-                    templateYaml.set(templateId + ".auctiontime", templateYaml.get(templateId + ".bidtime"));
-                }
+				if (templateYaml.isSet(templateId + ".bidtime")) {
+					templateYaml.set(templateId + ".auctiontime", templateYaml.get(templateId + ".bidtime"));
+				}
 
 				if (templateYaml.isSet(templateId + ".input.id")) {
 					templateYaml.set(templateId + ".input.1", templateYaml.getString(templateId + ".input.id"));
@@ -333,7 +333,7 @@ public class TemplateManager {
 									.getInstance()
 									.getLogger()
 									.warning(
-                                            String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
+											String.format("The world %s in the template %s was not found and could not be loaded.", worldStr, template.getId()));
 						}
 					}
 				}

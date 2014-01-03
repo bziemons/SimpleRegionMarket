@@ -18,16 +18,20 @@
 
 package com.thezorro266.bukkit.srm.factories;
 
+import java.util.Map;
+import java.util.Set;
 import lombok.Data;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Options;
 
 public class SignFactory {
 	public static final SignFactory instance = new SignFactory();
@@ -79,6 +83,15 @@ public class SignFactory {
 			BlockFace direction = BlockFace.valueOf(config.getString(path + "direction"));
 
 			Sign sign = createSign(region, location, isWallSign, direction);
+
+			// Set sign options from values from options path
+			Set<Map.Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+			for (Map.Entry<String, Object> optionEntry : optionEntrySet) {
+				if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
+					sign.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+				}
+			}
+
 			region.getTemplate().updateSign(sign);
 		} else {
 			throw new ContentLoadException("Region string in sign config did not match the outer region");
@@ -92,6 +105,7 @@ public class SignFactory {
 		final Location location;
 		final boolean isWallSign;
 		final BlockFace direction;
+		private final Options options;
 
 		private Sign(Region region, Location location, boolean isWallSign, BlockFace direction) {
 			if (region == null) {
@@ -108,6 +122,7 @@ public class SignFactory {
 			this.location = new Location(location);
 			this.isWallSign = isWallSign;
 			this.direction = direction;
+			options = new Options();
 		}
 
 		public void clear() {
@@ -140,6 +155,15 @@ public class SignFactory {
 			location.saveToConfiguration(config, path + "location.");
 			config.set(path + "is_wall_sign", isWallSign);
 			config.set(path + "direction", direction.toString());
+			saveOptions(config, path + "options.");
+		}
+
+		private void saveOptions(Configuration config, String path) {
+			synchronized (options) {
+				for (Map.Entry<String, Object> optionEntry : options) {
+					config.set(path + optionEntry.getKey(), optionEntry.getValue());
+				}
+			}
 		}
 
 		@Override

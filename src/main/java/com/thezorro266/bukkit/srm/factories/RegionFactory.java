@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.thezorro266.bukkit.srm.helpers.Options;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -39,6 +37,7 @@ import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Options;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
 
@@ -101,10 +100,11 @@ public class RegionFactory {
 			throw new ContentLoadException("Could not create region " + config.getString(path + "worldguard_region"), e);
 		}
 
+		// Set region options from values from options path
 		Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
 		for (Entry<String, Object> optionEntry : optionEntrySet) {
 			if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
-                region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
+				region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
 			}
 		}
 
@@ -129,8 +129,9 @@ public class RegionFactory {
 		final ProtectedRegion worldguardRegion;
 		@Getter
 		ArrayList<Sign> signList;
+
 		@Getter
-        private final Options options;
+		private final Options options;
 
 		private Region(Template template, World world, ProtectedRegion worldguardRegion) {
 			if (template == null) {
@@ -147,7 +148,7 @@ public class RegionFactory {
 			this.world = world;
 			this.worldguardRegion = worldguardRegion;
 			signList = new ArrayList<Sign>();
-            options = new Options();
+			options = new Options();
 		}
 
 		public String getName() {
@@ -204,11 +205,11 @@ public class RegionFactory {
 		}
 
 		private void saveOptions(Configuration config, String path) {
-            synchronized (options) {
-                for (Entry<String, Object> optionEntry : options) {
-                    config.set(path + optionEntry.getKey(), optionEntry.getValue());
-                }
-            }
+			synchronized (options) {
+				for (Entry<String, Object> optionEntry : options) {
+					config.set(path + optionEntry.getKey(), optionEntry.getValue());
+				}
+			}
 		}
 
 		@Override

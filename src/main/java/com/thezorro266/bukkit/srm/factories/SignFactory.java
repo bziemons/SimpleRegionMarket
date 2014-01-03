@@ -135,15 +135,6 @@ public class SignFactory {
 			signBlockState.update(false, false);
 		}
 
-		public boolean isBlockThisSign(Block block) {
-			if (isSign(block)) {
-				if (location.isBlockAt(block)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		public void saveToConfiguration(Configuration config, String path) {
 			config.set(path + "region", region.getName());
 			location.saveToConfiguration(config, path + "location.");

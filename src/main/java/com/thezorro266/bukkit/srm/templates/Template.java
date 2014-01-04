@@ -1,6 +1,6 @@
 /**
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public abstract class Template {
 	@Getter
 	protected String type = TYPE_UNKNOWN;
 	@Getter
-	protected List<Region> regionList = new ArrayList<Region>();
+	protected final List<Region> regionList = new ArrayList<Region>();
 
 	public Template(ConfigurationSection templateConfigSection) {
 		id = templateConfigSection.getName();
@@ -67,7 +67,8 @@ public abstract class Template {
 
 			Template template;
 			try {
-				template = Template.class.cast(templateClass.getConstructor(new Class[] { ConfigurationSection.class }).newInstance(templateConfigSection));
+				template = Template.class.cast(templateClass.getConstructor(new Class[] { ConfigurationSection.class })
+						.newInstance(templateConfigSection));
 			} catch (IllegalArgumentException e) {
 				throw new TemplateFormatException("Template class " + type + " on id " + id + " is not valid", e);
 			} catch (IllegalAccessException e) {

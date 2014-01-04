@@ -158,23 +158,18 @@ public class TemplateSell extends OwnableRegionTemplate {
 	@Override
 	public Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
 		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block),
-				inputMap.remove("region"));
+				inputMap.get("region"));
 
 		if (worldguardRegion != null) {
-			Region region = null;
-			for (Region regionEntry : regionList) {
-				if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
-					region = regionEntry;
-					break;
-				}
-			}
+			Region region = SimpleRegionMarket.getInstance().getWorldHelper()
+					.getRegion(worldguardRegion.getId(), block.getWorld());
 
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
 				double price;
 				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
-					String priceString = inputMap.remove("price");
+					String priceString = inputMap.get("price");
 					if (priceString != null) {
 						try {
 							price = Double.parseDouble(priceString);
@@ -189,7 +184,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 					price = 0;
 				}
 
-				if (priceMin > price && (priceMax == -1 || price < priceMax)) {
+				if (priceMin > price || (priceMax != -1 && price > priceMax)) {
 					String priceMinString;
 					String priceMaxString;
 					try {
@@ -207,7 +202,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 				String account = player.getName();
 				{
-					String accountString = inputMap.remove("account");
+					String accountString = inputMap.get("account");
 					if (accountString != null) {
 						if (SimpleRegionMarket.getInstance().getVaultHook()
 								.hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
@@ -223,6 +218,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 				region.getOptions().set("price", price);
 				region.getOptions().set("account", account);
 				clearRegion(region);
+			} else if (region.getTemplate() != this) {
+				player.sendMessage(LanguageSupport.instance.getString("sign.create.different.template"));
+				return null;
 			}
 
 			Sign sign = region.addBlockAsSign(block);

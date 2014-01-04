@@ -18,6 +18,17 @@
 
 package com.thezorro266.bukkit.srm.factories;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -29,18 +40,6 @@ import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.helpers.Options;
 import com.thezorro266.bukkit.srm.templates.SignTemplate;
 import com.thezorro266.bukkit.srm.templates.Template;
-import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.ConfigurationSection;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class RegionFactory {
 	public static final RegionFactory instance = new RegionFactory();
@@ -52,7 +51,8 @@ public class RegionFactory {
 
 	public static ProtectedRegion getProtectedRegionFromLocation(Location loc, String region) {
 		ProtectedRegion protectedRegion = null;
-		final RegionManager worldRegionManager = SimpleRegionMarket.getInstance().getWorldGuardManager().getWorldGuard().getRegionManager(loc.getWorld());
+		final RegionManager worldRegionManager = SimpleRegionMarket.getInstance().getWorldGuardManager()
+				.getWorldGuard().getRegionManager(loc.getWorld());
 		if (region == null) {
 			ApplicableRegionSet regionSet = worldRegionManager.getApplicableRegions(loc.getBukkitLocation());
 			if (regionSet.size() == 1) {
@@ -71,7 +71,9 @@ public class RegionFactory {
 		Region region = new Region(template, world, worldguardRegion);
 
 		SimpleRegionMarket.getInstance().getWorldHelper().putRegion(region, world);
-		template.getRegionList().add(region);
+		synchronized (template.getRegionList()) {
+			template.getRegionList().add(region);
+		}
 
 		++regionCount;
 
@@ -79,17 +81,25 @@ public class RegionFactory {
 	}
 
 	public void destroyRegion(Region region) {
-		for (Sign sign : region.getSignList()) {
-			sign.clear();
+		{
+			Sign[] signArray = new Sign[region.getSignList().size()];
+			signArray = region.getSignList().toArray(signArray);
+			for (Sign sign : signArray) {
+				sign.clear();
+				SignFactory.instance.destroySign(sign);
+			}
 		}
 
-		region.getTemplate().getRegionList().remove(region);
+		synchronized (region.getTemplate().getRegionList()) {
+			region.getTemplate().getRegionList().remove(region);
+		}
 
 		--regionCount;
 	}
 
 	public void loadFromConfiguration(Configuration config, String path) throws ContentLoadException {
-		Template template = SimpleRegionMarket.getInstance().getTemplateManager().getTemplateFromId(config.getString(path + "template_id"));
+		Template template = SimpleRegionMarket.getInstance().getTemplateManager()
+				.getTemplateFromId(config.getString(path + "template_id"));
 		World world = Bukkit.getWorld(config.getString(path + "world"));
 		ProtectedRegion worldguardRegion = SimpleRegionMarket.getInstance().getWorldGuardManager()
 				.getProtectedRegion(world, config.getString(path + "worldguard_region"));
@@ -104,7 +114,8 @@ public class RegionFactory {
 		// Check if there are options
 		if (config.isSet(path + "options")) {
 			// Set region options from values from options path
-			Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+			Set<Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options")
+					.getValues(true).entrySet();
 			for (Entry<String, Object> optionEntry : optionEntrySet) {
 				if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
 					region.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
@@ -116,7 +127,8 @@ public class RegionFactory {
 		if (signSection != null) {
 			for (String signKey : signSection.getKeys(false)) {
 				try {
-					SignFactory.instance.loadFromConfiguration(config, region, path + String.format("signs.%s.", signKey));
+					SignFactory.instance.loadFromConfiguration(config, region,
+							path + String.format("signs.%s.", signKey));
 				} catch (IllegalArgumentException e) {
 					throw new ContentLoadException("Could not create sign " + signKey, e);
 				}
@@ -162,7 +174,8 @@ public class RegionFactory {
 		public Sign addBlockAsSign(Block block) {
 			if (SignFactory.instance.isSign(block)) {
 				org.bukkit.material.Sign signMat = (org.bukkit.material.Sign) block.getState().getData();
-				return SignFactory.instance.createSign(this, Location.fromBlock(block), block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
+				return SignFactory.instance.createSign(this, Location.fromBlock(block),
+						block.getType().equals(Material.WALL_SIGN), signMat.getFacing());
 			}
 			return null;
 		}
@@ -182,12 +195,18 @@ public class RegionFactory {
 			replacementMap.put("region", getName());
 			replacementMap.put("world", world.getName());
 			if (getWorldguardRegion() instanceof ProtectedCuboidRegion) {
-				replacementMap.put("x",
-						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX() - (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
-				replacementMap.put("y",
-						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY() - (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
-				replacementMap.put("z",
-						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ() - (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
+				replacementMap.put(
+						"x",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getX()
+								- (int) (worldguardRegion.getMinimumPoint().getX() - 1))));
+				replacementMap.put(
+						"y",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getY()
+								- (int) (worldguardRegion.getMinimumPoint().getY() - 1))));
+				replacementMap.put(
+						"z",
+						Integer.toString(Math.abs((int) worldguardRegion.getMaximumPoint().getZ()
+								- (int) (worldguardRegion.getMinimumPoint().getZ() - 1))));
 			}
 
 			((SignTemplate) template).replacementMap(this, replacementMap);

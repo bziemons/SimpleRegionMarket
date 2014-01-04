@@ -18,14 +18,18 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.thezorro266.bukkit.srm.LanguageSupport;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.Utils;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import com.thezorro266.bukkit.srm.factories.SignFactory;
@@ -33,18 +37,67 @@ import com.thezorro266.bukkit.srm.helpers.Location;
 import com.thezorro266.bukkit.srm.templates.interfaces.TimedTemplate;
 
 public class TemplateLease extends TemplateSell implements TimedTemplate {
+	protected int minTime = 60;
+	protected int maxTime = -1;
+
 	public TemplateLease(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
+
 		type = "lease";
+
+		if (templateConfigSection.contains("renttime.min")) {
+			minTime = templateConfigSection.getInt("renttime.min");
+		}
+		if (templateConfigSection.contains("renttime.max")) {
+			maxTime = templateConfigSection.getInt("renttime.max");
+		}
 	}
 
 	@Override
 	public void schedule() {
-		for (RegionFactory.Region region : regionList) {
-			if (isRegionOccupied(region)) {
-				int currentSecs = (int) (System.nanoTime() / 1000000000);
+		synchronized (regionList) {
+			for (RegionFactory.Region region : regionList) {
+				if (isRegionOccupied(region)) {
+					int currentSecs = (int) (System.currentTimeMillis() / 1000);
 
-				// TODO: Check for expiration, try to expand the time, send the owner a message, and clearRegion, if expanding is not possible
+					if (currentSecs > (Integer) region.getOptions().get("renttime")) {
+						OfflinePlayer op = Bukkit.getOfflinePlayer((String) region.getOptions().get("owner"));
+						// TODO: Player money, check
+						if (true) {
+							int time = (Integer) region.getOptions().get("time");
+							region.getOptions().set("renttime", currentSecs + time);
+
+							if (op.isOnline()) {
+								op.getPlayer().sendMessage(
+										MessageFormat.format(
+												LanguageSupport.instance.getString("region.lease.expanded"),
+												region.getName(), Utils.getTimeLeft(currentSecs + time)));
+							}
+						} else {
+							clearRegion(region);
+
+							if (op.isOnline()) {
+								op.getPlayer().sendMessage(
+										MessageFormat.format(
+												LanguageSupport.instance.getString("region.lease.expired"),
+												region.getName()));
+							}
+						}
+
+						try {
+							SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+						} catch (ContentSaveException e) {
+							SimpleRegionMarket
+									.getInstance()
+									.getLogger()
+									.severe(MessageFormat.format(
+											LanguageSupport.instance.getString("region.save.problem.console"),
+											region.getName()));
+							SimpleRegionMarket.getInstance().printError(e);
+						}
+					}
+					region.updateSigns();
+				}
 			}
 		}
 	}
@@ -57,7 +110,7 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 	@Override
 	public boolean setRegionOccupied(RegionFactory.Region region, boolean isOccupied) {
 		if (!isOccupied) {
-			// TODO: Unset renttime
+			region.getOptions().set("renttime", null);
 			region.getOptions().set("owner", null);
 		}
 		region.getOptions().set("state", (isOccupied ? "occupied" : "free"));
@@ -69,9 +122,9 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 		RegionFactory.Region region = sign.getRegion();
 		if (isRegionOccupied(region)) {
 			if (isRegionOwner(player, region)) {
-				player.sendMessage("This is your region.");
+				player.sendMessage(LanguageSupport.instance.getString("region.yours"));
 			} else {
-				player.sendMessage("This region is already sold.");
+				player.sendMessage(LanguageSupport.instance.getString("region.already.sold"));
 			}
 		} else {
 			// TODO: Player permissions
@@ -83,19 +136,26 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 				setRegionMembers(region, new OfflinePlayer[] { player });
 			}
 
-			// TODO: Set renttime
+			int currentSecs = (int) (System.currentTimeMillis() / 1000);
+			int time = (Integer) region.getOptions().get("time");
+			region.getOptions().set("renttime", currentSecs + time);
+
 			region.getOptions().set("owner", player.getName());
 			setRegionOccupied(region, true);
 
 			try {
 				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
 			} catch (ContentSaveException e) {
-				player.sendMessage(ChatColor.RED + "Could not save region");
-				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+				player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("region.save.problem.player"));
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.severe(MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"),
+								region.getName()));
 				SimpleRegionMarket.getInstance().printError(e);
 			}
 
-			player.sendMessage("You're now the owner of this region");
+			player.sendMessage(LanguageSupport.instance.getString("region.new.owner"));
 		}
 		region.updateSigns();
 	}
@@ -104,33 +164,39 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 	public void replacementMap(RegionFactory.Region region, HashMap<String, String> replacementMap) {
 		super.replacementMap(region, replacementMap);
 
-		// TODO: Add renttime, owner, etc. to the replacement map
+		if (region.getOptions().exists("owner"))
+			replacementMap.put("owner", (String) region.getOptions().get("owner"));
+
+		if (region.getOptions().exists("time"))
+			replacementMap.put(
+					"time",
+					Utils.getTimeLeft((int) (System.currentTimeMillis() / 1000)
+							+ (Integer) region.getOptions().get("time")));
+
+		if (region.getOptions().exists("renttime"))
+			replacementMap.put("timeleft", Utils.getTimeLeft((Integer) region.getOptions().get("renttime")));
 	}
 
 	@Override
 	public SignFactory.Sign makeSign(Player player, Block block, HashMap<String, String> inputMap) {
-		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block), inputMap.remove("region"));
+		ProtectedRegion worldguardRegion = RegionFactory.getProtectedRegionFromLocation(Location.fromBlock(block),
+				inputMap.get("region"));
 
 		if (worldguardRegion != null) {
-			RegionFactory.Region region = null;
-			for (RegionFactory.Region regionEntry : regionList) {
-				if (regionEntry.getWorldguardRegion().equals(worldguardRegion)) {
-					region = regionEntry;
-					break;
-				}
-			}
+			RegionFactory.Region region = SimpleRegionMarket.getInstance().getWorldHelper()
+					.getRegion(worldguardRegion.getId(), block.getWorld());
 
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
 				double price;
 				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
-					String priceString = inputMap.remove("price");
+					String priceString = inputMap.get("price");
 					if (priceString != null) {
 						try {
 							price = Double.parseDouble(priceString);
 						} catch (final Exception e) {
-							player.sendMessage("Price not found.");
+							player.sendMessage(LanguageSupport.instance.getString("price.not.found"));
 							return null;
 						}
 					} else {
@@ -150,15 +216,18 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 						priceMinString = String.format("%.2f", priceMin);
 						priceMaxString = String.format("%.2f", priceMax);
 					}
-					player.sendMessage(String.format(ChatColor.RED + "The price must be between %s and %s", priceMinString, priceMaxString));
+					player.sendMessage(ChatColor.RED
+							+ MessageFormat.format(LanguageSupport.instance.getString("price.must.between"),
+									priceMinString, priceMaxString));
 					return null;
 				}
 
 				String account = player.getName();
 				{
-					String accountString = inputMap.remove("account");
+					String accountString = inputMap.get("account");
 					if (accountString != null) {
-						if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+						if (SimpleRegionMarket.getInstance().getVaultHook()
+								.hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
 							if (accountString.equalsIgnoreCase("none")) {
 								account = "";
 							} else {
@@ -168,11 +237,27 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 					}
 				}
 
-				// TODO: Check for renttime
+				int time = minTime;
+				{
+					String timeString = inputMap.get("time");
+					if (timeString != null) {
+						time = Utils.parseTime(timeString);
+						if (minTime > time || (maxTime != -1 && time > maxTime)) {
+							player.sendMessage(ChatColor.RED
+									+ MessageFormat.format(LanguageSupport.instance.getString("renttime.between"),
+											minTime, maxTime));
+							return null;
+						}
+					}
+				}
 
+				region.getOptions().set("time", time);
 				region.getOptions().set("price", price);
 				region.getOptions().set("account", account);
 				clearRegion(region);
+			} else if (region.getTemplate() != this) {
+				player.sendMessage(LanguageSupport.instance.getString("sign.create.different.template"));
+				return null;
 			}
 
 			SignFactory.Sign sign = region.addBlockAsSign(block);
@@ -180,13 +265,17 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 			try {
 				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
 			} catch (ContentSaveException e) {
-				SimpleRegionMarket.getInstance().getLogger().severe("Could not save region " + region.getName());
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.severe(MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"),
+								region.getName()));
 				SimpleRegionMarket.getInstance().printError(e);
 			}
 
 			return sign;
 		} else {
-			player.sendMessage(ChatColor.RED + "Could not find the region.");
+			player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("sign.make.region.not.found"));
 		}
 		return null;
 	}

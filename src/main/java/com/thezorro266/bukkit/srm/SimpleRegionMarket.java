@@ -20,6 +20,7 @@ package com.thezorro266.bukkit.srm;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.logging.Level;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
@@ -69,7 +70,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
-		long start = System.nanoTime();
+		Utils.TimeMeasurement tm = new Utils.TimeMeasurement();
 		{
 			try {
 				templateManager.load();
@@ -81,9 +82,13 @@ public class SimpleRegionMarket extends JavaPlugin {
 				return;
 			}
 		}
+		int templateCount;
+		synchronized (templateManager.getTemplateList()) {
+			templateCount = templateManager.getTemplateList().size();
+		}
 		getLogger().info(
-				MessageFormat.format(LanguageSupport.instance.getString("template.load.report"), templateManager
-						.getTemplateList().size(), (System.nanoTime() - start) / 1000000L));
+				MessageFormat.format(LanguageSupport.instance.getString("template.load.report"), templateCount,
+						tm.diff()));
 	}
 
 	@Override
@@ -100,7 +105,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 
 		if (!disable) {
 			// Load regions in templates
-			long start = System.nanoTime();
+			Utils.TimeMeasurement tm = new Utils.TimeMeasurement();
 			{
 				try {
 					templateManager.loadContent();
@@ -108,11 +113,11 @@ public class SimpleRegionMarket extends JavaPlugin {
 					except(e);
 				}
 			}
-			
+
 			if (!disable) {
 				getLogger().info(
 						MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
-								RegionFactory.instance.getRegionCount(), (System.nanoTime() - start) / 1000000L));
+								RegionFactory.instance.getRegionCount(), tm.diff()));
 			}
 		}
 
@@ -133,11 +138,18 @@ public class SimpleRegionMarket extends JavaPlugin {
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
 			@Override
 			public void run() {
-				for (Template template : templateManager.getTemplateList()) {
-					if (template instanceof TimedTemplate) {
-						((TimedTemplate) template).schedule();
+				Utils.TimeMeasurement tm = new Utils.TimeMeasurement();
+				{
+					synchronized (templateManager.getTemplateList()) {
+						for (Template template : templateManager.getTemplateList()) {
+							if (template instanceof TimedTemplate) {
+								((TimedTemplate) template).schedule();
+							}
+						}
 					}
 				}
+				getLogger().log(Level.FINEST,
+						MessageFormat.format(LanguageSupport.instance.getString("schedule.report"), tm.diff()));
 			}
 		}, 1200L, 1200L);
 	}

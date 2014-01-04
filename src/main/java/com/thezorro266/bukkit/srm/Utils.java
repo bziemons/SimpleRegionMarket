@@ -24,52 +24,53 @@ package com.thezorro266.bukkit.srm;
 @SuppressWarnings("HardCodedStringLiteral")
 public class Utils {
 	/**
-	 * Generates a string, which represents the given time.
+	 * Generates a string, which represents the time left until the given time.
 	 * 
-	 * @param time in seconds
+	 * @param renttime in seconds
 	 * @return the generated string
 	 */
-	public static String getTimeString(int time) {
-		final int days = time / (24 * 60 * 60);
-		time = time % (24 * 60 * 60);
-		final int hours = time / (60 * 60);
-		time = time % (60 * 60);
-		final int minutes = time / 60;
-		time = time % (60);
-		final int seconds = time;
-		String strReturn = "< 1 min";
+	public static String getTimeLeft(int renttime) {
+		renttime -= (int) (System.currentTimeMillis() / 1000);
+
+		final int days = renttime / (24 * 60 * 60);
+		renttime = renttime % (24 * 60 * 60);
+		final int hours = renttime / (60 * 60);
+		renttime = renttime % (60 * 60);
+		final int minutes = renttime / 60;
+		renttime = renttime % (60);
+		final int seconds = renttime;
+		StringBuilder sb = new StringBuilder();
 		if (days > 0) {
-			strReturn = Integer.toString(days);
+			sb.append(days);
 			if (hours > 0) {
-				strReturn += "+";
+				sb.append("+");
 			}
-			if (days == 1) {
-				strReturn += " day";
-			} else {
-				strReturn += " days";
+			sb.append(" day");
+			if (days > 1) {
+				sb.append("s");
 			}
 		} else if (hours > 0) {
-			strReturn = Integer.toString(hours);
+			sb.append(hours);
 			if (minutes > 0) {
-				strReturn += "+";
+				sb.append("+");
 			}
-			if (hours == 1) {
-				strReturn += " hour";
-			} else {
-				strReturn += " hours";
+			sb.append(" hour");
+			if (hours > 1) {
+				sb.append("s");
 			}
 		} else if (minutes > 0) {
-			strReturn = Integer.toString(minutes);
+			sb.append(minutes);
 			if (seconds > 0) {
-				strReturn += "+";
+				sb.append("+");
 			}
-			if (minutes == 1) {
-				strReturn += " min";
-			} else {
-				strReturn += " mins";
+			sb.append(" min");
+			if (minutes > 1) {
+				sb.append("s");
 			}
+		} else {
+			sb.append("< 1 min");
 		}
-		return strReturn;
+		return sb.toString();
 	}
 
 	/**
@@ -119,5 +120,17 @@ public class Utils {
 		}
 
 		return time;
+	}
+
+	public static class TimeMeasurement {
+		private long start;
+
+		public TimeMeasurement() {
+			start = System.nanoTime();
+		}
+
+		public int diff() {
+			return (int) ((System.nanoTime() - start) / 1000000L);
+		}
 	}
 }

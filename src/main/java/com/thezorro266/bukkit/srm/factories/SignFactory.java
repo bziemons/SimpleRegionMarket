@@ -18,11 +18,8 @@
 
 package com.thezorro266.bukkit.srm.factories;
 
-import com.thezorro266.bukkit.srm.SimpleRegionMarket;
-import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
-import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.helpers.Location;
-import com.thezorro266.bukkit.srm.helpers.Options;
+import java.util.Map;
+import java.util.Set;
 import lombok.Data;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -30,9 +27,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-
-import java.util.Map;
-import java.util.Set;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
+import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
+import com.thezorro266.bukkit.srm.helpers.Location;
+import com.thezorro266.bukkit.srm.helpers.Options;
 
 public class SignFactory {
 	public static final SignFactory instance = new SignFactory();
@@ -100,7 +99,8 @@ public class SignFactory {
 			// Check, if there are options
 			if (config.isSet(path + "options")) {
 				// Set sign options from values from options path
-				Set<Map.Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options").getValues(true).entrySet();
+				Set<Map.Entry<String, Object>> optionEntrySet = config.getConfigurationSection(path + "options")
+						.getValues(true).entrySet();
 				for (Map.Entry<String, Object> optionEntry : optionEntrySet) {
 					if (!(optionEntry.getValue() instanceof ConfigurationSection)) {
 						sign.getOptions().set(optionEntry.getKey(), optionEntry.getValue());
@@ -114,8 +114,7 @@ public class SignFactory {
 		}
 	}
 
-	public
-	@Data
+	public @Data
 	class Sign {
 		public static final int SIGN_LINE_COUNT = 4;
 		final Region region;

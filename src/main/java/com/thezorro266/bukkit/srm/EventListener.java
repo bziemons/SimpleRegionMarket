@@ -51,11 +51,13 @@ public class EventListener implements Listener {
 				}
 			}
 
-			for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
-				String[] lines = event.getLines();
-				if (template.isSignApplicable(Location.fromBlock(event.getBlock()), lines)) {
-					if (template.createSign(player, event.getBlock(), lines)) {
-						break;
+			synchronized (SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
+				for (Template template : SimpleRegionMarket.getInstance().getTemplateManager().getTemplateList()) {
+					String[] lines = event.getLines();
+					if (template.isSignApplicable(Location.fromBlock(event.getBlock()), lines)) {
+						if (template.createSign(player, event.getBlock(), lines)) {
+							break;
+						}
 					}
 				}
 			}

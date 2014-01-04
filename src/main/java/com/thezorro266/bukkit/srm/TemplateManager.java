@@ -51,7 +51,7 @@ public class TemplateManager {
 	public static final String REGIONS_YML_FORMAT_STRING = "%s.yml"; //NON-NLS
 
 	@Getter
-	private List<Template> templateList = null;
+	private final List<Template> templateList = new ArrayList<Template>();
 
 	public void load() throws TemplateFormatException, IOException {
 		File templateFile = new File(SimpleRegionMarket.getInstance().getDataFolder(), TEMPLATE_CONFIG_FILENAME);
@@ -62,14 +62,16 @@ public class TemplateManager {
 				if (templateYaml.getInt("version", 0) != TEMPLATE_VERSION) {
 					update(templateFile, templateYaml);
 				} else {
-					templateList = new ArrayList<Template>();
-					for (String templateId : templateYaml.getRoot().getKeys(false)) {
-						if (templateYaml.isSet(templateId + ".type")) {
-							Template template = Template.load(templateYaml.getConfigurationSection(templateId));
-							if (templateList.contains(template)) {
-								throw new TemplateFormatException("Duplicate id in templates configuration file");
+					synchronized (templateList) {
+						templateList.clear();
+						for (String templateId : templateYaml.getRoot().getKeys(false)) {
+							if (templateYaml.isSet(templateId + ".type")) {
+								Template template = Template.load(templateYaml.getConfigurationSection(templateId));
+								if (templateList.contains(template)) {
+									throw new TemplateFormatException("Duplicate id in templates configuration file");
+								}
+								templateList.add(template);
 							}
-							templateList.add(template);
 						}
 					}
 					templateYaml.save(templateFile);
@@ -103,11 +105,13 @@ public class TemplateManager {
 
 		TemplateSell tokenAgent = null;
 		TemplateRent tokenHotel = null;
-		for (Template template : templateList) {
-			if (template.getId().equalsIgnoreCase("SELL")) {
-				tokenAgent = (TemplateSell) template;
-			} else if (template.getId().equalsIgnoreCase("HOTEL")) {
-				tokenHotel = (TemplateRent) template;
+		synchronized (templateList) {
+			for (Template template : templateList) {
+				if (template.getId().equalsIgnoreCase("SELL")) {
+					tokenAgent = (TemplateSell) template;
+				} else if (template.getId().equalsIgnoreCase("HOTEL")) {
+					tokenHotel = (TemplateRent) template;
+				}
 			}
 		}
 
@@ -210,7 +214,25 @@ public class TemplateManager {
 				}
 
 				if (templateYaml.isSet(templateId + ".bidtime")) {
+					if (templateYaml.isSet(templateId + ".bidtime.min")) {
+						templateYaml.set(templateId + ".bidtime.min",
+								templateYaml.getInt(templateId + ".bidtime.min") / 1000);
+					}
+					if (templateYaml.isSet(templateId + ".bidtime.max")) {
+						templateYaml.set(templateId + ".bidtime.max",
+								templateYaml.getInt(templateId + ".bidtime.max") / 1000);
+					}
 					templateYaml.set(templateId + ".auctiontime", templateYaml.get(templateId + ".bidtime"));
+					templateYaml.set(templateId + ".bidtime", null);
+				}
+
+				if (templateYaml.isSet(templateId + ".renttime.min")) {
+					templateYaml.set(templateId + "renttime.min",
+							templateYaml.getInt(templateId + ".renttime.min") / 1000);
+				}
+				if (templateYaml.isSet(templateId + ".renttime.max")) {
+					templateYaml.set(templateId + "renttime.max",
+							templateYaml.getInt(templateId + ".renttime.max") / 1000);
 				}
 
 				if (templateYaml.isSet(templateId + ".input.id")) {
@@ -298,9 +320,11 @@ public class TemplateManager {
 
 	public Template getTemplateFromId(String id) {
 		if (id != null) {
-			for (Template template : templateList) {
-				if (template.getId().equalsIgnoreCase(id)) {
-					return template;
+			synchronized (templateList) {
+				for (Template template : templateList) {
+					if (template.getId().equalsIgnoreCase(id)) {
+						return template;
+					}
 				}
 			}
 		}
@@ -308,54 +332,59 @@ public class TemplateManager {
 	}
 
 	public void loadContent() throws ContentLoadException {
-		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
-					template.getId().toLowerCase());
+		synchronized (templateList) {
+			for (Template template : templateList) {
+				File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
+						template.getId().toLowerCase());
 
-			// Search through template dir, if exists
-			if (templateDir.exists()) {
-				for (String worldStr : templateDir.list()) {
-					File worldDir = new File(templateDir, worldStr);
-					if (worldDir.isDirectory()) {
-						// Check the world and get the world object from Bukkit
-						World world = Bukkit.getWorld(worldStr);
+				// Search through template dir, if exists
+				if (templateDir.exists()) {
+					for (String worldStr : templateDir.list()) {
+						File worldDir = new File(templateDir, worldStr);
+						if (worldDir.isDirectory()) {
+							// Check the world and get the world object from Bukkit
+							World world = Bukkit.getWorld(worldStr);
 
-						if (world != null) {
-							File[] files = worldDir.listFiles();
-							if (files != null) {
-								for (File regionFile : files) {
-									// Create a fresh YamlConfiguration
-									YamlConfiguration regionConfig = new YamlConfiguration();
+							if (world != null) {
+								File[] files = worldDir.listFiles();
+								if (files != null) {
+									for (File regionFile : files) {
+										// Create a fresh YamlConfiguration
+										YamlConfiguration regionConfig = new YamlConfiguration();
 
-									// Open the region configuration file and try to load it
-									try {
-										regionConfig.load(regionFile);
-									} catch (FileNotFoundException e) {
-										throw new ThisShouldNeverHappenException(
-												"The region file does not exist, but it did a few nanoseconds ago");
-									} catch (IOException e) {
-										throw new ContentLoadException("Problem when loading region file", e);
-									} catch (InvalidConfigurationException e) {
-										throw new ContentLoadException("Yaml region file with wrong configuration", e);
-									}
+										// Open the region configuration file and try to load it
+										try {
+											regionConfig.load(regionFile);
+										} catch (FileNotFoundException e) {
+											throw new ThisShouldNeverHappenException(
+													"The region file does not exist, but it did a few nanoseconds ago");
+										} catch (IOException e) {
+											throw new ContentLoadException("Problem when loading region file", e);
+										} catch (InvalidConfigurationException e) {
+											throw new ContentLoadException("Yaml region file with wrong configuration",
+													e);
+										}
 
-									// Let the RegionFactory do the rest
-									try {
-										RegionFactory.instance.loadFromConfiguration(regionConfig, "");
-									} catch (ContentLoadException e) {
-										throw new ContentLoadException("There was a problem reading the region file "
-												+ regionFile.getPath());
+										// Let the RegionFactory do the rest
+										try {
+											RegionFactory.instance.loadFromConfiguration(regionConfig, "");
+										} catch (ContentLoadException e) {
+											throw new ContentLoadException(
+													"There was a problem reading the region file "
+															+ regionFile.getPath());
+										}
 									}
 								}
+							} else {
+								SimpleRegionMarket
+										.getInstance()
+										.getLogger()
+										.warning(
+												MessageFormat.format(
+														LanguageSupport.instance
+																.getString("template.load.world.not.found"),
+														worldStr, template.getId()));
 							}
-						} else {
-							SimpleRegionMarket
-									.getInstance()
-									.getLogger()
-									.warning(
-											MessageFormat.format(
-													LanguageSupport.instance.getString("template.load.world.not.found"),
-													worldStr, template.getId()));
 						}
 					}
 				}
@@ -374,38 +403,41 @@ public class TemplateManager {
 			throw new IllegalArgumentException("World cannot be null");
 		}
 
-		for (Template template : templateList) {
-			File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
-					template.getId().toLowerCase());
+		synchronized (templateList) {
+			for (Template template : templateList) {
+				File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
+						template.getId().toLowerCase());
 
-			// Get the world folder
-			File worldFolder = new File(templateDir, world.getName());
-			File[] regionFiles = worldFolder.listFiles();
-			ArrayList<File> files;
-			if (regionFiles != null) {
-				files = new ArrayList<File>(Arrays.asList(regionFiles));
-			} else {
-				// empty ArrayList
-				files = new ArrayList<File>(0);
-			}
-
-			for (Region region : template.getRegionList()) {
-				if (region.getWorld().equals(world)) {
-					File regionFile = new File(worldFolder, String.format(REGIONS_YML_FORMAT_STRING, region.getName()));
-					files.remove(regionFile);
-					saveRegion(region, regionFile);
+				// Get the world folder
+				File worldFolder = new File(templateDir, world.getName());
+				File[] regionFiles = worldFolder.listFiles();
+				ArrayList<File> files;
+				if (regionFiles != null) {
+					files = new ArrayList<File>(Arrays.asList(regionFiles));
+				} else {
+					// empty ArrayList
+					files = new ArrayList<File>(0);
 				}
-			}
 
-			for (File toDelete : files) {
-				if (!toDelete.delete()) {
-					SimpleRegionMarket
-							.getInstance()
-							.getLogger()
-							.warning(
-									MessageFormat.format(
-											LanguageSupport.instance.getString("region.save.could.not.remove.file"),
-											toDelete.getPath()));
+				for (Region region : template.getRegionList()) {
+					if (region.getWorld().equals(world)) {
+						File regionFile = new File(worldFolder, String.format(REGIONS_YML_FORMAT_STRING,
+								region.getName()));
+						files.remove(regionFile);
+						saveRegion(region, regionFile);
+					}
+				}
+
+				for (File toDelete : files) {
+					if (!toDelete.delete()) {
+						SimpleRegionMarket
+								.getInstance()
+								.getLogger()
+								.warning(
+										MessageFormat.format(
+												LanguageSupport.instance.getString("region.save.could.not.remove.file"),
+												toDelete.getPath()));
+					}
 				}
 			}
 		}

@@ -22,7 +22,7 @@ lease:
   buyer: member
   price.min: 0
   price.max: -1
-  renttime.min: 60000
+  renttime.min: 60
   renttime.max: -1
   input.1: '[LEASE]'
   input.2: '[[region]]'
@@ -42,7 +42,7 @@ rent:
   buyer: member
   price.min: 0
   price.max: -1
-  renttime.min: 60000
+  renttime.min: 60
   renttime.max: -1
   input.1: '[RENT]'
   input.2: '[[region]]'
@@ -61,7 +61,7 @@ auction:
   buyer: owner
   price.min: 0
   price.max: -1
-  auctiontime.min: 60000
+  auctiontime.min: 60
   auctiontime.max: -1
   input.1: '[AUCTION]'
   input.2: '[[region]]'

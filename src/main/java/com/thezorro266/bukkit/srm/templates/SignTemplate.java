@@ -123,8 +123,10 @@ public abstract class SignTemplate extends Template {
 		if (lines[0].equalsIgnoreCase(signInput[0])) {
 			HashMap<String, String> inputMap = getSignInput(this, lines);
 			Sign sign = makeSign(player, block, inputMap);
-			updateSignLines(sign.getRegion(), lines);
-			return true;
+			if (sign != null) {
+				updateSignLines(sign.getRegion(), lines);
+				return true;
+			}
 		}
 		return false;
 	}

@@ -1,4 +1,4 @@
-/**
+/*
  * SimpleRegionMarket
  * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *

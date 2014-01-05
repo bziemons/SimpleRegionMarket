@@ -1,6 +1,6 @@
-/**
+/*
  * SimpleRegionMarket
- * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 	@Getter
 	private final TemplateManager templateManager;
 	@Getter
+	private final WorldEditManager worldEditManager;
+	@Getter
 	private final WorldGuardManager worldGuardManager;
 	@Getter
 	private final VaultHook vaultHook;
@@ -55,6 +57,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		locationSignHelper = new LocationSignHelper();
 		worldHelper = new WorldHelper();
 		templateManager = new TemplateManager();
+		worldEditManager = new WorldEditManager();
 		worldGuardManager = new WorldGuardManager();
 		vaultHook = new VaultHook();
 	}
@@ -98,6 +101,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 			try {
 				vaultHook.load();
 				worldGuardManager.load();
+				worldEditManager.load();
 			} catch (Throwable e) {
 				except(e);
 			}
@@ -170,7 +174,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		} else {
 			getLogger().severe(t.toString());
 			for (StackTraceElement element : t.getStackTrace()) {
-				getLogger().severe(element.toString());
+				getLogger().severe("  " + element.toString());
 			}
 
 			Throwable cause = t.getCause();

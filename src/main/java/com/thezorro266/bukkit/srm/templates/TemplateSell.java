@@ -1,6 +1,6 @@
-/**
+/*
  * SimpleRegionMarket
- * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
@@ -40,6 +41,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 	protected double priceMax = -1;
 	protected boolean removeSigns = true;
 	protected boolean buyerIsOwner = true;
+	protected boolean regionReset = false;
 
 	public TemplateSell(ConfigurationSection templateConfigSection) {
 		super(templateConfigSection);
@@ -63,6 +65,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 				buyerIsOwner = false;
 			}
 		}
+		if (templateConfigSection.contains("regionreset")) {
+			regionReset = templateConfigSection.getBoolean("regionreset");
+		}
 	}
 
 	@Override
@@ -81,8 +86,14 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public boolean clearRegion(Region region) {
-		setRegionOccupied(region, false);
-		return super.clearRegion(region);
+		if (super.clearRegion(region)) {
+			setRegionOccupied(region, false);
+			if (regionReset) {
+				SimpleRegionMarket.getInstance().getWorldEditManager().replaceRegionFromSchematic(region);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -162,7 +173,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 		if (worldguardRegion != null) {
 			Region region = SimpleRegionMarket.getInstance().getWorldHelper()
-					.getRegion(worldguardRegion.getId(), block.getWorld());
+					.getRegionExact(worldguardRegion.getId(), block.getWorld());
 
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
@@ -217,7 +228,23 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 				region.getOptions().set("price", price);
 				region.getOptions().set("account", account);
-				clearRegion(region);
+				setRegionOccupied(region, false);
+				clearOwnershipOfRegion(region);
+
+				if (regionReset) {
+					try {
+						SimpleRegionMarket.getInstance().getWorldEditManager().saveRegionToSchematic(region);
+					} catch (IOException e) {
+						player.sendMessage(LanguageSupport.instance.getString("region.schematic.save.failure"));
+						SimpleRegionMarket
+								.getInstance()
+								.getLogger()
+								.severe(MessageFormat.format(LanguageSupport.instance
+										.getString("region.in.world.schematic.save.failure.console"), region.getName(),
+										region.getWorld().getName()));
+						SimpleRegionMarket.getInstance().printError(e);
+					}
+				}
 			} else if (region.getTemplate() != this) {
 				player.sendMessage(LanguageSupport.instance.getString("sign.create.different.template"));
 				return null;
@@ -241,5 +268,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 			player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("sign.make.region.not.found"));
 		}
 		return null;
+	}
+
+	public boolean doesRegionReset() {
+		return regionReset;
 	}
 }

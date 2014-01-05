@@ -1,6 +1,6 @@
-/**
+/*
  * SimpleRegionMarket
- * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@ package com.thezorro266.bukkit.srm;
 import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -44,10 +44,10 @@ import com.thezorro266.bukkit.srm.templates.TemplateRent;
 import com.thezorro266.bukkit.srm.templates.TemplateSell;
 
 public class TemplateManager {
-	private static final String REGIONS_FOLDER = "regions"; //NON-NLS
 	private static final String AGENTS_FILENAME = "agents.yml"; //NON-NLS
 	private static final String TEMPLATE_CONFIG_FILENAME = "templates.yml"; //NON-NLS
 	private static final int TEMPLATE_VERSION = 1;
+	public static final String REGIONS_FOLDER = "regions"; //NON-NLS
 	public static final String REGIONS_YML_FORMAT_STRING = "%s.yml"; //NON-NLS
 
 	@Getter
@@ -332,6 +332,13 @@ public class TemplateManager {
 	}
 
 	public void loadContent() throws ContentLoadException {
+		FilenameFilter ymlFiles = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".yml");
+			}
+		};
+
 		synchronized (templateList) {
 			for (Template template : templateList) {
 				File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
@@ -346,7 +353,7 @@ public class TemplateManager {
 							World world = Bukkit.getWorld(worldStr);
 
 							if (world != null) {
-								File[] files = worldDir.listFiles();
+								File[] files = worldDir.listFiles(ymlFiles);
 								if (files != null) {
 									for (File regionFile : files) {
 										// Create a fresh YamlConfiguration
@@ -392,55 +399,70 @@ public class TemplateManager {
 		}
 	}
 
-	public void saveContent() throws ContentSaveException {
-		for (World world : Bukkit.getWorlds()) {
-			saveContent(world);
-		}
-	}
+	//	public void saveContent() throws ContentSaveException {
+	//		for (World world : Bukkit.getWorlds()) {
+	//			saveContent(world);
+	//		}
+	//	}
+	//
+	//	public void saveContent(World world) throws ContentSaveException {
+	//		if (world == null) {
+	//			throw new IllegalArgumentException("World cannot be null");
+	//		}
+	//
+	//		synchronized (templateList) {
+	//			for (Template template : templateList) {
+	//				File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
+	//						template.getId().toLowerCase());
+	//
+	//				// Get the world folder
+	//				File worldFolder = new File(templateDir, world.getName());
+	//				File[] regionFiles = worldFolder.listFiles();
+	//				ArrayList<File> files;
+	//				if (regionFiles != null) {
+	//					files = new ArrayList<File>(Arrays.asList(regionFiles));
+	//				} else {
+	//					// empty ArrayList
+	//					files = new ArrayList<File>(0);
+	//				}
+	//
+	//				for (Region region : template.getRegionList()) {
+	//					if (region.getWorld().equals(world)) {
+	//						File regionFile = new File(worldFolder, String.format(REGIONS_YML_FORMAT_STRING,
+	//								region.getName()));
+	//						files.remove(regionFile);
+	//						saveRegion(region, regionFile);
+	//					}
+	//				}
+	//
+	//				for (File toDelete : files) {
+	//					if (!toDelete.delete()) {
+	//						SimpleRegionMarket
+	//								.getInstance()
+	//								.getLogger()
+	//								.warning(
+	//										MessageFormat.format(
+	//												LanguageSupport.instance.getString("region.save.could.not.remove.file"),
+	//												toDelete.getPath()));
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
 
-	public void saveContent(World world) throws ContentSaveException {
-		if (world == null) {
-			throw new IllegalArgumentException("World cannot be null");
-		}
-
-		synchronized (templateList) {
-			for (Template template : templateList) {
-				File templateDir = new File(new File(SimpleRegionMarket.getInstance().getDataFolder(), REGIONS_FOLDER),
-						template.getId().toLowerCase());
-
-				// Get the world folder
-				File worldFolder = new File(templateDir, world.getName());
-				File[] regionFiles = worldFolder.listFiles();
-				ArrayList<File> files;
-				if (regionFiles != null) {
-					files = new ArrayList<File>(Arrays.asList(regionFiles));
-				} else {
-					// empty ArrayList
-					files = new ArrayList<File>(0);
-				}
-
-				for (Region region : template.getRegionList()) {
-					if (region.getWorld().equals(world)) {
-						File regionFile = new File(worldFolder, String.format(REGIONS_YML_FORMAT_STRING,
-								region.getName()));
-						files.remove(regionFile);
-						saveRegion(region, regionFile);
-					}
-				}
-
-				for (File toDelete : files) {
-					if (!toDelete.delete()) {
-						SimpleRegionMarket
-								.getInstance()
-								.getLogger()
-								.warning(
-										MessageFormat.format(
-												LanguageSupport.instance.getString("region.save.could.not.remove.file"),
-												toDelete.getPath()));
-					}
-				}
-			}
-		}
+	public File getRegionFile(Region region) {
+		return new File(
+				new File(
+						new File(
+								new File(
+										SimpleRegionMarket.getInstance().getDataFolder(),
+										REGIONS_FOLDER
+								),
+								region.getTemplate().getId().toLowerCase()
+						),
+						region.getWorld().getName()
+				),
+				String.format(REGIONS_YML_FORMAT_STRING, region.getName()));
 	}
 
 	public void saveRegion(Region region) throws ContentSaveException {
@@ -448,21 +470,7 @@ public class TemplateManager {
 			throw new IllegalArgumentException("Region cannot be null");
 		}
 
-		File regionFile = new File(
-				new File(
-						new File(
-								new File(
-										SimpleRegionMarket.getInstance().getDataFolder(),
-										REGIONS_FOLDER
-								),
-								region.getTemplate().getId().toLowerCase()
-						),
-						region.getWorld().getName()
-				),
-				String.format(REGIONS_YML_FORMAT_STRING, region.getName())
-				);
-
-		saveRegion(region, regionFile);
+		saveRegion(region, getRegionFile(region));
 	}
 
 	public void removeRegion(Region region) {
@@ -470,20 +478,18 @@ public class TemplateManager {
 			throw new IllegalArgumentException("Region cannot be null");
 		}
 
-		File regionFile = new File(
-				new File(
-						new File(
-								new File(
-										SimpleRegionMarket.getInstance().getDataFolder(),
-										REGIONS_FOLDER
-								),
-								region.getTemplate().getId().toLowerCase()
-						),
-						region.getWorld().getName()
-				),
-				String.format(REGIONS_YML_FORMAT_STRING, region.getName())
-				);
+		if (region.getTemplate() instanceof TemplateSell) {
+			TemplateSell sellTemplate = (TemplateSell) region.getTemplate();
+			File schematicFile = SimpleRegionMarket.getInstance().getWorldEditManager().getSchematicFile(region);
+			if (sellTemplate.doesRegionReset()) {
+				if (!schematicFile.delete()) {
+					SimpleRegionMarket.getInstance().getLogger()
+							.warning("Could not remove region schematic file " + schematicFile.getPath());
+				}
+			}
+		}
 
+		File regionFile = getRegionFile(region);
 		if (!regionFile.delete()) {
 			SimpleRegionMarket
 					.getInstance()

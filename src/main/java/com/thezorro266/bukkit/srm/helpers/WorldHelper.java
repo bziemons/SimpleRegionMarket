@@ -1,4 +1,4 @@
-/**
+/*
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  *
@@ -19,6 +19,7 @@
 package com.thezorro266.bukkit.srm.helpers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import org.bukkit.World;
@@ -30,7 +31,14 @@ public class WorldHelper {
 	public Region[] getRegions(World world) {
 		ArrayList<Region> list = new ArrayList<Region>();
 
-		for (Entry<Region, World> entry : regionMap.entrySet()) {
+		for (Iterator<Entry<Region, World>> iterator = regionMap.entrySet().iterator(); iterator.hasNext();) {
+			Entry<Region, World> entry = (Entry<Region, World>) iterator.next();
+
+			// Check cache Validation
+			if (!entry.getKey().getTemplate().getRegionList().contains(entry.getKey())) {
+				iterator.remove();
+			}
+
 			if (entry.getValue().equals(world)) {
 				list.add(entry.getKey());
 			}
@@ -43,8 +51,17 @@ public class WorldHelper {
 		Region found = null;
 		String lowerName = name.toLowerCase();
 		int delta = Integer.MAX_VALUE;
-		for (Region region : regionMap.keySet()) {
-			if (region.getName().toLowerCase().startsWith(lowerName) && (world == null || regionMap.get(region).equals(world))) {
+		for (Iterator<Region> iterator = regionMap.keySet().iterator(); iterator.hasNext();) {
+			Region region = (Region) iterator.next();
+
+			// Check cache validation
+			if (!region.getTemplate().getRegionList().contains(region)) {
+				iterator.remove();
+				continue;
+			}
+
+			if (region.getName().toLowerCase().startsWith(lowerName)
+					&& (world == null || regionMap.get(region).equals(world))) {
 				int curDelta = region.getName().length() - lowerName.length();
 				if (curDelta < delta) {
 					found = region;
@@ -57,6 +74,23 @@ public class WorldHelper {
 		return found;
 	}
 
+	public Region getRegionExact(String name, World world) {
+		for (Iterator<Region> iterator = regionMap.keySet().iterator(); iterator.hasNext();) {
+			Region region = (Region) iterator.next();
+
+			// Check cache validation
+			if (!region.getTemplate().getRegionList().contains(region)) {
+				iterator.remove();
+				continue;
+			}
+
+			if (region.getName().equals(name)) {
+				return region;
+			}
+		}
+		return null;
+	}
+
 	public void putRegion(Region region, World world) {
 		if (region == null) {
 			throw new IllegalArgumentException();
@@ -65,6 +99,8 @@ public class WorldHelper {
 			throw new IllegalArgumentException();
 		}
 
-		regionMap.put(region, world);
+		if (region.getTemplate().getRegionList().contains(region)) {
+			regionMap.put(region, world);
+		}
 	}
 }

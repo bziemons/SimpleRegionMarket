@@ -1,4 +1,4 @@
-/**
+/*
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  *
@@ -153,6 +153,11 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 
 	@Override
 	public boolean clearRegion(RegionFactory.Region region) {
+		return clearOwnershipOfRegion(region);
+	}
+
+	@Override
+	public boolean clearOwnershipOfRegion(RegionFactory.Region region) {
 		WorldGuardManager wgm = SimpleRegionMarket.getInstance().getWorldGuardManager();
 		WorldGuardManager.WorldGuardOwnable wgo = wgm.getOwnable(region);
 

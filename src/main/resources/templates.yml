@@ -19,6 +19,7 @@ sell:
 lease:
   type: TemplateLease
   removesigns: false
+  regionreset: true
   buyer: member
   price.min: 0
   price.max: -1
@@ -39,6 +40,7 @@ lease:
 rent:
   type: TemplateRent
   removesigns: false
+  regionreset: true
   buyer: member
   price.min: 0
   price.max: -1

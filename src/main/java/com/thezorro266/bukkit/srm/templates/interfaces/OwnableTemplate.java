@@ -1,4 +1,4 @@
-/**
+/*
  * SimpleRegionMarket
  * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
  *
@@ -139,4 +139,12 @@ public interface OwnableTemplate {
 	 * @return true, if successful
 	 */
 	public boolean clearRegion(Region region);
+
+	/**
+	 * Clears only the owners and members from the region.
+	 * 
+	 * @param region as the {@link Region}, which should be cleared
+	 * @return true, if successful
+	 */
+	public boolean clearOwnershipOfRegion(Region region);
 }

@@ -1,6 +1,6 @@
-/**
+/*
  * SimpleRegionMarket
- * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 
 package com.thezorro266.bukkit.srm.templates.interfaces;
 
-import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import org.bukkit.entity.Player;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
 
 public interface TimedTemplate {
 
-    public boolean cancel(RegionFactory.Region region, Player player);
+	public boolean cancel(RegionFactory.Region region, Player player);
 
 	public void schedule();
 }

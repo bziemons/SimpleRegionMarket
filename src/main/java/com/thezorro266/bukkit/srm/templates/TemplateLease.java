@@ -1,6 +1,6 @@
-/**
+/*
  * SimpleRegionMarket
- * Copyright (C) 2013-2014  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import org.bukkit.Bukkit;
@@ -184,7 +185,7 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 
 		if (worldguardRegion != null) {
 			RegionFactory.Region region = SimpleRegionMarket.getInstance().getWorldHelper()
-					.getRegion(worldguardRegion.getId(), block.getWorld());
+					.getRegionExact(worldguardRegion.getId(), block.getWorld());
 
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
@@ -254,7 +255,23 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 				region.getOptions().set("time", time);
 				region.getOptions().set("price", price);
 				region.getOptions().set("account", account);
-				clearRegion(region);
+				setRegionOccupied(region, false);
+				clearOwnershipOfRegion(region);
+
+				if (regionReset) {
+					try {
+						SimpleRegionMarket.getInstance().getWorldEditManager().saveRegionToSchematic(region);
+					} catch (IOException e) {
+						player.sendMessage(LanguageSupport.instance.getString("region.schematic.save.failure"));
+						SimpleRegionMarket
+								.getInstance()
+								.getLogger()
+								.severe(MessageFormat.format(LanguageSupport.instance
+										.getString("region.in.world.schematic.save.failure.console"), region.getName(),
+										region.getWorld().getName()));
+						SimpleRegionMarket.getInstance().printError(e);
+					}
+				}
 			} else if (region.getTemplate() != this) {
 				player.sendMessage(LanguageSupport.instance.getString("sign.create.different.template"));
 				return null;

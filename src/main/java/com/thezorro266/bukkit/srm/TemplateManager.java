@@ -266,6 +266,15 @@ public class TemplateManager {
 					templateYaml.set(templateId + ".taken", null);
 				}
 
+				if (templateYaml.isSet(templateId + ".input")) {
+					for (int i = 0; i < SIGN_LINE_COUNT; ++i) {
+						String path = templateId + ".input." + (i + 1);
+						if (templateYaml.isSet(path)) {
+							templateYaml.set(path, templateYaml.getString(path).replaceAll("\\Q[[price:time]]\\E", "[[price]]:[[time]]"));
+						}
+					}
+				}
+
 				String type = templateYaml.getString(templateId + ".type");
 				if (templateYaml.isSet(templateId + ".output.occupied")) {
 					for (int i = 1; i <= SIGN_LINE_COUNT; ++i) {

@@ -163,18 +163,17 @@ public class CommandHandler implements CommandExecutor {
 			Region region = null;
 			if (!isConsole) {
 				ArrayList<Region> playerRegions = SimpleRegionMarket.getInstance().getPlayerManager().getPlayerRegions((Player) sender);
-				System.out.println(playerRegions.toString());
 
 				if (playerRegions.size() == 1) {
 					region = playerRegions.get(0);
 				}
 			}
 
-			boolean regionArg = false;
+			int skip = 1;
 			String regionString = "";
 			if (region == null) {
-				if (args.length > 1) {
-					regionArg = true;
+				if (args.length > 2) {
+					skip = 2;
 					regionString = args[1];
 					region = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(regionString, null);
 					if (region == null && !isConsole) {
@@ -184,7 +183,6 @@ public class CommandHandler implements CommandExecutor {
 			}
 
 			if (region != null) {
-				int skip = regionArg ? 2 : 1;
 				String[] realArgs = new String[args.length - skip];
 				System.arraycopy(args, skip, realArgs, 0, realArgs.length);
 

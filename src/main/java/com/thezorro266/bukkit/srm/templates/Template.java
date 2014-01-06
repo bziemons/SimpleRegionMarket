@@ -21,8 +21,11 @@ package com.thezorro266.bukkit.srm.templates;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import lombok.Getter;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
@@ -105,6 +108,8 @@ public abstract class Template {
 		}
 		return false;
 	}
+
+	abstract public void regionCommand(Region region, CommandSender sender, String[] args);
 
 	abstract public boolean isSignApplicable(Location location, String[] lines);
 

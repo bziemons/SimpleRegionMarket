@@ -109,6 +109,11 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 	}
 
 	@Override
+	public String getMainOwner(RegionFactory.Region region) {
+		return (String) region.getOptions().get("owner");
+	}
+
+	@Override
 	public boolean setRegionOccupied(RegionFactory.Region region, boolean isOccupied) {
 		if (!isOccupied) {
 			region.getOptions().set("renttime", null);

@@ -147,4 +147,12 @@ public interface OwnableTemplate {
 	 * @return true, if successful
 	 */
 	public boolean clearOwnershipOfRegion(Region region);
+
+	/**
+	 * Gets the main owner, who is registered with SRM.
+	 *
+	 * @param region as the {@link Region} from which the owner should be get
+	 * @return the name of the owner
+	 */
+	public String getMainOwner(Region region);
 }

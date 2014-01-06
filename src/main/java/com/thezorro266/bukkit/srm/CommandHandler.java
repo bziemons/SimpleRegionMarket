@@ -18,15 +18,6 @@
 
 package com.thezorro266.bukkit.srm;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
@@ -34,6 +25,16 @@ import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.helpers.Permission;
 import com.thezorro266.bukkit.srm.templates.Template;
 import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
 
 public class CommandHandler implements CommandExecutor {
 
@@ -158,7 +159,44 @@ public class CommandHandler implements CommandExecutor {
 			} else {
 				sender.sendMessage(LanguageSupport.instance.getString("player.no.permission"));
 			}
-		} else if (args[0].equalsIgnoreCase("list")) { //NON-NLS TODO Can list own and rented regions
+		} else if (args[0].equalsIgnoreCase("region")) { //NON-NLS
+			Region region = null;
+			if (!isConsole) {
+				ArrayList<Region> playerRegions = SimpleRegionMarket.getInstance().getPlayerManager().getPlayerRegions((Player) sender);
+				System.out.println(playerRegions.toString());
+
+				if (playerRegions.size() == 1) {
+					region = playerRegions.get(0);
+				}
+			}
+
+			boolean regionArg = false;
+			String regionString = "";
+			if (region == null) {
+				if (args.length > 1) {
+					regionArg = true;
+					regionString = args[1];
+					region = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(regionString, null);
+					if (region == null && !isConsole) {
+						region = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(regionString, player.getWorld());
+					}
+				}
+			}
+
+			if (region != null) {
+				int skip = regionArg ? 2 : 1;
+				String[] realArgs = new String[args.length - skip];
+				System.arraycopy(args, skip, realArgs, 0, realArgs.length);
+
+				region.getTemplate().regionCommand(region, sender, realArgs);
+			} else {
+				if (regionString.isEmpty()) {
+					sender.sendMessage(LanguageSupport.instance.getString("region.specify"));
+				} else {
+					sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.not.found"), regionString));
+				}
+			}
+		} else if (args[0].equalsIgnoreCase("list")) { //NON-NLS
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_LIST)) {
 				sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
 			} else {
@@ -167,7 +205,7 @@ public class CommandHandler implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("addmember")) { //NON-NLS
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OWN)
 					|| SimpleRegionMarket.getInstance().getVaultHook()
-							.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
+					.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage(LanguageSupport.instance.getString("command.addmember"));
 				} else {
@@ -247,7 +285,7 @@ public class CommandHandler implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("remmember") || args[0].equalsIgnoreCase("removemember")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDMEMBER_OWN)
 					|| SimpleRegionMarket.getInstance().getVaultHook()
-							.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
+					.hasPermission(player, Permission.COMMAND_ADDMEMBER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm removemember <player> <region> (<world>) - Removes the member from the region");
 				} else {
@@ -327,7 +365,7 @@ public class CommandHandler implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("addowner")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OWN)
 					|| SimpleRegionMarket.getInstance().getVaultHook()
-							.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
+					.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm addowner <player> <region> (<world>) - Adds the player as an owner to the region");
 				} else {
@@ -407,7 +445,7 @@ public class CommandHandler implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("remowner") || args[0].equalsIgnoreCase("removeowner")) {
 			if (SimpleRegionMarket.getInstance().getVaultHook().hasPermission(player, Permission.COMMAND_ADDOWNER_OWN)
 					|| SimpleRegionMarket.getInstance().getVaultHook()
-							.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
+					.hasPermission(player, Permission.COMMAND_ADDOWNER_OTHER)) {
 				if (args.length < 3) {
 					sender.sendMessage("Usage: /rm removeowner <player> <region> (<world>) - Removes the owner from the region");
 				} else {

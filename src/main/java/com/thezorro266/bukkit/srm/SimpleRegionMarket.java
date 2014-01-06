@@ -47,6 +47,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 	@Getter
 	private final WorldGuardManager worldGuardManager;
 	@Getter
+	private final PlayerManager playerManager;
+	@Getter
 	private final VaultHook vaultHook;
 	private boolean loading = true;
 	private boolean disable = false;
@@ -60,6 +62,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		worldEditManager = new WorldEditManager();
 		worldGuardManager = new WorldGuardManager();
 		vaultHook = new VaultHook();
+		playerManager = new PlayerManager();
 	}
 
 	public static String getCopyright() {
@@ -133,6 +136,7 @@ public class SimpleRegionMarket extends JavaPlugin {
 		loading = false;
 
 		// Register events
+		playerManager.registerEvents();
 		new EventListener();
 
 		// Set command executor

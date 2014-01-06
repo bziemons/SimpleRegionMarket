@@ -18,14 +18,6 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.thezorro266.bukkit.srm.LanguageSupport;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
@@ -35,6 +27,16 @@ import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
 import com.thezorro266.bukkit.srm.factories.SignFactory;
 import com.thezorro266.bukkit.srm.factories.SignFactory.Sign;
 import com.thezorro266.bukkit.srm.helpers.Location;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.HashMap;
 
 public class TemplateSell extends OwnableRegionTemplate {
 	protected double priceMin = 0;
@@ -71,6 +73,11 @@ public class TemplateSell extends OwnableRegionTemplate {
 	}
 
 	@Override
+	public String getMainOwner(Region region) {
+		return (String) region.getOptions().get("buyer");
+	}
+
+	@Override
 	public boolean isRegionOccupied(Region region) {
 		return region.getOptions().get("state").equals("occupied");
 	}
@@ -94,6 +101,32 @@ public class TemplateSell extends OwnableRegionTemplate {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void regionCommand(Region region, CommandSender sender, String[] args) {
+		if (args.length > 0) {
+			if (args[0].equalsIgnoreCase("snapshot") //NON-NLS
+					&& regionReset) {
+				try {
+					SimpleRegionMarket.getInstance().getWorldEditManager().saveRegionToSchematic(region);
+					sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.schematic.save.successful"), region.getName()));
+				} catch (IOException e) {
+					sender.sendMessage(LanguageSupport.instance.getString("region.schematic.save.failure"));
+					SimpleRegionMarket
+							.getInstance()
+							.getLogger()
+							.severe(MessageFormat.format(LanguageSupport.instance
+									.getString("region.in.world.schematic.save.failure.console"), region.getName(),
+									region.getWorld().getName()));
+					SimpleRegionMarket.getInstance().printError(e);
+				}
+			} else {
+				// TODO: region command help
+			}
+		} else {
+			// TODO: region command help
+		}
 	}
 
 	@Override
@@ -121,9 +154,9 @@ public class TemplateSell extends OwnableRegionTemplate {
 			// TODO: Player money
 			clearRegion(region);
 			if (buyerIsOwner) {
-				setRegionOwners(region, new OfflinePlayer[] { player });
+				setRegionOwners(region, new OfflinePlayer[]{player});
 			} else {
-				setRegionMembers(region, new OfflinePlayer[] { player });
+				setRegionMembers(region, new OfflinePlayer[]{player});
 			}
 
 			region.getOptions().set("buyer", player.getName());

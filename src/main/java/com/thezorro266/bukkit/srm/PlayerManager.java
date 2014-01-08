@@ -48,7 +48,8 @@ public class PlayerManager implements Listener {
 					OwnableTemplate ownableTemplate = (OwnableTemplate) template;
 					synchronized (template.getRegionList()) {
 						for (RegionFactory.Region region : template.getRegionList()) {
-							if (ownableTemplate.getMainOwner(region).equalsIgnoreCase(event.getPlayer().getName())) {
+							String mainOwner = ownableTemplate.getMainOwner(region);
+							if (mainOwner != null && mainOwner.equalsIgnoreCase(event.getPlayer().getName())) {
 								tempRegions.add(region);
 							}
 						}

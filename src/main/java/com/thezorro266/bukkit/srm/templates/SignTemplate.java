@@ -19,6 +19,7 @@
 package com.thezorro266.bukkit.srm.templates;
 
 import static com.thezorro266.bukkit.srm.factories.SignFactory.Sign.SIGN_LINE_COUNT;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,53 +52,52 @@ public abstract class SignTemplate extends Template {
 	}
 
 	private static String replaceTokens(String text, Map<String, String> replacementMap) {
-		final Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
-		final Matcher matcher = pattern.matcher(text);
-		final StringBuffer buffer = new StringBuffer();
-		while (matcher.find()) {
-			try {
-				final String replacement = replacementMap.get(matcher.group(1));
-				if (replacement != null) {
-					matcher.appendReplacement(buffer, "");
-					buffer.append(replacement);
-				}
-			} catch (Throwable e) {
-				throw new RuntimeException("Replacement map has a misconfiguration at " + matcher.group(1), e);
+		Matcher matcher = Pattern.compile("(\\[\\[\\w+\\]\\])").matcher(text);
+		if (matcher.find()) {
+			ArrayList<SimpleEntry<Integer, String>> entryList = new ArrayList<SimpleEntry<Integer, String>>();
+			do {
+				entryList.add(new SimpleEntry<Integer, String>(matcher.end(), matcher.group()));
+			} while (matcher.find());
+
+			for (int i = entryList.size() - 1; i >= 0; --i) {
+				SimpleEntry<Integer, String> entry = entryList.get(i);
+				StringBuilder newText = new StringBuilder();
+				newText.append(text.substring(0, entry.getKey() - entry.getValue().length()));
+				newText.append(replacementMap.get(entry.getValue().substring(2, entry.getValue().length() - 2)));
+				newText.append(text.substring(entry.getKey()));
+				text = newText.toString();
 			}
 		}
-		matcher.appendTail(buffer);
-		return buffer.toString();
+		return text;
 	}
 
 	private static HashMap<String, String> getSignInput(SignTemplate signTemplate, String[] lines) {
-		final HashMap<String, String> outputMap = new HashMap<String, String>();
+		HashMap<String, String> outputMap = new HashMap<String, String>();
+
 		for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-			final String inputLine = signTemplate.signInput[i];
+			String inputLine = signTemplate.signInput[i];
 			if (inputLine != null && !inputLine.isEmpty()) {
+				Matcher matcher = Pattern.compile("(\\[\\[\\w+\\]\\])").matcher(inputLine);
 
-				Pattern pattern = Pattern.compile("\\[\\[(.+?)\\]\\]");
-				Matcher matcher = pattern.matcher(inputLine);
-				final ArrayList<String> keys = new ArrayList<String>();
-				while (matcher.find()) {
-					for (int u = 0; u < matcher.groupCount(); u++) {
-						keys.add(matcher.group(u + 1));
-					}
-				}
-				String newPattern = matcher.replaceAll("(.+)");
+				if (matcher.find()) {
+					ArrayList<String> paramList = new ArrayList<String>();
+					do {
+						String param = matcher.group();
+						paramList.add(param.substring(2, param.length() - 2));
+					} while (matcher.find());
 
-				pattern = Pattern.compile(newPattern);
-				matcher = pattern.matcher(lines[i]);
-				final ArrayList<String> vars = new ArrayList<String>();
-				while (matcher.find()) {
-					for (int u = 0; u < matcher.groupCount(); u++) {
-						vars.add(matcher.group(u + 1));
-					}
-				}
-				for (int u = 0; u < keys.size(); u++) {
-					if (u < vars.size()) {
-						outputMap.put(keys.get(u), vars.get(u));
-					} else {
-						outputMap.put(keys.get(u), null);
+					String newPattern = String.format("\\Q%s\\E", matcher.replaceAll("\\\\E(.*)\\\\Q")).replaceAll(
+							"\\\\Q\\\\E", "");
+
+					int matchCount = 0;
+					matcher = Pattern.compile(newPattern).matcher(lines[i]);
+					if (matcher.matches()) {
+						for (int j = 1; j <= matcher.groupCount(); ++j) {
+							if (!matcher.group(j).isEmpty()) {
+								outputMap.put(paramList.get(matchCount), matcher.group(j));
+							}
+							++matchCount;
+						}
 					}
 				}
 			}

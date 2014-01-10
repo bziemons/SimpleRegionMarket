@@ -21,6 +21,8 @@ package com.thezorro266.bukkit.srm;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.logging.Level;
+
+import com.thezorro266.bukkit.srm.hooks.*;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.thezorro266.bukkit.srm.exceptions.ContentLoadException;
@@ -49,6 +51,9 @@ public class SimpleRegionMarket extends JavaPlugin {
 	@Getter
 	private final PlayerManager playerManager;
 	@Getter
+	private Economy economy;
+	@Getter
+	private Permissions permissions;
 	private final VaultHook vaultHook;
 	private boolean loading = true;
 	private boolean disable = false;
@@ -134,6 +139,21 @@ public class SimpleRegionMarket extends JavaPlugin {
 			return;
 		}
 		loading = false;
+
+		// TODO: permissions = new <insert permissions class with list support here>();
+		if (vaultHook.isVaultEnabled()) {
+			economy = new VaultEconomy();
+			if (permissions == null) {
+				permissions = new VaultPermissions();
+			}
+		}
+
+		if (permissions == null) {
+			permissions = new BasicPermissions();
+		}
+		if (economy == null) {
+			economy = new NoEconomy();
+		}
 
 		// Register events
 		playerManager.registerEvents();

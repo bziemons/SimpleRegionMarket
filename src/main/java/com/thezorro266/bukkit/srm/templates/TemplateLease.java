@@ -195,8 +195,10 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
-				double price;
-				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
+				if (SimpleRegionMarket.getInstance().getEconomy().isEnabled()) {
+					double price;
+					String account = player.getName();
+
 					String priceString = inputMap.get("price");
 					if (priceString != null) {
 						try {
@@ -208,32 +210,19 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 					} else {
 						price = priceMin;
 					}
-				} else {
-					price = 0;
-				}
 
-				if (priceMin > price && (priceMax == -1 || price < priceMax)) {
-					String priceMinString;
-					String priceMaxString;
-					try {
-						priceMinString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMin);
-						priceMaxString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMax);
-					} catch (Throwable e) {
-						priceMinString = String.format("%.2f", priceMin);
-						priceMaxString = String.format("%.2f", priceMax);
+					if (priceMin > price || (priceMax != -1 && price > priceMax)) {
+						String priceMinString = SimpleRegionMarket.getInstance().getEconomy().format(priceMin);
+						String priceMaxString = SimpleRegionMarket.getInstance().getEconomy().format(priceMax);
+						player.sendMessage(MessageFormat.format(
+								ChatColor.RED + LanguageSupport.instance.getString("price.must.between"), priceMinString,
+								priceMaxString));
+						return null;
 					}
-					player.sendMessage(ChatColor.RED
-							+ MessageFormat.format(LanguageSupport.instance.getString("price.must.between"),
-									priceMinString, priceMaxString));
-					return null;
-				}
 
-				String account = player.getName();
-				{
-					String accountString = inputMap.get("account");
-					if (accountString != null) {
-						if (SimpleRegionMarket.getInstance().getVaultHook()
-								.hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+					{
+						String accountString = inputMap.get("account");
+						if (accountString != null) {
 							if (accountString.equalsIgnoreCase("none")) {
 								account = "";
 							} else {
@@ -241,6 +230,9 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 							}
 						}
 					}
+
+					region.getOptions().set("price", price);
+					region.getOptions().set("account", account);
 				}
 
 				int time = minTime;
@@ -258,8 +250,6 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 				}
 
 				region.getOptions().set("time", time);
-				region.getOptions().set("price", price);
-				region.getOptions().set("account", account);
 				setRegionOccupied(region, false);
 				clearOwnershipOfRegion(region);
 

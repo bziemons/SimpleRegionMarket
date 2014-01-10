@@ -25,6 +25,7 @@ import lombok.Getter;
 
 public final class LanguageSupport {
 	public static final LanguageSupport instance = new LanguageSupport();
+	private static final String STANDARD_LANGUAGE = "en"; //NON-NLS
 
 	@Getter
 	private Locale locale;
@@ -32,7 +33,7 @@ public final class LanguageSupport {
 
 	private LanguageSupport() {
 		// Load English as default
-		load("en");
+		load(STANDARD_LANGUAGE);
 	}
 
 	public void load(String language) {
@@ -64,8 +65,8 @@ public final class LanguageSupport {
 					.getInstance()
 					.getLogger()
 					.warning(
-							String.format("language string %s doesnt exist in %s language file", s,
-									locale.getLanguage())); //NON-NLS
+							String.format("language string %s doesnt exist in %s language file", s, //NON-NLS
+									locale.getLanguage()));
 			SimpleRegionMarket.getInstance().printError(e);
 			return s;
 		}

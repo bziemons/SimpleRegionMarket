@@ -1,6 +1,6 @@
 /*
  * SimpleRegionMarket
- * Copyright (C) 2013  theZorro266 <http://www.thezorro266.com>
+ * Copyright (C) 2014  theZorro266 <http://www.thezorro266.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.thezorro266.bukkit.srm.helpers;
+package com.thezorro266.bukkit.srm.hooks;
 
-public enum Permission {
-	COMMAND_RELEASE,
-	COMMAND_REMOVE,
-	COMMAND_LIST,
-	COMMAND_ADDMEMBER_OWN,
-	COMMAND_ADDMEMBER_OTHER,
-	COMMAND_ADDOWNER_OWN,
-	COMMAND_ADDOWNER_OTHER,
+public class NoEconomy extends Economy {
+	@Override
+	public boolean isValidAccount(String account) {
+		return true;
+	}
+
+	@Override
+	public boolean hasEnough(String account, double money) {
+		return true;
+	}
+
+	@Override
+	public boolean subtractMoney(String account, double money) {
+		return true;
+	}
+
+	@Override
+	public boolean addMoney(String account, double money) {
+		return true;
+	}
 }

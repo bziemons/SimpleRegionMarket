@@ -182,18 +182,18 @@ public class TemplateSell extends OwnableRegionTemplate {
 	@Override
 	public void replacementMap(Region region, HashMap<String, String> replacementMap) {
 		if (region.getOptions().exists("price")) {
-			String strPrice;
-			Double price = (Double) region.getOptions().get("price");
-			try {
-				strPrice = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(price);
-			} catch (Throwable e) {
-				strPrice = String.format("%.2f", price);
-			}
-			replacementMap.put("price", strPrice);
+			double price = (Double) region.getOptions().get("price");
+
+			replacementMap.put("price", SimpleRegionMarket.getInstance().getEconomy().format(price));
+		} else {
+			replacementMap.put("price", "free");
 		}
 
-		if (region.getOptions().exists("account"))
+		if (region.getOptions().exists("account")) {
 			replacementMap.put("account", region.getOptions().get("account").toString());
+		} else {
+			replacementMap.put("account", "");
+		}
 
 		if (region.getOptions().exists("buyer"))
 			replacementMap.put("buyer", region.getOptions().get("buyer").toString());
@@ -211,8 +211,10 @@ public class TemplateSell extends OwnableRegionTemplate {
 			if (region == null) {
 				region = RegionFactory.instance.createRegion(this, block.getWorld(), worldguardRegion);
 
-				double price;
-				if (SimpleRegionMarket.getInstance().getVaultHook().getEconomy() != null) {
+				if (SimpleRegionMarket.getInstance().getEconomy().isEnabled()) {
+					double price;
+					String account = player.getName();
+
 					String priceString = inputMap.get("price");
 					if (priceString != null) {
 						try {
@@ -224,32 +226,19 @@ public class TemplateSell extends OwnableRegionTemplate {
 					} else {
 						price = priceMin;
 					}
-				} else {
-					price = 0;
-				}
 
-				if (priceMin > price || (priceMax != -1 && price > priceMax)) {
-					String priceMinString;
-					String priceMaxString;
-					try {
-						priceMinString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMin);
-						priceMaxString = SimpleRegionMarket.getInstance().getVaultHook().getEconomy().format(priceMax);
-					} catch (Throwable e) {
-						priceMinString = String.format("%.2f", priceMin);
-						priceMaxString = String.format("%.2f", priceMax);
+					if (priceMin > price || (priceMax != -1 && price > priceMax)) {
+						String priceMinString = SimpleRegionMarket.getInstance().getEconomy().format(priceMin);
+						String priceMaxString = SimpleRegionMarket.getInstance().getEconomy().format(priceMax);
+						player.sendMessage(MessageFormat.format(
+								ChatColor.RED + LanguageSupport.instance.getString("price.must.between"), priceMinString,
+								priceMaxString));
+						return null;
 					}
-					player.sendMessage(MessageFormat.format(
-							ChatColor.RED + LanguageSupport.instance.getString("price.must.between"), priceMinString,
-							priceMaxString));
-					return null;
-				}
 
-				String account = player.getName();
-				{
-					String accountString = inputMap.get("account");
-					if (accountString != null) {
-						if (SimpleRegionMarket.getInstance().getVaultHook()
-								.hasPermission(player, String.format("simpleregionmarket.%s.setaccount", getId()))) {
+					{
+						String accountString = inputMap.get("account");
+						if (accountString != null) {
 							if (accountString.equalsIgnoreCase("none")) {
 								account = "";
 							} else {
@@ -257,10 +246,11 @@ public class TemplateSell extends OwnableRegionTemplate {
 							}
 						}
 					}
+
+					region.getOptions().set("price", price);
+					region.getOptions().set("account", account);
 				}
 
-				region.getOptions().set("price", price);
-				region.getOptions().set("account", account);
 				setRegionOccupied(region, false);
 				clearOwnershipOfRegion(region);
 

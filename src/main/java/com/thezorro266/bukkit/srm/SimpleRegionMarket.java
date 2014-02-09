@@ -110,26 +110,8 @@ public class SimpleRegionMarket extends JavaPlugin {
 				vaultHook.load();
 				worldGuardManager.load();
 				worldEditManager.load();
-			} catch (Throwable e) {
+			} catch (NullPointerException e) {
 				except(e);
-			}
-		}
-
-		if (!disable) {
-			// Load regions in templates
-			Utils.TimeMeasurement tm = new Utils.TimeMeasurement();
-			{
-				try {
-					templateManager.loadContent();
-				} catch (ContentLoadException e) {
-					except(e);
-				}
-			}
-
-			if (!disable) {
-				getLogger().info(
-						MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
-								RegionFactory.instance.getRegionCount(), tm.diff()));
 			}
 		}
 
@@ -147,13 +129,26 @@ public class SimpleRegionMarket extends JavaPlugin {
 				permissions = new VaultPermissions();
 			}
 		}
-
 		if (permissions == null) {
 			permissions = new BasicPermissions();
 		}
 		if (economy == null) {
 			economy = new NoEconomy();
 		}
+
+		// Load regions in templates
+		Utils.TimeMeasurement tm = new Utils.TimeMeasurement();
+		{
+			try {
+				templateManager.loadContent();
+			} catch (ContentLoadException e) {
+				except(e);
+			}
+		}
+
+		getLogger().info(
+			MessageFormat.format(LanguageSupport.instance.getString("region.load.report"),
+					RegionFactory.instance.getRegionCount(), tm.diff()));
 
 		// Register events
 		playerManager.registerEvents();

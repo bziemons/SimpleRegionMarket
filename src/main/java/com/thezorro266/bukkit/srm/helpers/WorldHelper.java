@@ -32,7 +32,7 @@ public class WorldHelper {
 		ArrayList<Region> list = new ArrayList<Region>();
 
 		for (Iterator<Entry<Region, World>> iterator = regionMap.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Region, World> entry = (Entry<Region, World>) iterator.next();
+			Entry<Region, World> entry = iterator.next();
 
 			// Check cache Validation
 			if (!entry.getKey().getTemplate().getRegionList().contains(entry.getKey())) {
@@ -52,7 +52,7 @@ public class WorldHelper {
 		String lowerName = name.toLowerCase();
 		int delta = Integer.MAX_VALUE;
 		for (Iterator<Region> iterator = regionMap.keySet().iterator(); iterator.hasNext();) {
-			Region region = (Region) iterator.next();
+			Region region = iterator.next();
 
 			// Check cache validation
 			if (!region.getTemplate().getRegionList().contains(region)) {
@@ -75,8 +75,9 @@ public class WorldHelper {
 	}
 
 	public Region getRegionExact(String name, World world) {
+		Region region;
 		for (Iterator<Region> iterator = regionMap.keySet().iterator(); iterator.hasNext();) {
-			Region region = (Region) iterator.next();
+			region = iterator.next();
 
 			// Check cache validation
 			if (!region.getTemplate().getRegionList().contains(region)) {

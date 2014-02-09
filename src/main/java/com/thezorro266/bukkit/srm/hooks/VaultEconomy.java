@@ -55,7 +55,7 @@ public class VaultEconomy extends Economy {
 	public boolean isEnabled() {
 		try {
 			return economy.isEnabled();
-		} catch (Throwable t) {
+		} catch (NullPointerException t) {
 			return super.isEnabled();
 		}
 	}
@@ -64,7 +64,7 @@ public class VaultEconomy extends Economy {
 	public boolean isValidAccount(String account) {
 		try {
 			return economy.hasAccount(account);
-		} catch (Throwable t) {
+		} catch (NullPointerException t) {
 			SimpleRegionMarket.getInstance().getLogger().warning(MessageFormat.format(LanguageSupport.instance.getString("vault.economy.problem"), t.toString()));
 			return false;
 		}
@@ -74,7 +74,7 @@ public class VaultEconomy extends Economy {
 	public boolean hasEnough(String account, double money) {
 		try {
 			return economy.has(account, money);
-		} catch (Throwable t) {
+		} catch (NullPointerException t) {
 			SimpleRegionMarket.getInstance().getLogger().warning(MessageFormat.format(LanguageSupport.instance.getString("vault.economy.problem"), t.toString()));
 			return false;
 		}
@@ -92,7 +92,7 @@ public class VaultEconomy extends Economy {
 				} else {
 					return true;
 				}
-			} catch (Throwable t) {
+			} catch (NullPointerException t) {
 				SimpleRegionMarket.getInstance().getLogger().warning(MessageFormat.format(LanguageSupport.instance.getString("vault.economy.problem"), t.toString()));
 			}
 			return false;
@@ -113,7 +113,7 @@ public class VaultEconomy extends Economy {
 				} else {
 					return true;
 				}
-			} catch (Throwable t) {
+			} catch (NullPointerException t) {
 				SimpleRegionMarket.getInstance().getLogger().warning(MessageFormat.format(LanguageSupport.instance.getString("vault.economy.problem"), t.toString()));
 			}
 			return false;
@@ -124,10 +124,10 @@ public class VaultEconomy extends Economy {
 
 	@Override
 	public String format(double money) {
-		if (economy.isEnabled()) {
+		if (isEnabled()) {
 			try {
 				return economy.format(money);
-			} catch (Throwable t) {
+			} catch (NullPointerException t) {
 				SimpleRegionMarket.getInstance().getLogger().warning(MessageFormat.format(LanguageSupport.instance.getString("vault.economy.problem"), t.toString()));
 			}
 		}

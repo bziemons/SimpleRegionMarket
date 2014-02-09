@@ -33,9 +33,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <majorversion>0.1</majorversion>
         <state>indev</state>
-        <bukkit.version>1.7.2-R0.3-SNAPSHOT</bukkit.version>
+        <bukkit.version>1.7.2-R0.2</bukkit.version>
         <worldguard.version>5.8.1-SNAPSHOT</worldguard.version>
-        <vault.version>1.2.27</vault.version>
+        <vault.version>1.2.31</vault.version>
     </properties>
 
     <repositories>

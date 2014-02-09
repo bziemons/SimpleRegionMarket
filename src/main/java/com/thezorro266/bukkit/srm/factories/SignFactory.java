@@ -151,19 +151,20 @@ public class SignFactory {
 				throw new IllegalArgumentException("Lines array must be in the correct format and must not be null");
 			}
 
-			Block signBlock = location.getBlock();
-			if (!isSign(signBlock)) {
-				signBlock.setType(isWallSign ? Material.WALL_SIGN : Material.SIGN_POST);
-				// TODO: problem when setting facing direction
-				((org.bukkit.material.Sign) signBlock.getState().getData()).setFacingDirection(direction);
+			Block block = location.getBlock();
+			if (!isSign(block)) {
+				block.setType(isWallSign ? Material.WALL_SIGN : Material.SIGN_POST);
+			}
+			org.bukkit.block.Sign signBlock = (org.bukkit.block.Sign) block.getState();
+			org.bukkit.material.Sign signMaterial = (org.bukkit.material.Sign) signBlock.getData();
+			if (!signMaterial.getFacing().equals(direction)) {
+				signMaterial.setFacingDirection(direction);
 			}
 
-			org.bukkit.block.Sign signBlockState = (org.bukkit.block.Sign) signBlock.getState();
 			for (int i = 0; i < SIGN_LINE_COUNT; i++) {
-				signBlockState.setLine(i, lines[i]);
+				signBlock.setLine(i, lines[i]);
 			}
-
-			signBlockState.update(false, false);
+			signBlock.update(true, false);
 		}
 
 		public void saveToConfiguration(Configuration config, String path) {

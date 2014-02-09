@@ -203,7 +203,10 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 					if (priceString != null) {
 						try {
 							price = Double.parseDouble(priceString);
-						} catch (final Exception e) {
+						} catch (NullPointerException e) {
+							player.sendMessage(LanguageSupport.instance.getString("price.not.found"));
+							return null;
+						} catch (NumberFormatException e) {
 							player.sendMessage(LanguageSupport.instance.getString("price.not.found"));
 							return null;
 						}

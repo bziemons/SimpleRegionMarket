@@ -18,7 +18,19 @@
 
 package com.thezorro266.bukkit.srm.templates;
 
+import com.thezorro266.bukkit.srm.LanguageSupport;
+import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.Utils;
+import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
+import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.factories.SignFactory;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+
+import java.text.MessageFormat;
 
 public class TemplateRent extends TemplateLease {
 	public TemplateRent(ConfigurationSection templateConfigSection) {
@@ -26,48 +38,95 @@ public class TemplateRent extends TemplateLease {
 		type = "rent";
 	}
 
-	/*
 	@Override
-	public void ownerClicksTakenSign(String world, String region) {
-		final long newExpiredate = Utils.getEntryLong(this, world, region, "expiredate") + Utils.getEntryLong(this, world, region, "renttime");
-		final Player owner = Bukkit.getPlayer(Utils.getEntryString(this, world, region, "owner"));
-		if (Utils.getOptionLong(this, "renttime.max") == -1 || (newExpiredate - System.currentTimeMillis()) < Utils.getOptionLong(this, "renttime.max")) {
-			if (AlphaRegionMarket.instance.econManager.isEconomy()) {
-				String account = Utils.getEntryString(this, world, region, "account");
-				if (account.isEmpty()) {
-					account = null;
-				}
-				final double price = Utils.getEntryDouble(this, world, region, "price");
-				if (AlphaRegionMarket.instance.econManager.moneyTransaction(Utils.getEntryString(this, world, region, "owner"), account, price)) {
-					Utils.setEntry(this, world, region, "expiredate", newExpiredate);
-					tokenManager.updateSigns(this, world, region);
-					langHandler.playerNormalOut(owner, "PLAYER.REGION.ADDED_RENTTIME", null);
+	public void clickSign(Player player, SignFactory.Sign sign) {
+		RegionFactory.Region region = sign.getRegion();
+		if (isRegionOccupied(region)) {
+			if (isRegionOwner(player, region)) {
+				// TODO: Player permissions
+				// TODO: Player money
+
+				int time = (Integer) region.getOptions().get("time");
+				int newtime = (Integer) region.getOptions().get("renttime") + time;
+				if (newtime - (int) (System.currentTimeMillis() / 1000) <= maxTime) {
+					region.getOptions().set("renttime", newtime);
+
+					player.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.expanded"),
+							Utils.getTimeString(time)));
+				} else {
+					player.sendMessage(LanguageSupport.instance.getString("region.expand.maxtime.reached"));
 				}
 			} else {
-				Utils.setEntry(this, world, region, "expiredate", newExpiredate);
-				tokenManager.updateSigns(this, world, region);
-				langHandler.playerNormalOut(owner, "PLAYER.REGION.ADDED_RENTTIME", null);
+				player.sendMessage(LanguageSupport.instance.getString("region.already.rented"));
 			}
 		} else {
-			langHandler.playerErrorOut(owner, "PLAYER.ERROR.RERENT_TOO_LONG", null);
+			// TODO: Player permissions
+			// TODO: Player money
+			clearRegion(region);
+			if (buyerIsOwner) {
+				setRegionOwners(region, new OfflinePlayer[] { player });
+			} else {
+				setRegionMembers(region, new OfflinePlayer[] { player });
+			}
+
+			int currentSecs = (int) (System.currentTimeMillis() / 1000);
+			int time = (Integer) region.getOptions().get("time");
+			region.getOptions().set("renttime", currentSecs + time);
+
+			region.getOptions().set("owner", player.getName());
+			setRegionOccupied(region, true);
+
+			try {
+				SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+			} catch (ContentSaveException e) {
+				player.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("region.save.problem.player"));
+				SimpleRegionMarket
+						.getInstance()
+						.getLogger()
+						.severe(MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"),
+								region.getName()));
+				SimpleRegionMarket.getInstance().printError(e);
+			}
+
+			player.sendMessage(LanguageSupport.instance.getString("region.new.owner"));
 		}
+		region.updateSigns();
 	}
 
 	@Override
-	public void schedule(String world, String region) {
-		if (Utils.getEntryBoolean(this, world, region, "taken")) {
-			if (Utils.getEntryLong(this, world, region, "expiredate") < System.currentTimeMillis()) {
-				if (Utils.getEntry(this, world, region, "owner") != null) {
-					final Player player = Bukkit.getPlayer(Utils.getEntryString(this, world, region, "owner"));
-					if (player != null) {
-						final ArrayList<String> list = new ArrayList<String>();
-						list.add(region);
-						langHandler.playerNormalOut(player, "PLAYER.REGION.EXPIRED", list);
+	public void schedule() {
+		synchronized (regionList) {
+			for (RegionFactory.Region region : regionList) {
+				if (isRegionOccupied(region)) {
+					int currentSecs = (int) (System.currentTimeMillis() / 1000);
+
+					if (currentSecs > (Integer) region.getOptions().get("renttime")) {
+						OfflinePlayer op = Bukkit.getOfflinePlayer((String) region.getOptions().get("owner"));
+
+						clearRegion(region);
+
+						if (op.isOnline()) {
+							op.getPlayer().sendMessage(
+									MessageFormat.format(
+											LanguageSupport.instance.getString("region.lease.expired"),
+											region.getName()));
+						}
+
+						try {
+							SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+						} catch (ContentSaveException e) {
+							SimpleRegionMarket
+									.getInstance()
+									.getLogger()
+									.severe(MessageFormat.format(
+											LanguageSupport.instance.getString("region.save.problem.console"),
+											region.getName()));
+							SimpleRegionMarket.getInstance().printError(e);
+						}
 					}
+					region.updateSigns();
 				}
-				releaseRegion(world, region);
 			}
 		}
 	}
-	*/
 }

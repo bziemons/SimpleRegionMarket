@@ -26,19 +26,28 @@ public class Utils {
 	/**
 	 * Generates a string, which represents the time left until the given time.
 	 * 
-	 * @param renttime in seconds
+	 * @param time in seconds
 	 * @return the generated string
 	 */
-	public static String getTimeLeft(int renttime) {
-		renttime -= (int) (System.currentTimeMillis() / 1000);
+	public static String getTimeLeft(int time) {
+		return getTimeString(time - (int) (System.currentTimeMillis() / 1000));
+	}
 
-		final int days = renttime / (24 * 60 * 60);
-		renttime = renttime % (24 * 60 * 60);
-		final int hours = renttime / (60 * 60);
-		renttime = renttime % (60 * 60);
-		final int minutes = renttime / 60;
-		renttime = renttime % (60);
-		final int seconds = renttime;
+	/**
+	 * Generates a time string for the passed time in seconds.
+	 *
+	 * @param time as seconds
+	 * @return the time representated as string
+	 */
+	public static String getTimeString(int time) {
+		final int days = time / (24 * 60 * 60);
+		time = time % (24 * 60 * 60);
+		final int hours = time / (60 * 60);
+		time = time % (60 * 60);
+		final int minutes = time / 60;
+		time = time % (60);
+		final int seconds = time;
+
 		StringBuilder sb = new StringBuilder();
 		if (days > 0) {
 			sb.append(days);

@@ -184,6 +184,7 @@ public class CommandHandler implements CommandExecutor {
 				}
 			}
 		} else {
+			sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
 			return false;
 		}
 		return true;

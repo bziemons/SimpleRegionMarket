@@ -130,7 +130,7 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 			if (isRegionOwner(player, region)) {
 				player.sendMessage(LanguageSupport.instance.getString("region.yours"));
 			} else {
-				player.sendMessage(LanguageSupport.instance.getString("region.already.sold"));
+				player.sendMessage(LanguageSupport.instance.getString("region.already.leased"));
 			}
 		} else {
 			// TODO: Player permissions

@@ -122,9 +122,11 @@ public class TemplateSell extends OwnableRegionTemplate {
 					SimpleRegionMarket.getInstance().printError(e);
 				}
 			} else {
+				sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
 				// TODO: region command help
 			}
 		} else {
+			sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
 			// TODO: region command help
 		}
 	}

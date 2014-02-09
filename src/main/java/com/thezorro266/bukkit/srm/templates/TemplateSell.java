@@ -21,6 +21,8 @@ package com.thezorro266.bukkit.srm.templates;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+
+import com.thezorro266.bukkit.srm.hooks.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -153,7 +155,25 @@ public class TemplateSell extends OwnableRegionTemplate {
 			}
 		} else {
 			// TODO: Player permissions
-			// TODO: Player money
+			Economy ec = SimpleRegionMarket.getInstance().getEconomy();
+			double price = (Double) region.getOptions().get("price");
+			String playerAccount = player.getName();
+			String regionAccount = (String) region.getOptions().get("account");
+			if (ec.isEnabled() && price > 0) {
+				if (!ec.isValidAccount(playerAccount)) {
+					player.sendMessage(LanguageSupport.instance.getString("economy.player.no.account"));
+					return;
+				}
+				if (!ec.hasEnough(playerAccount, price)) {
+					player.sendMessage(LanguageSupport.instance.getString("economy.player.no.money"));
+					return;
+				}
+			}
+			ec.subtractMoney(playerAccount, price);
+			if (!regionAccount.isEmpty() && ec.isValidAccount(regionAccount)) {
+				ec.addMoney(regionAccount, price);
+			}
+
 			clearRegion(region);
 			if (buyerIsOwner) {
 				setRegionOwners(region, new OfflinePlayer[] { player });

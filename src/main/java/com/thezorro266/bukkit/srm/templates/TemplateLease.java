@@ -21,6 +21,8 @@ package com.thezorro266.bukkit.srm.templates;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+
+import com.thezorro266.bukkit.srm.hooks.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -63,8 +65,43 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 
 					if (currentSecs > (Integer) region.getOptions().get("renttime")) {
 						OfflinePlayer op = Bukkit.getOfflinePlayer((String) region.getOptions().get("owner"));
-						// TODO: Player money, check
-						if (true) {
+
+						Economy ec = SimpleRegionMarket.getInstance().getEconomy();
+						double price = (Double) region.getOptions().get("price");
+						String playerAccount = op.getName();
+						String regionAccount = (String) region.getOptions().get("account");
+						boolean moneyOkay = true;
+						if (ec.isEnabled() && price > 0) {
+							if (!ec.isValidAccount(playerAccount)) {
+								if (op.isOnline()) {
+									op.getPlayer().sendMessage(
+											MessageFormat.format(
+													LanguageSupport.instance.getString("economy.lease.problem"),
+													region.getName()));
+									op.getPlayer().sendMessage(
+											LanguageSupport.instance.getString("economy.player.no.account"));
+								}
+								moneyOkay = false;
+							}
+							if (!ec.hasEnough(playerAccount, price)) {
+								if (op.isOnline()) {
+									op.getPlayer().sendMessage(
+											MessageFormat.format(
+													LanguageSupport.instance.getString("economy.lease.problem"),
+													region.getName()));
+									op.getPlayer().sendMessage(
+											LanguageSupport.instance.getString("economy.player.no.money"));
+								}
+								moneyOkay = false;
+							}
+						}
+
+						if (moneyOkay) {
+							ec.subtractMoney(playerAccount, price);
+							if (!regionAccount.isEmpty() && ec.isValidAccount(regionAccount)) {
+								ec.addMoney(regionAccount, price);
+							}
+
 							int time = (Integer) region.getOptions().get("time");
 							region.getOptions().set("renttime", currentSecs + time);
 
@@ -134,7 +171,25 @@ public class TemplateLease extends TemplateSell implements TimedTemplate {
 			}
 		} else {
 			// TODO: Player permissions
-			// TODO: Player money
+			Economy ec = SimpleRegionMarket.getInstance().getEconomy();
+			double price = (Double) region.getOptions().get("price");
+			String playerAccount = player.getName();
+			String regionAccount = (String) region.getOptions().get("account");
+			if (ec.isEnabled() && price > 0) {
+				if (!ec.isValidAccount(playerAccount)) {
+					player.sendMessage(LanguageSupport.instance.getString("economy.player.no.account"));
+					return;
+				}
+				if (!ec.hasEnough(playerAccount, price)) {
+					player.sendMessage(LanguageSupport.instance.getString("economy.player.no.money"));
+					return;
+				}
+			}
+			ec.subtractMoney(playerAccount, price);
+			if (!regionAccount.isEmpty() && ec.isValidAccount(regionAccount)) {
+				ec.addMoney(regionAccount, price);
+			}
+
 			clearRegion(region);
 			if (buyerIsOwner) {
 				setRegionOwners(region, new OfflinePlayer[] { player });

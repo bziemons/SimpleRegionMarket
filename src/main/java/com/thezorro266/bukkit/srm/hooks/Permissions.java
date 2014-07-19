@@ -20,6 +20,8 @@ package com.thezorro266.bukkit.srm.hooks;
 
 import com.thezorro266.bukkit.srm.LanguageSupport;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
+import com.thezorro266.bukkit.srm.exceptions.NotEnoughPermissionsException;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -32,6 +34,12 @@ public abstract class Permissions {
 
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	public void checkPermission(CommandSender sender, String permNode) throws NotEnoughPermissionsException {
+		if (!hasPermission(sender, permNode)) {
+			throw new NotEnoughPermissionsException(sender, permNode);
+		}
 	}
 
 	public abstract boolean hasPermission(CommandSender sender, String node);

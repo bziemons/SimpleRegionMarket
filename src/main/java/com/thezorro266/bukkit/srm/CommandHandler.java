@@ -18,13 +18,10 @@
 
 package com.thezorro266.bukkit.srm;
 
-import com.thezorro266.bukkit.srm.exceptions.ContentSaveException;
-import com.thezorro266.bukkit.srm.factories.RegionFactory;
+import com.thezorro266.bukkit.srm.exceptions.NotEnoughPermissionsException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory.Region;
-import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
-import org.bukkit.Bukkit;
+import com.thezorro266.bukkit.srm.hooks.Permissions;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,125 +29,74 @@ import org.bukkit.entity.Player;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class CommandHandler implements CommandExecutor {
+	private Logger logger;
+	private Permissions permissions;
+
+	public CommandHandler() {
+		this.logger = SimpleRegionMarket.getInstance().getLogger();
+		this.permissions = SimpleRegionMarket.getInstance().getPermissions();
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		Player player = null;
-		Boolean isConsole = true;
-		if (sender instanceof Player) {
-			player = (Player) sender;
-			isConsole = false;
+		if (args.length == 0) {
+			try {
+				command("", sender, new String[]{});
+			} catch (NotEnoughPermissionsException e) {
+				sender.sendMessage(ChatColor.RED + MessageFormat.format(LanguageSupport.instance.getString("not.enough.permissions.message"), e.getPermNode()));
+			}
 		}
 
-		if (args.length < 1) {
-			return false;
-		}
+		String[] realArguments = new String[args.length - 1];
+		System.arraycopy(args, 1, realArguments, 0, args.length - 1);
 
-		if (args[0].equalsIgnoreCase("version") || args[0].equalsIgnoreCase("v")) { //NON-NLS
-			String versionString = MessageFormat.format(LanguageSupport.instance.getString("command.version"),
-					SimpleRegionMarket.getInstance()
-							.getDescription().getVersion());
+		try {
+			command(args[0], sender, realArguments);
+		} catch (IllegalArgumentException e) {
+			if (e.getMessage().isEmpty()) {
+				return false;
+			} else {
+				sender.sendMessage(ChatColor.RED + e.getMessage());
+			}
+		} catch (NotEnoughPermissionsException e) {
+			sender.sendMessage(ChatColor.RED + MessageFormat.format(LanguageSupport.instance.getString("not.enough.permissions.message"), e.getPermNode()));
+		}
+		return true;
+	}
+
+	public void command(String cmd, CommandSender sender, String[] arguments) throws NotEnoughPermissionsException {
+		Player player = (sender instanceof Player ? (Player) sender : null);
+
+		if (cmd.isEmpty() || cmd.equalsIgnoreCase("help") || cmd.equals("?")) {
+			permissions.checkPermission(sender, "srm.help");
+			sender.sendMessage("No help for you!");
+
+		} else if (cmd.equalsIgnoreCase("version") || cmd.equalsIgnoreCase("v")) {
+			permissions.checkPermission(sender, "srm.version");
+			String versionString = MessageFormat.format(LanguageSupport.instance.getString("command.version"), SimpleRegionMarket.getInstance().getDescription().getVersion());
 			String copyrightString = SimpleRegionMarket.getCopyright();
 			sender.sendMessage(ChatColor.YELLOW + String.format("%s, %s", versionString, copyrightString)); //NON-NLS
-		} else if (args[0].equalsIgnoreCase("release")) { //NON-NLS
-			if (args.length < 2) {
-				sender.sendMessage(LanguageSupport.instance.getString("command.release"));
-				return true;
-			} else {
-				final String region = args[1];
-				String world = "";
-				if (args.length > 2) {
-					world = args[2];
-				} else {
-					if (!isConsole) {
-						world = player.getWorld().getName();
-					}
-				}
-				World realWorld = Bukkit.getWorld(world);
-				Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
-				if (realRegion == null) {
-					if (realWorld == null) {
-						sender.sendMessage(MessageFormat.format(
-								LanguageSupport.instance.getString("region.not.found"), region));
-					} else {
-						sender.sendMessage(MessageFormat.format(
-								LanguageSupport.instance.getString("region.in.world.not.found"), region, world));
-					}
-				} else {
-					if (realRegion.getTemplate() instanceof OwnableTemplate) {
-						OwnableTemplate ot = (OwnableTemplate) realRegion.getTemplate();
-						if (ot.isRegionOccupied(realRegion)) {
-							ot.clearRegion(realRegion);
-							sender.sendMessage(MessageFormat.format(
-									LanguageSupport.instance.getString("region.in.world.released"), region, world));
+		} else if (cmd.equalsIgnoreCase("language") || cmd.equalsIgnoreCase("lang")) {
+			permissions.checkPermission(sender, "srm.admin.language");
 
-							realRegion.updateSigns();
+		} else if (cmd.equalsIgnoreCase("reload")) {
+			permissions.checkPermission(sender, "srm.admin.reload");
 
-							try {
-								SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(realRegion);
-							} catch (ContentSaveException e) {
-								sender.sendMessage(ChatColor.RED
-										+ LanguageSupport.instance.getString("region.save.problem.player"));
-								SimpleRegionMarket
-										.getInstance()
-										.getLogger()
-										.severe(MessageFormat.format(
-												LanguageSupport.instance.getString("region.save.problem.console"),
-												realRegion.getName()));
-								SimpleRegionMarket.getInstance().printError(e);
-							}
-						} else {
-							sender.sendMessage(MessageFormat.format(
-									LanguageSupport.instance.getString("region.in.world.already.free"), region,
-									world));
-						}
-					} else {
-						sender.sendMessage(MessageFormat.format(
-								LanguageSupport.instance.getString("region.in.world.cannot.be.owned"), region,
-								world));
-					}
-				}
-			}
-		} else if (args[0].equalsIgnoreCase("remove")) { //NON-NLS
-			if (args.length < 2) {
-				sender.sendMessage(LanguageSupport.instance.getString("command.remove"));
-				return true;
-			} else {
-				final String region = args[1];
-				String world = "";
-				if (args.length > 2) {
-					world = args[2];
-				} else {
-					if (!isConsole) {
-						world = player.getWorld().getName();
-					}
-				}
-				World realWorld = Bukkit.getWorld(world);
-				Region realRegion = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(region, realWorld);
-				if (realRegion == null) {
-					if (realWorld == null) {
-						sender.sendMessage(MessageFormat.format(
-								LanguageSupport.instance.getString("region.not.found"), region));
-					} else {
-						sender.sendMessage(MessageFormat.format(
-								LanguageSupport.instance.getString("region.in.world.not.found"), region, world));
-					}
-				} else {
-					if (realRegion.getTemplate() instanceof OwnableTemplate) {
-						((OwnableTemplate) realRegion.getTemplate()).clearRegion(realRegion);
-					}
+		} else if (cmd.equalsIgnoreCase("info")) {
+			permissions.checkPermission(sender, "srm.t.template.info");
 
-					SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(realRegion);
-					RegionFactory.instance.destroyRegion(realRegion);
-					sender.sendMessage(MessageFormat.format(
-							LanguageSupport.instance.getString("region.in.world.removed"), region, world));
-				}
-			}
-		} else if (args[0].equalsIgnoreCase("region")) { //NON-NLS
+		} else if (cmd.equalsIgnoreCase("tp")) {
+			permissions.checkPermission(sender, "srm.t.template.tp");
+
+		} else if (cmd.equalsIgnoreCase("list")) {
+			permissions.checkPermission(sender, "srm.t.template.list");
+
+		} else if (cmd.equalsIgnoreCase("region")) {
 			Region region = null;
-			if (!isConsole) {
+			if (player != null) {
 				ArrayList<Region> playerRegions = SimpleRegionMarket.getInstance().getPlayerManager().getPlayerRegions((Player) sender);
 
 				if (playerRegions.size() == 1) {
@@ -158,35 +104,39 @@ public class CommandHandler implements CommandExecutor {
 				}
 			}
 
-			int skip = 1;
+			String[] regionArguments = null;
+
 			String regionString = "";
 			if (region == null) {
-				if (args.length > 2) {
-					skip = 2;
-					regionString = args[1];
+				if (arguments.length > 2) {
+					regionString = arguments[1];
 					region = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(regionString, null);
-					if (region == null && !isConsole) {
+					if (region == null && player != null) {
 						region = SimpleRegionMarket.getInstance().getWorldHelper().getRegion(regionString, player.getWorld());
+					}
+					if (region != null) {
+						regionArguments = new String[arguments.length - 2];
+						System.arraycopy(arguments, 2, regionArguments, 0, arguments.length - 2);
 					}
 				}
 			}
 
 			if (region != null) {
-				String[] realArgs = new String[args.length - skip];
-				System.arraycopy(args, skip, realArgs, 0, realArgs.length);
+				if (regionArguments == null) {
+					regionArguments = new String[arguments.length - 1];
+					System.arraycopy(arguments, 1, regionArguments, 0, arguments.length - 1);
+				}
 
-				region.getTemplate().regionCommand(region, sender, realArgs);
+				region.getTemplate().regionCommand(region, arguments[0], sender, regionArguments);
 			} else {
 				if (regionString.isEmpty()) {
-					sender.sendMessage(LanguageSupport.instance.getString("region.specify"));
+					throw new IllegalArgumentException(LanguageSupport.instance.getString("region.specify"));
 				} else {
-					sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.not.found"), regionString));
+					throw new IllegalArgumentException(MessageFormat.format(LanguageSupport.instance.getString("region.not.found"), regionString));
 				}
 			}
 		} else {
-			sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
-			return false;
+			throw new IllegalArgumentException();
 		}
-		return true;
 	}
 }

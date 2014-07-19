@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.thezorro266.bukkit.srm.exceptions.NotEnoughPermissionsException;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
 import lombok.Getter;
 import org.bukkit.block.Block;
@@ -109,7 +110,7 @@ public abstract class Template {
 		return false;
 	}
 
-	abstract public void regionCommand(Region region, CommandSender sender, String[] args);
+	abstract public void regionCommand(Region region, String cmd, CommandSender sender, String[] arguments) throws NotEnoughPermissionsException;
 
 	abstract public boolean isSignApplicable(Location location, String[] lines);
 

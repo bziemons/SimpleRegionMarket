@@ -21,10 +21,17 @@ package com.thezorro266.bukkit.srm.templates;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.thezorro266.bukkit.srm.exceptions.NotEnoughPermissionsException;
 import com.thezorro266.bukkit.srm.hooks.Economy;
+import com.thezorro266.bukkit.srm.hooks.Permissions;
+import com.thezorro266.bukkit.srm.templates.interfaces.OwnableTemplate;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -105,27 +112,43 @@ public class TemplateSell extends OwnableRegionTemplate {
 	}
 
 	@Override
-	public void regionCommand(Region region, CommandSender sender, String[] args) {
-		if (args.length > 0) {
-			if (args[0].equalsIgnoreCase("snapshot") //NON-NLS
-					&& regionReset) {
+	public void regionCommand(Region region, String cmd, CommandSender sender, String[] arguments) throws NotEnoughPermissionsException {
+		Permissions permissions = SimpleRegionMarket.getInstance().getPermissions();
+		Logger logger = SimpleRegionMarket.getInstance().getLogger();
+
+		if (cmd.isEmpty() || cmd.equalsIgnoreCase("help") || cmd.equals("?")) {
+
+		} else if (cmd.equalsIgnoreCase("terminate")) { //NON-NLS
+			permissions.checkPermission(sender, "srm.admin.terminate");
+
+			OwnableTemplate ot = (OwnableTemplate) region.getTemplate();
+			if (ot.isRegionOccupied(region)) {
+				ot.clearRegion(region);
+				sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.in.world.released"), region, region.getWorld()));
+
+				region.updateSigns();
+
 				try {
-					SimpleRegionMarket.getInstance().getWorldEditManager().saveRegionToSchematic(region);
-					sender.sendMessage(MessageFormat.format(
-							LanguageSupport.instance.getString("region.schematic.save.successful"), region.getName()));
-				} catch (IOException e) {
-					sender.sendMessage(LanguageSupport.instance.getString("region.schematic.save.failure"));
-					SimpleRegionMarket
-							.getInstance()
-							.getLogger()
-							.severe(MessageFormat.format(LanguageSupport.instance
-									.getString("region.in.world.schematic.save.failure.console"), region.getName(),
-									region.getWorld().getName()));
-					SimpleRegionMarket.getInstance().printError(e);
+					SimpleRegionMarket.getInstance().getTemplateManager().saveRegion(region);
+				} catch (ContentSaveException e) {
+					sender.sendMessage(ChatColor.RED + LanguageSupport.instance.getString("region.save.problem.player"));
+					logger.log(Level.SEVERE, MessageFormat.format(LanguageSupport.instance.getString("region.save.problem.console"), region.getName()), e);
 				}
 			} else {
-				sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));
-				// TODO: region command help
+				sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.in.world.already.free"), region, region.getWorld()));
+			}
+		} else if (cmd.equalsIgnoreCase("remove")) { //NON-NLS
+			((OwnableTemplate) region.getTemplate()).clearRegion(region);
+			SimpleRegionMarket.getInstance().getTemplateManager().removeRegion(region);
+			RegionFactory.instance.destroyRegion(region);
+			sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.in.world.removed"), region, region.getWorld()));
+		} else if (cmd.equalsIgnoreCase("snapshot") && regionReset) {
+			try {
+				SimpleRegionMarket.getInstance().getWorldEditManager().saveRegionToSchematic(region);
+				sender.sendMessage(MessageFormat.format(LanguageSupport.instance.getString("region.schematic.save.successful"), region.getName()));
+			} catch (IOException e) {
+				sender.sendMessage(LanguageSupport.instance.getString("region.schematic.save.failure"));
+				logger.log(Level.SEVERE, MessageFormat.format(LanguageSupport.instance.getString("region.in.world.schematic.save.failure.console"), region.getName()), e);
 			}
 		} else {
 			sender.sendMessage(LanguageSupport.instance.getString("not.yet.implemented"));

@@ -20,7 +20,8 @@ package com.thezorro266.bukkit.srm.templates;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+
+import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.thezorro266.bukkit.srm.SimpleRegionMarket;
 import com.thezorro266.bukkit.srm.WorldGuardManager;
 import com.thezorro266.bukkit.srm.factories.RegionFactory;
@@ -68,7 +69,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -86,7 +87,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -101,7 +102,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -116,7 +117,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -131,7 +132,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -146,7 +147,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}
@@ -167,7 +168,7 @@ public abstract class OwnableRegionTemplate extends SignTemplate implements Owna
 		try {
 			wgo.saveChanges();
 			return true;
-		} catch (ProtectionDatabaseException e) {
+		} catch (StorageException e) {
 			return false;
 		}
 	}

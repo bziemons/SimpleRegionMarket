@@ -33,15 +33,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <majorversion>0.1</majorversion>
         <state>indev</state>
-        <bukkit.version>1.8-R0.1-SNAPSHOT</bukkit.version>
+        <bukkit.version>1.9-R0.1-SNAPSHOT</bukkit.version>
         <worldguard.version>6.0.0-SNAPSHOT</worldguard.version>
         <vault.version>1.2.32</vault.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
             <id>sk89q-repo</id>

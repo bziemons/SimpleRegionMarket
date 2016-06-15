@@ -87,7 +87,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 
 	@Override
 	public boolean isRegionOccupied(Region region) {
-		return region.getOptions().get("state").equals("occupied");
+		return "occupied".equals(region.getOptions().get("state"));
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 		} else {
 			// TODO: Player permissions
 			Economy ec = SimpleRegionMarket.getInstance().getEconomy();
-			double price = (Double) region.getOptions().get("price");
+			double price = region.getOptions().exists("price") ? (Double) region.getOptions().get("price") : 0.0;
 			String playerAccount = player.getName();
 			String regionAccount = (String) region.getOptions().get("account");
 			if (ec.isEnabled() && price > 0) {
@@ -193,7 +193,7 @@ public class TemplateSell extends OwnableRegionTemplate {
 				}
 			}
 			ec.subtractMoney(playerAccount, price);
-			if (!regionAccount.isEmpty() && ec.isValidAccount(regionAccount)) {
+			if (regionAccount != null && !regionAccount.isEmpty() && ec.isValidAccount(regionAccount)) {
 				ec.addMoney(regionAccount, price);
 			}
 

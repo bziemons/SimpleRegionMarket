@@ -56,7 +56,7 @@ public class CommandHandler implements CommandExecutor {
 		try {
 			command(args[0], sender, realArguments);
 		} catch (IllegalArgumentException e) {
-			if (e.getMessage().isEmpty()) {
+			if (e.getMessage() == null || e.getMessage().isEmpty()) {
 				return false;
 			} else {
 				sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -118,7 +118,9 @@ public class CommandHandler implements CommandExecutor {
 						regionArguments = new String[arguments.length - 2];
 						System.arraycopy(arguments, 2, regionArguments, 0, arguments.length - 2);
 					}
-				}
+				}else{
+                                    throw new IllegalArgumentException("missing arguments");
+                                }
 			}
 
 			if (region != null) {
@@ -136,7 +138,7 @@ public class CommandHandler implements CommandExecutor {
 				}
 			}
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(MessageFormat.format(LanguageSupport.instance.getString("command.unknown"), cmd));
 		}
 	}
 }
